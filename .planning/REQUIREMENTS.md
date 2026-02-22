@@ -105,47 +105,47 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| VHCL-01 | — | Pending |
-| VHCL-02 | — | Pending |
-| VHCL-03 | — | Pending |
-| VHCL-04 | — | Pending |
-| VHCL-05 | — | Pending |
-| BOOK-01 | — | Pending |
-| BOOK-02 | — | Pending |
-| BOOK-03 | — | Pending |
-| BOOK-04 | — | Pending |
-| BOOK-05 | — | Pending |
-| BOOK-06 | — | Pending |
-| BOOK-07 | — | Pending |
-| BOOK-08 | — | Pending |
-| BOOK-09 | — | Pending |
-| BOOK-10 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| NOTF-01 | — | Pending |
-| NOTF-02 | — | Pending |
-| NOTF-03 | — | Pending |
-| NOTF-04 | — | Pending |
-| M365-01 | — | Pending |
-| M365-02 | — | Pending |
-| M365-03 | — | Pending |
-| M365-04 | — | Pending |
-| RPRT-01 | — | Pending |
-| RPRT-02 | — | Pending |
-| RPRT-03 | — | Pending |
-| RPRT-04 | — | Pending |
-| PLAT-01 | — | Pending |
-| PLAT-02 | — | Pending |
-| PLAT-03 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| VHCL-01 | Phase 2 | Pending |
+| VHCL-02 | Phase 2 | Pending |
+| VHCL-03 | Phase 2 | Pending |
+| VHCL-04 | Phase 2 | Pending |
+| VHCL-05 | Phase 2 | Pending |
+| BOOK-01 | Phase 3 | Pending |
+| BOOK-02 | Phase 3 | Pending |
+| BOOK-03 | Phase 3 | Pending |
+| BOOK-04 | Phase 3 | Pending |
+| BOOK-05 | Phase 3 | Pending |
+| BOOK-06 | Phase 3 | Pending |
+| BOOK-07 | Phase 4 | Pending |
+| BOOK-08 | Phase 4 | Pending |
+| BOOK-09 | Phase 4 | Pending |
+| BOOK-10 | Phase 4 | Pending |
+| ADMN-01 | Phase 4 | Pending |
+| ADMN-02 | Phase 4 | Pending |
+| NOTF-01 | Phase 6 | Pending |
+| NOTF-02 | Phase 6 | Pending |
+| NOTF-03 | Phase 6 | Pending |
+| NOTF-04 | Phase 6 | Pending |
+| M365-01 | Phase 5 | Pending |
+| M365-02 | Phase 5 | Pending |
+| M365-03 | Phase 5 | Pending |
+| M365-04 | Phase 2 | Pending |
+| RPRT-01 | Phase 7 | Pending |
+| RPRT-02 | Phase 7 | Pending |
+| RPRT-03 | Phase 7 | Pending |
+| RPRT-04 | Phase 7 | Pending |
+| PLAT-01 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Pending |
+| PLAT-03 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 35 total
-- Mapped to phases: 0
-- Unmapped: 35 ⚠️
+- Mapped to phases: 35
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after initial definition*
+*Last updated: 2026-02-22 after roadmap creation*
