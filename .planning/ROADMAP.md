@@ -32,11 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User's role (Employee, Manager, or Admin) is displayed in the UI based on their Entra ID app role assignment
   4. An employee-role user who attempts to call an admin API endpoint receives a 403 Forbidden response
   5. The webpart renders responsively on Teams mobile
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Scaffold SPFx + Azure Functions projects, implement auth middleware and API endpoints
+- [ ] 01-02-PLAN.md — Build SPFx app shell with AuthContext, sidebar, bottom tab bar, welcome screen, error handling
+- [ ] 01-03-PLAN.md — Integration verification and human-verify checkpoint
 
 ### Phase 2: Vehicle Inventory and Locations
 **Goal**: Fleet admins can manage the complete vehicle inventory and company locations are automatically synced from the corporate directory
@@ -141,7 +142,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Authentication | 0/TBD | Not started | - |
+| 1. Foundation and Authentication | 0/3 | Planning complete | - |
 | 2. Vehicle Inventory and Locations | 0/TBD | Not started | - |
 | 3. Core Booking Flow | 0/TBD | Not started | - |
 | 4. Booking Lifecycle and Admin Oversight | 0/TBD | Not started | - |
