@@ -13,7 +13,7 @@ RentAVehicle delivers an internal vehicle rental system on Microsoft 365 and Azu
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and Authentication** - Authenticated SPFx webpart in SharePoint and Teams with Entra ID SSO and role-based access
-- [ ] **Phase 2: Vehicle Inventory and Locations** - Admin fleet management and location sync from Entra ID
+- [x] **Phase 2: Vehicle Inventory and Locations** - Admin fleet management and location sync from Entra ID (completed 2026-02-23)
 - [ ] **Phase 3: Core Booking Flow** - Employees can find, book, and view vehicle reservations
 - [ ] **Phase 4: Booking Lifecycle and Admin Oversight** - Full reservation lifecycle with calendar views, check-in/out, and admin control
 - [ ] **Phase 5: M365 Calendar Integration** - Vehicle bookings visible in Outlook through resource calendars and employee calendars
@@ -145,7 +145,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Authentication | 3/3 | Complete    | 2026-02-23 |
-| 2. Vehicle Inventory and Locations | 0/4 | Not started | - |
+| 2. Vehicle Inventory and Locations | 0/4 | Complete    | 2026-02-23 |
 | 3. Core Booking Flow | 0/TBD | Not started | - |
 | 4. Booking Lifecycle and Admin Oversight | 0/TBD | Not started | - |
 | 5. M365 Calendar Integration | 0/TBD | Not started | - |
