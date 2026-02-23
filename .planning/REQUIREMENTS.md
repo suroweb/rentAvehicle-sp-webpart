@@ -16,9 +16,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Vehicle Management
 
 - [x] **VHCL-01**: Admin can add a new vehicle (make, model, year, license plate, location, category, capacity, photo)
-- [ ] **VHCL-02**: Admin can edit vehicle details
-- [ ] **VHCL-03**: Admin can remove a vehicle from the fleet
-- [ ] **VHCL-04**: Admin can set vehicle status (available, in maintenance, retired)
+- [x] **VHCL-02**: Admin can edit vehicle details
+- [x] **VHCL-03**: Admin can remove a vehicle from the fleet
+- [x] **VHCL-04**: Admin can set vehicle status (available, in maintenance, retired)
 - [x] **VHCL-05**: Vehicles not in "available" status are excluded from employee browsing
 
 ### Booking
@@ -51,7 +51,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **M365-01**: Each vehicle has an Exchange equipment mailbox with a resource calendar
 - [ ] **M365-02**: Booking creates a calendar event on the vehicle's resource calendar (visible in Outlook)
 - [ ] **M365-03**: Booking creates a calendar event on the employee's personal Outlook calendar
-- [ ] **M365-04**: Locations synced from Entra ID (officeLocation or organizational data)
+- [x] **M365-04**: Locations synced from Entra ID (officeLocation or organizational data)
 
 ### Reporting
 
@@ -109,9 +109,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
 | VHCL-01 | Phase 2 | Complete |
-| VHCL-02 | Phase 2 | Pending |
-| VHCL-03 | Phase 2 | Pending |
-| VHCL-04 | Phase 2 | Pending |
+| VHCL-02 | Phase 2 | Complete |
+| VHCL-03 | Phase 2 | Complete |
+| VHCL-04 | Phase 2 | Complete |
 | VHCL-05 | Phase 2 | Complete |
 | BOOK-01 | Phase 3 | Pending |
 | BOOK-02 | Phase 3 | Pending |
@@ -132,7 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | M365-01 | Phase 5 | Pending |
 | M365-02 | Phase 5 | Pending |
 | M365-03 | Phase 5 | Pending |
-| M365-04 | Phase 2 | Pending |
+| M365-04 | Phase 2 | Complete |
 | RPRT-01 | Phase 7 | Pending |
 | RPRT-02 | Phase 7 | Pending |
 | RPRT-03 | Phase 7 | Pending |
