@@ -5,6 +5,7 @@ export interface IUser {
   displayName: string;
   email: string;
   role: AppRole;
+  officeLocation?: string | null;
 }
 
 export const ROLE_HIERARCHY: Record<AppRole, number> = {

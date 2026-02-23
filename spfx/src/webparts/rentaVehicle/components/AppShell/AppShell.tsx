@@ -10,6 +10,9 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FleetManagement } from '../FleetManagement/FleetManagement';
 import { CategoryManagement } from '../CategoryManagement/CategoryManagement';
 import { LocationList } from '../LocationList/LocationList';
+import { VehicleBrowse } from '../VehicleBrowse/VehicleBrowse';
+import { VehicleDetail } from '../VehicleDetail/VehicleDetail';
+import { MyBookings } from '../MyBookings/MyBookings';
 import { ApiService } from '../../services/ApiService';
 import { AadHttpClient } from '@microsoft/sp-http';
 
@@ -27,6 +30,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
   const auth = useAuth();
   const { isMobile } = useResponsive();
   const [activeNavKey, setActiveNavKey] = React.useState<string>('home');
+  const [selectedVehicleId, setSelectedVehicleId] = React.useState<number | null>(null);
 
   const apiService = React.useMemo(() => {
     if (!apiClient) return null;
@@ -35,6 +39,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
 
   const handleNavigate = (key: string): void => {
     setActiveNavKey(key);
+    setSelectedVehicleId(null);
   };
 
   const renderPage = (navKey: string): React.ReactElement => {
@@ -75,6 +80,48 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
         return (
           <p className={styles.welcomeText}>
             API connection is not available. Location management requires an active API connection.
+          </p>
+        );
+      case 'browse':
+        if (apiService) {
+          if (selectedVehicleId !== null) {
+            return (
+              <VehicleDetail
+                vehicleId={selectedVehicleId}
+                apiService={apiService}
+                onBack={() => setSelectedVehicleId(null)}
+                onNavigateToMyBookings={() => {
+                  setSelectedVehicleId(null);
+                  setActiveNavKey('myBookings');
+                }}
+              />
+            );
+          }
+          return (
+            <VehicleBrowse
+              apiService={apiService}
+              onNavigateToDetail={(id: number) => setSelectedVehicleId(id)}
+              userOfficeLocation={auth.user ? auth.user.officeLocation : null}
+            />
+          );
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. Browse requires an active API connection.
+          </p>
+        );
+      case 'myBookings':
+        if (apiService) {
+          return (
+            <MyBookings
+              apiService={apiService}
+              onNavigateToBrowse={() => { setActiveNavKey('browse'); }}
+            />
+          );
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. My Bookings requires an active API connection.
           </p>
         );
       default:
