@@ -7,22 +7,66 @@ import { Sidebar } from '../Sidebar/Sidebar';
 import { BottomTabBar } from '../BottomTabBar/BottomTabBar';
 import { WelcomeScreen } from '../WelcomeScreen/WelcomeScreen';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import { FleetManagement } from '../FleetManagement/FleetManagement';
+import { ApiService } from '../../services/ApiService';
+import { AadHttpClient } from '@microsoft/sp-http';
 
 interface IAppShellContentProps {
   supportContact: string;
   userDisplayName: string;
+  apiClient: AadHttpClient | null;
 }
 
 const AppShellContent: React.FC<IAppShellContentProps> = ({
   supportContact,
   userDisplayName,
+  apiClient,
 }) => {
   const auth = useAuth();
   const { isMobile } = useResponsive();
   const [activeNavKey, setActiveNavKey] = React.useState<string>('home');
 
+  const apiService = React.useMemo(() => {
+    if (!apiClient) return null;
+    return new ApiService(apiClient);
+  }, [apiClient]);
+
   const handleNavigate = (key: string): void => {
     setActiveNavKey(key);
+  };
+
+  const renderPage = (navKey: string): React.ReactElement => {
+    switch (navKey) {
+      case 'home':
+        return (
+          <>
+            <h2 className={styles.welcomeHeading}>
+              Welcome, {auth.user ? auth.user.displayName : userDisplayName}!
+            </h2>
+            <p className={styles.welcomeText}>
+              Select a section from the navigation to get started.
+            </p>
+          </>
+        );
+      case 'vehicles':
+        if (apiService) {
+          return <FleetManagement apiService={apiService} />;
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. Fleet management requires an active API connection.
+          </p>
+        );
+      default:
+        return (
+          <>
+            <h2 className={styles.welcomeHeading}>Coming Soon</h2>
+            <p className={styles.welcomeText}>
+              This section is under development.
+            </p>
+          </>
+        );
+    }
   };
 
   // Loading state: show welcome screen
@@ -58,12 +102,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
                 Running with limited functionality. Some features may be unavailable.
               </div>
             )}
-            <h2 className={styles.welcomeHeading}>
-              Welcome, {auth.user.displayName}!
-            </h2>
-            <p className={styles.welcomeText}>
-              Select a section from the navigation to get started.
-            </p>
+            {renderPage(activeNavKey)}
           </div>
         </main>
         {isMobile && (
@@ -101,6 +140,7 @@ export const AppShell: React.FC<IAppShellProps> = ({
       <AppShellContent
         supportContact={supportContact}
         userDisplayName={userDisplayName}
+        apiClient={apiClient}
       />
     </AuthProvider>
   );

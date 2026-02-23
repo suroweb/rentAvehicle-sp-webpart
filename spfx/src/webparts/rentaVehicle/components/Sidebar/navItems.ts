@@ -13,6 +13,8 @@ export const NAV_ITEMS: INavItem[] = [
   { key: 'myBookings', label: 'My Bookings', icon: 'Calendar', minRole: 'Employee' },
   { key: 'teamBookings', label: 'Team Bookings', icon: 'People', minRole: 'Manager' },
   { key: 'vehicles', label: 'Manage Vehicles', icon: 'Settings', minRole: 'Admin' },
+  { key: 'locations', label: 'Locations', icon: 'MapPin', minRole: 'Admin' },
+  { key: 'categories', label: 'Categories', icon: 'Tag', minRole: 'Admin' },
   { key: 'allBookings', label: 'All Bookings', icon: 'BulletedList', minRole: 'Admin' },
   { key: 'reports', label: 'Reports', icon: 'BarChartVertical', minRole: 'Admin' },
 ];
