@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@azure/functions": "^4.11.2",
+    "@azure/identity": "^4.13.0",
+    "mssql": "^12.2.0",
     "zod": "^3.0.0"
   },
   "devDependencies": {
-    "typescript": "~5.8.0",
-    "@types/node": "^22.0.0"
+    "@types/mssql": "^9.1.9",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.8.0"
   }
 }
