@@ -15,11 +15,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Vehicle Management
 
-- [ ] **VHCL-01**: Admin can add a new vehicle (make, model, year, license plate, location, category, capacity, photo)
+- [x] **VHCL-01**: Admin can add a new vehicle (make, model, year, license plate, location, category, capacity, photo)
 - [ ] **VHCL-02**: Admin can edit vehicle details
 - [ ] **VHCL-03**: Admin can remove a vehicle from the fleet
 - [ ] **VHCL-04**: Admin can set vehicle status (available, in maintenance, retired)
-- [ ] **VHCL-05**: Vehicles not in "available" status are excluded from employee browsing
+- [x] **VHCL-05**: Vehicles not in "available" status are excluded from employee browsing
 
 ### Booking
 
@@ -108,11 +108,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
-| VHCL-01 | Phase 2 | Pending |
+| VHCL-01 | Phase 2 | Complete |
 | VHCL-02 | Phase 2 | Pending |
 | VHCL-03 | Phase 2 | Pending |
 | VHCL-04 | Phase 2 | Pending |
-| VHCL-05 | Phase 2 | Pending |
+| VHCL-05 | Phase 2 | Complete |
 | BOOK-01 | Phase 3 | Pending |
 | BOOK-02 | Phase 3 | Pending |
 | BOOK-03 | Phase 3 | Pending |
