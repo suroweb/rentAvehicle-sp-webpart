@@ -1,0 +1,412 @@
+@import '../../styles/variables.module.scss';
+
+/* ── Detail page layout ─────────────────────────────── */
+
+.vehicleDetail {
+  padding: 0;
+  max-width: 900px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+/* ── Back navigation ────────────────────────────────── */
+
+.backNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.backLink {
+  font-size: 14px;
+  color: $color-primary;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ── Hero image ─────────────────────────────────────── */
+
+.heroImage {
+  width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: #f3f2f1;
+}
+
+.heroImg {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.heroPlaceholder {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f2f1;
+}
+
+.heroPlaceholderIcon {
+  font-size: 72px;
+  color: #a19f9d;
+}
+
+/* ── Vehicle title ──────────────────────────────────── */
+
+.vehicleTitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 16px 0;
+}
+
+/* ── Success bar ────────────────────────────────────── */
+
+.successBar {
+  margin-bottom: 20px;
+}
+
+/* ── Specs section ──────────────────────────────────── */
+
+.specsSection {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #faf9f8;
+  border-radius: 8px;
+  border: 1px solid #edebe9;
+}
+
+.specsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.specItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.specLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.specValue {
+  font-size: 14px;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.specMono {
+  font-family: monospace;
+  background: #f3f2f1;
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.specBadge {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $color-primary;
+  background: rgba(0, 120, 212, 0.1);
+  border-radius: 12px;
+}
+
+.specIcon {
+  font-size: 14px;
+}
+
+/* ── Availability strip ─────────────────────────────── */
+
+.availabilityStrip {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #edebe9;
+}
+
+.stripHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.stripTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.stripTimezone {
+  font-size: 12px;
+  color: $color-text-secondary;
+  background: #f3f2f1;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.stripLegend {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: $color-text-secondary;
+}
+
+.legendFree {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #e6f5e6;
+  border: 1px solid #107c10;
+  display: inline-block;
+}
+
+.legendBooked {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #fde7e7;
+  border: 1px solid #d13438;
+  display: inline-block;
+}
+
+.stripGrid {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+}
+
+.stripHourLabels {
+  display: flex;
+  flex-direction: column;
+  min-width: 48px;
+  flex: 0 0 48px;
+}
+
+.stripHourLabel {
+  font-size: 10px;
+  color: $color-text-secondary;
+  height: 16px;
+  line-height: 16px;
+  /* Position labels at 4-hour intervals across 12 slots */
+  &:nth-child(2) { margin-top: 0; }
+  &:nth-child(3) { margin-top: 48px; }
+  &:nth-child(4) { margin-top: 48px; }
+  &:nth-child(5) { margin-top: 48px; }
+}
+
+.stripDayColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 50px;
+}
+
+.stripDayHeader {
+  text-align: center;
+  margin-bottom: 4px;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stripDayName {
+  font-size: 11px;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.stripDate {
+  font-size: 10px;
+  color: $color-text-secondary;
+}
+
+.stripBlocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.stripBlockFree {
+  height: 16px;
+  background: #e6f5e6;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #c8e6c8;
+  }
+}
+
+.stripBlockBooked {
+  height: 16px;
+  background: #fde7e7;
+  border-radius: 2px;
+  cursor: default;
+
+  &:hover {
+    background: #f5cccc;
+  }
+}
+
+/* ── Booking form ───────────────────────────────────── */
+
+.bookingForm {
+  max-width: 500px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #edebe9;
+  margin-bottom: 24px;
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 16px 0;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.formField {
+  flex: 1 1 auto;
+}
+
+.formFieldNarrow {
+  flex: 0 0 140px;
+}
+
+.timezoneNote {
+  font-size: 12px;
+  color: $color-text-secondary;
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.formActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.formSpinner {
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ── Review panel ───────────────────────────────────── */
+
+.reviewPanel {
+  background: #faf9f8;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.reviewRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #edebe9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.reviewLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-secondary;
+}
+
+.reviewValue {
+  font-size: 13px;
+  color: $color-text-primary;
+  text-align: right;
+}
+
+/* ── Mobile responsive ──────────────────────────────── */
+
+@media (max-width: $mobile-breakpoint) {
+  .specsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicleTitle {
+    font-size: 22px;
+  }
+
+  .heroImg,
+  .heroPlaceholder {
+    height: 200px;
+  }
+
+  .formRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formFieldNarrow {
+    flex: 1 1 auto;
+  }
+
+  .bookingForm {
+    max-width: none;
+  }
+
+  .stripGrid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stripDayColumn {
+    min-width: 45px;
+  }
+}

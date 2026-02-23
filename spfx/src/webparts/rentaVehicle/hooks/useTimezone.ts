@@ -28,8 +28,7 @@ function extractTimezoneAbbr(tz: string): string {
     }
     return tz;
   } catch (e) {
-    void e; // suppress unused variable lint
-    return tz;
+    return e ? tz : tz;
   }
 }
 
