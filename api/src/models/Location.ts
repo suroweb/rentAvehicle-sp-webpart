@@ -6,6 +6,8 @@ export interface ILocation {
   id: number;
   name: string;
   isActive: boolean;
+  /** IANA timezone identifier (e.g. 'Europe/Bucharest'). Optional since existing locations may not have it until migrated. */
+  timezone?: string;
   vehicleCount?: number;
   lastSyncedAt: string;
   createdAt: string;

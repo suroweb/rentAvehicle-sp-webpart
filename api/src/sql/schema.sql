@@ -47,3 +47,31 @@ CREATE INDEX IX_Vehicles_LocationId ON Vehicles(locationId);
 CREATE INDEX IX_Vehicles_CategoryId ON Vehicles(categoryId);
 CREATE INDEX IX_Vehicles_Status ON Vehicles(status) WHERE isArchived = 0;
 CREATE INDEX IX_Vehicles_IsArchived ON Vehicles(isArchived);
+
+-- Phase 3: Core Booking Flow
+
+-- Add IANA timezone column to Locations (defaults to UTC for existing rows)
+ALTER TABLE Locations ADD timezone NVARCHAR(64) NOT NULL DEFAULT 'UTC';
+
+-- Booking records for vehicle reservations
+CREATE TABLE Bookings (
+  id INT IDENTITY(1,1) PRIMARY KEY,
+  vehicleId INT NOT NULL REFERENCES Vehicles(id),
+  userId NVARCHAR(255) NOT NULL,
+  userEmail NVARCHAR(255) NOT NULL,
+  userDisplayName NVARCHAR(255) NULL,
+  startTime DATETIME2 NOT NULL,
+  endTime DATETIME2 NOT NULL,
+  status NVARCHAR(20) NOT NULL DEFAULT 'Confirmed'
+    CHECK (status IN ('Confirmed', 'Active', 'Completed', 'Cancelled')),
+  cancelledAt DATETIME2 NULL,
+  cancelledBy NVARCHAR(255) NULL,
+  createdAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  updatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+  CONSTRAINT CK_Bookings_TimeOrder CHECK (endTime > startTime)
+);
+
+-- Booking indexes for common queries
+CREATE INDEX IX_Bookings_VehicleId_Status ON Bookings(vehicleId, status) INCLUDE (startTime, endTime);
+CREATE INDEX IX_Bookings_UserId ON Bookings(userId) INCLUDE (status, startTime, endTime);
+CREATE INDEX IX_Bookings_StartTime ON Bookings(startTime) WHERE status IN ('Confirmed', 'Active');
