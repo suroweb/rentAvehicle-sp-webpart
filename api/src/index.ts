@@ -1,2 +1,4 @@
 // Azure Functions v4 app entry point
-// Function files in src/functions/ are auto-discovered by the runtime
+// Import all function registration modules so app.http() calls are executed
+import './functions/health.js';
+import './functions/me.js';
