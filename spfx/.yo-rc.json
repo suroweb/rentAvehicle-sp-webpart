@@ -1,0 +1,22 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "renta-vehicle",
+    "useGulp": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "RentaVehicle",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.22.0",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "renta-vehicle",
+    "libraryId": "faa3486e-fc56-40d2-b420-c5b9d30257b3",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionShortDescription": "renta-vehicle description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "rentavehicle-api",
+  "version": "1.0.0",
+  "description": "RentAVehicle Azure Functions API",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "func start",
+    "prestart": "npm run build"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.11.2",
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.0",
+    "@types/node": "^22.0.0"
+  }
+}

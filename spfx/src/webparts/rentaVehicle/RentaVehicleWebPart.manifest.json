@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "c79feb6b-b2b6-4102-bbc4-a2b3a9beff18",
+  "alias": "RentaVehicleWebPart",
+  "componentType": "WebPart",
+
+  // The "*" signifies that the version should be taken from the package.json
+  "version": "*",
+  "manifestVersion": 2,
+
+  // If true, the component can only be installed on sites where Custom Script is allowed.
+  // Components that allow authors to embed arbitrary script code should set this to true.
+  // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "cf066440-35c3-4b21-b040-1e33a8fc7f0d",
+    "group": { "default": "Business Applications" },
+    "title": { "default": "RentAVehicle" },
+    "description": { "default": "Internal vehicle rental system" },
+    "officeFabricIconFontName": "Car",
+    "properties": {
+      "supportContact": ""
+    }
+  }]
+}

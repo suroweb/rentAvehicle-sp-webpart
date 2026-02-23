@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "LOCAL_DEV": "true",
+    "LOCAL_DEV_NAME": "Test User",
+    "LOCAL_DEV_EMAIL": "test@contoso.com",
+    "LOCAL_DEV_ROLE": "Admin"
+  }
+}
