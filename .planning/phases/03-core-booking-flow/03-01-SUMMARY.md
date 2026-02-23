@@ -80,7 +80,7 @@ Each task was committed atomically:
 1. **Task 1: Add Bookings table schema, Locations.timezone column, and Booking TypeScript model** - `5c1006d` (feat)
 2. **Task 2: Build booking service with SERIALIZABLE transactions and employee-facing API endpoints** - `083a41e` (feat)
 
-**Plan metadata:** (pending)
+**Plan metadata:** `1767a0c` (docs: complete plan)
 
 ## Files Created/Modified
 - `api/src/sql/schema.sql` - Bookings table DDL, Locations.timezone ALTER, 3 performance indexes
