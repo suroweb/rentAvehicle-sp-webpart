@@ -3,6 +3,7 @@ import { IUser } from '../models/IUser';
 import { IVehicle, IVehicleInput, IVehicleFilters } from '../models/IVehicle';
 import { ICategory, ICategoryInput } from '../models/ICategory';
 import { ILocation, ILocationSyncResult } from '../models/ILocation';
+import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput } from '../models/IBooking';
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
@@ -97,6 +98,56 @@ export class ApiService {
     return this.post<ILocationSyncResult>('/api/backoffice/locations/sync', {});
   }
 
+  // ── Employee: Vehicle Browse & Detail ────────────────────
+
+  public async browseAvailableVehicles(
+    locationId: number,
+    startTime: string,
+    endTime: string,
+    categoryId?: number
+  ): Promise<IAvailableVehicle[]> {
+    const params = new URLSearchParams();
+    params.append('locationId', String(locationId));
+    params.append('startTime', startTime);
+    params.append('endTime', endTime);
+    if (categoryId !== undefined) {
+      params.append('categoryId', String(categoryId));
+    }
+    return this.get<IAvailableVehicle[]>(`/api/vehicles/available?${params.toString()}`);
+  }
+
+  public async getVehicleDetail(vehicleId: number): Promise<IAvailableVehicle> {
+    return this.get<IAvailableVehicle>(`/api/vehicles/${vehicleId}/detail`);
+  }
+
+  public async getVehicleAvailability(
+    vehicleId: number,
+    days?: number
+  ): Promise<IVehicleAvailabilitySlot[]> {
+    const params = days !== undefined ? `?days=${days}` : '';
+    return this.get<IVehicleAvailabilitySlot[]>(`/api/vehicles/${vehicleId}/availability${params}`);
+  }
+
+  // ── Employee: Bookings ──────────────────────────────────
+
+  public async createBooking(input: IBookingInput): Promise<{ id: number }> {
+    return this.postWithConflict<{ id: number }>('/api/bookings', input);
+  }
+
+  public async getMyBookings(): Promise<IBooking[]> {
+    return this.get<IBooking[]>('/api/bookings/my');
+  }
+
+  public async cancelBooking(bookingId: number): Promise<void> {
+    await this.del<void>(`/api/bookings/${bookingId}`);
+  }
+
+  // ── Locations (public read) ─────────────────────────────
+
+  public async getLocationsPublic(): Promise<ILocation[]> {
+    return this.get<ILocation[]>('/api/backoffice/locations');
+  }
+
   // ── HTTP helpers ──────────────────────────────────────────
 
   private async get<T>(path: string): Promise<T> {
@@ -178,6 +229,41 @@ export class ApiService {
         body: JSON.stringify(body),
       }
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    const text = await response.text();
+    if (!text) {
+      return undefined as unknown as T;
+    }
+    return JSON.parse(text) as T;
+  }
+
+  /**
+   * POST with specific 409 conflict detection.
+   * Throws an error with message starting with 'CONFLICT:' for 409 responses
+   * so the UI can distinguish booking conflicts from other errors.
+   */
+  private async postWithConflict<T>(path: string, body: unknown): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+    const response = await this.client.post(
+      url,
+      AadHttpClient.configurations.v1,
+      {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (response.status === 409) {
+      const errorText = await response.text();
+      throw new Error(`CONFLICT: ${errorText || 'This slot was just booked by someone else'}`);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
