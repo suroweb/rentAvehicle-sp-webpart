@@ -49,11 +49,13 @@ Plans:
   3. Admin can remove a vehicle from the fleet
   4. Admin can change a vehicle's status to "in maintenance" or "retired" and that vehicle no longer appears when employees browse available vehicles
   5. Company office locations from the Entra ID directory are available as selectable locations in the system without manual entry
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Database foundation, models, zod schemas, SuperAdmin role update
+- [ ] 02-02-PLAN.md — Vehicle/category/location API endpoints and Graph API location sync
+- [ ] 02-03-PLAN.md — Fleet management table UI with filtering, sorting, status badges, row actions
+- [ ] 02-04-PLAN.md — Vehicle form, photo upload, category management, location list, human verification
 
 ### Phase 3: Core Booking Flow
 **Goal**: Employees can find an available vehicle at their location and book it with hourly precision, with the system preventing double-bookings and displaying all times correctly for the vehicle's timezone
@@ -143,7 +145,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Authentication | 3/3 | Complete    | 2026-02-23 |
-| 2. Vehicle Inventory and Locations | 0/TBD | Not started | - |
+| 2. Vehicle Inventory and Locations | 0/4 | Not started | - |
 | 3. Core Booking Flow | 0/TBD | Not started | - |
 | 4. Booking Lifecycle and Admin Oversight | 0/TBD | Not started | - |
 | 5. M365 Calendar Integration | 0/TBD | Not started | - |
@@ -152,4 +154,4 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-23*
+*Last updated: 2026-02-23 (Phase 2 planned)*
