@@ -1,8 +1,8 @@
 /**
  * Effective role type for RentAVehicle RBAC.
- * Hierarchy: Admin > Manager > Employee.
+ * Hierarchy: SuperAdmin > Admin > Manager > Employee.
  */
-export type AppRole = 'Admin' | 'Manager' | 'Employee';
+export type AppRole = 'SuperAdmin' | 'Admin' | 'Manager' | 'Employee';
 
 /**
  * Parsed user identity from x-ms-client-principal header.
@@ -17,6 +17,8 @@ export interface UserContext {
   email: string;
   /** All role claim values from the token */
   roles: string[];
-  /** Highest-privilege role: Admin > Manager > Employee */
+  /** Highest-privilege role: SuperAdmin > Admin > Manager > Employee */
   effectiveRole: AppRole;
+  /** User's office location from Entra ID (for location-scoped access) */
+  officeLocation?: string | null;
 }

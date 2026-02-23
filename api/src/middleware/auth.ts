@@ -27,6 +27,7 @@ const ROLE_HIERARCHY: Record<string, number> = {
   Employee: 0,
   Manager: 1,
   Admin: 2,
+  SuperAdmin: 3,
 };
 
 /**
@@ -34,6 +35,7 @@ const ROLE_HIERARCHY: Record<string, number> = {
  * Defaults to Employee if no recognized roles are present.
  */
 function resolveEffectiveRole(roles: string[]): AppRole {
+  if (roles.includes('SuperAdmin')) return 'SuperAdmin';
   if (roles.includes('Admin')) return 'Admin';
   if (roles.includes('Manager')) return 'Manager';
   return 'Employee';
@@ -117,7 +119,7 @@ export function getLocalDevUser(): UserContext | null {
   }
 
   const role = (process.env.LOCAL_DEV_ROLE || 'Employee') as AppRole;
-  const validRoles: AppRole[] = ['Admin', 'Manager', 'Employee'];
+  const validRoles: AppRole[] = ['SuperAdmin', 'Admin', 'Manager', 'Employee'];
   const effectiveRole = validRoles.includes(role) ? role : 'Employee';
 
   return {

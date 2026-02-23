@@ -6,6 +6,11 @@
     "LOCAL_DEV": "true",
     "LOCAL_DEV_NAME": "Test User",
     "LOCAL_DEV_EMAIL": "test@contoso.com",
-    "LOCAL_DEV_ROLE": "Admin"
+    "LOCAL_DEV_ROLE": "Employee",
+    "AZURE_SQL_SERVER": "",
+    "AZURE_SQL_DATABASE": "",
+    "AZURE_SQL_PORT": "1433",
+    "AZURE_SQL_USER": "",
+    "AZURE_SQL_PASSWORD": ""
   }
 }

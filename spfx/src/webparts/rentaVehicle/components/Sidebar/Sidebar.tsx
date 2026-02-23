@@ -11,6 +11,7 @@ export interface ISidebarProps {
 }
 
 const ROLE_COLORS: Record<AppRole, string> = {
+  SuperAdmin: styles.roleSuperAdmin,
   Admin: styles.roleAdmin,
   Manager: styles.roleManager,
   Employee: styles.roleEmployee,
