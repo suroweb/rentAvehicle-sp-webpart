@@ -1,0 +1,129 @@
+@import '../../styles/variables.module.scss';
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  height: 100%;
+  background-color: $color-sidebar-bg;
+  border-right: 1px solid #e1dfdd;
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1dfdd;
+}
+
+.logo {
+  font-size: 24px;
+  color: $color-primary;
+  margin-right: 10px;
+}
+
+.appName {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-text-primary;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: $color-text-primary;
+  font-size: 14px;
+  text-align: left;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: $color-sidebar-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: -2px;
+  }
+}
+
+.active {
+  background-color: $color-sidebar-hover;
+  color: $color-primary;
+  font-weight: 600;
+
+  .navIcon {
+    color: $color-primary;
+  }
+}
+
+.navIcon {
+  font-size: 16px;
+  margin-right: 12px;
+  width: 20px;
+  text-align: center;
+  color: $color-text-secondary;
+}
+
+.navLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footer {
+  padding: 12px 20px;
+  border-top: 1px solid #e1dfdd;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roleBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.roleAdmin {
+  background-color: $color-role-admin;
+}
+
+.roleManager {
+  background-color: $color-role-manager;
+}
+
+.roleEmployee {
+  background-color: $color-role-employee;
+}

@@ -6,12 +6,10 @@ import {
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import { AadHttpClient } from '@microsoft/sp-http';
 
-import * as strings from 'RentaVehicleWebPartStrings';
-import RentaVehicle from './components/RentaVehicle';
-import { IRentaVehicleProps } from './components/IRentaVehicleProps';
+import { AppShell } from './components/AppShell/AppShell';
+import { IAppShellProps } from './components/AppShell/IAppShellProps';
 
 export interface IRentaVehicleWebPartProps {
   supportContact: string;
@@ -19,23 +17,18 @@ export interface IRentaVehicleWebPartProps {
 
 export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVehicleWebPartProps> {
 
-  private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
-  private _apiClient: AadHttpClient | undefined;
+  private _apiClient: AadHttpClient | null = null;
   private _isTeams: boolean = false;
 
   public render(): void {
-    const element: React.ReactElement<IRentaVehicleProps> = React.createElement(
-      RentaVehicle,
+    const element: React.ReactElement<IAppShellProps> = React.createElement(
+      AppShell,
       {
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        hasTeamsContext: this._isTeams,
-        userDisplayName: this.context.pageContext.user.displayName,
-        userEmail: this.context.pageContext.user.email,
-        supportContact: this.properties.supportContact || '',
         apiClient: this._apiClient,
         isTeams: this._isTeams,
+        supportContact: this.properties.supportContact || '',
+        userDisplayName: this.context.pageContext.user.displayName,
+        userEmail: this.context.pageContext.user.email,
       }
     );
 
@@ -54,55 +47,8 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
         .getClient('api://<azure-functions-app-client-id>');
     } catch (error) {
       console.error('Failed to initialize API client:', error);
-      // Will render error state in component
+      // apiClient remains null -- AuthContext will handle the error state
     }
-
-    this._environmentMessage = await this._getEnvironmentMessage();
-  }
-
-  private _getEnvironmentMessage(): Promise<string> {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams, office.com or Outlook
-      return this.context.sdks.microsoftTeams.teamsJs.app.getContext()
-        .then(context => {
-          let environmentMessage: string = '';
-          switch (context.app.host.name) {
-            case 'Office': // running in Office
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOffice : strings.AppOfficeEnvironment;
-              break;
-            case 'Outlook': // running in Outlook
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentOutlook : strings.AppOutlookEnvironment;
-              break;
-            case 'Teams': // running in Teams
-            case 'TeamsModern':
-              environmentMessage = this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
-              break;
-            default:
-              environmentMessage = strings.UnknownEnvironment;
-          }
-
-          return environmentMessage;
-        });
-    }
-
-    return Promise.resolve(this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment);
-  }
-
-  protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
-    if (!currentTheme) {
-      return;
-    }
-
-    this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
-
-    if (semanticColors) {
-      this.domElement.style.setProperty('--bodyText', semanticColors.bodyText || null);
-      this.domElement.style.setProperty('--link', semanticColors.link || null);
-      this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered || null);
-    }
-
   }
 
   protected onDispose(): void {

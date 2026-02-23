@@ -1,0 +1,63 @@
+@import '../../styles/variables.module.scss';
+
+.bottomTabBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: $bottom-bar-height;
+  background-color: #ffffff;
+  border-top: 1px solid #e1dfdd;
+  z-index: 100;
+  padding: 0 4px;
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: $color-text-secondary;
+  padding: 4px 2px;
+  transition: color 0.15s ease;
+  min-width: 0;
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: -2px;
+  }
+}
+
+.active {
+  color: $color-primary;
+
+  .tabIcon {
+    color: $color-primary;
+  }
+
+  .tabLabel {
+    color: $color-primary;
+    font-weight: 600;
+  }
+}
+
+.tabIcon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.tabLabel {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
