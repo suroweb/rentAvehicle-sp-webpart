@@ -68,12 +68,12 @@ Plans:
   4. When two employees attempt to book the same vehicle for overlapping times simultaneously, one succeeds and the other is prevented -- no double-bookings occur
   5. Employee can view their own bookings organized as upcoming, active, and past
   6. All date/times are displayed in the vehicle's location timezone regardless of where the employee is browsing from
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md -- Backend: DB schema (Bookings table + Locations.timezone), booking model/Zod, booking service with SERIALIZABLE transactions, employee-facing API endpoints
+- [ ] 03-02-PLAN.md -- Frontend: Vehicle browse card grid with filters, vehicle detail page with availability strip, inline booking form with timezone display
+- [ ] 03-03-PLAN.md -- Frontend: My Bookings page with tabs and cancel flow, AppShell routing integration, human verification checkpoint
 
 ### Phase 4: Booking Lifecycle and Admin Oversight
 **Goal**: The booking experience is complete -- employees see visual availability, manage the full pickup-to-return lifecycle, get smart suggestions when slots are taken, and admins have full visibility and control over all bookings
@@ -146,7 +146,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 |-------|----------------|--------|-----------|
 | 1. Foundation and Authentication | 3/3 | Complete    | 2026-02-23 |
 | 2. Vehicle Inventory and Locations | 0/4 | Complete    | 2026-02-23 |
-| 3. Core Booking Flow | 0/TBD | Not started | - |
+| 3. Core Booking Flow | 0/3 | Planned | - |
 | 4. Booking Lifecycle and Admin Oversight | 0/TBD | Not started | - |
 | 5. M365 Calendar Integration | 0/TBD | Not started | - |
 | 6. Notifications | 0/TBD | Not started | - |
@@ -154,4 +154,4 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-23 (Phase 2 planned)*
+*Last updated: 2026-02-23 (Phase 3 planned)*
