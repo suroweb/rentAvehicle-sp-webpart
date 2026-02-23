@@ -23,12 +23,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Booking
 
-- [ ] **BOOK-01**: Employee can browse available vehicles filtered by location, date/time range, and category
-- [ ] **BOOK-02**: Employee can view vehicle details (make, model, year, plate, category, capacity, photo)
-- [ ] **BOOK-03**: Employee can book a specific vehicle with start date/time and return date/time (hourly precision)
-- [ ] **BOOK-04**: System prevents double-booking via database-level constraints
-- [ ] **BOOK-05**: Employee can view their bookings (upcoming, active, past)
-- [ ] **BOOK-06**: All times displayed in user's local timezone (stored as UTC)
+- [x] **BOOK-01**: Employee can browse available vehicles filtered by location, date/time range, and category
+- [x] **BOOK-02**: Employee can view vehicle details (make, model, year, plate, category, capacity, photo)
+- [x] **BOOK-03**: Employee can book a specific vehicle with start date/time and return date/time (hourly precision)
+- [x] **BOOK-04**: System prevents double-booking via database-level constraints
+- [x] **BOOK-05**: Employee can view their bookings (upcoming, active, past)
+- [x] **BOOK-06**: All times displayed in user's local timezone (stored as UTC)
 - [ ] **BOOK-07**: Availability shown as both filterable list and visual calendar timeline
 - [ ] **BOOK-08**: Employee can check out a vehicle at pickup time
 - [ ] **BOOK-09**: Employee can check in (return) a vehicle through the system
@@ -113,12 +113,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VHCL-03 | Phase 2 | Complete |
 | VHCL-04 | Phase 2 | Complete |
 | VHCL-05 | Phase 2 | Complete |
-| BOOK-01 | Phase 3 | Pending |
-| BOOK-02 | Phase 3 | Pending |
-| BOOK-03 | Phase 3 | Pending |
-| BOOK-04 | Phase 3 | Pending |
-| BOOK-05 | Phase 3 | Pending |
-| BOOK-06 | Phase 3 | Pending |
+| BOOK-01 | Phase 3 | Complete |
+| BOOK-02 | Phase 3 | Complete |
+| BOOK-03 | Phase 3 | Complete |
+| BOOK-04 | Phase 3 | Complete |
+| BOOK-05 | Phase 3 | Complete |
+| BOOK-06 | Phase 3 | Complete |
 | BOOK-07 | Phase 4 | Pending |
 | BOOK-08 | Phase 4 | Pending |
 | BOOK-09 | Phase 4 | Pending |

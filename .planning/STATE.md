@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 2: Vehicle Inventory and Locations -- CHECKPOINT (awaiting human verification)
+**Current focus:** Phase 3: Core Booking Flow -- Plan 1 complete, continuing to Plan 2
 
 ## Current Position
 
-Phase: 2 of 7 (Vehicle Inventory and Locations)
-Plan: 4 of 4 in current phase (02-04 code complete, checkpoint pending)
-Status: Checkpoint
-Last activity: 2026-02-23 -- Completed 02-04-PLAN.md tasks 1-2 (vehicle form, categories, locations)
+Phase: 3 of 7 (Core Booking Flow)
+Plan: 2 of 3 in current phase (03-01 complete, starting 03-02)
+Status: In Progress
+Last activity: 2026-02-23 -- Completed 03-01-PLAN.md (booking backend: schema, service, 6 API endpoints)
 
-Progress: [###.......] 33%
+Progress: [####......] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 5.9min
-- Total execution time: 0.69 hours
+- Total plans completed: 8
+- Average duration: 5.5min
+- Total execution time: 0.73 hours
 
 **By Phase:**
 
@@ -34,9 +34,10 @@ Progress: [###.......] 33%
 | Phase 02 P02 | 4min | 2 tasks | 10 files |
 | Phase 02 P03 | 5min | 2 tasks | 12 files |
 | Phase 02 P04 | 4min | 2 tasks | 9 files |
+| Phase 03 P01 | 3min | 2 tasks | 7 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 3min, 4min, 5min, 4min
+- Last 5 plans: 3min, 4min, 5min, 4min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -68,6 +69,10 @@ Recent decisions affecting current work:
 - [Phase 02]: Base64 data URL for Phase 2 photo storage -- deferred Azure Blob Storage with Valet Key pattern
 - [Phase 02]: Inline category editing in-place vs separate form -- simpler UX for small category count
 - [Phase 02]: FleetManagement table-to-form toggle via showForm state -- full-page form locked decision within SPA
+- [Phase 03]: Employee-facing endpoints use /api/vehicles/* and /api/bookings/* (not /api/backoffice/) -- all authenticated users
+- [Phase 03]: getVehicleDetail does not filter by status=Available -- employees see detail even if unavailable
+- [Phase 03]: cancelBooking validates startTime > now -- cannot cancel already-started bookings
+- [Phase 03]: SQL Server deadlock error 1205 treated as conflict (409) not server error (500)
 
 ### Pending Todos
 
@@ -81,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: 02-04-PLAN.md Task 3 checkpoint (human-verify Phase 2 fleet management)
-Resume file: .planning/phases/02-vehicle-inventory-and-locations/02-04-SUMMARY.md
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-core-booking-flow/03-01-SUMMARY.md
