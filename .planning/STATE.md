@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 3: Core Booking Flow -- Plan 1 complete, continuing to Plan 2
+**Current focus:** Phase 3: Core Booking Flow -- Plan 2 complete, continuing to Plan 3
 
 ## Current Position
 
 Phase: 3 of 7 (Core Booking Flow)
-Plan: 2 of 3 in current phase (03-01 complete, starting 03-02)
+Plan: 3 of 3 in current phase (03-01, 03-02 complete, starting 03-03)
 Status: In Progress
-Last activity: 2026-02-23 -- Completed 03-01-PLAN.md (booking backend: schema, service, 6 API endpoints)
+Last activity: 2026-02-23 -- Completed 03-02-PLAN.md (search-to-book frontend: VehicleBrowse, VehicleDetail, BookingForm)
 
-Progress: [####......] 40%
+Progress: [#####.....] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 5.5min
-- Total execution time: 0.73 hours
+- Total plans completed: 9
+- Average duration: 5.8min
+- Total execution time: 0.87 hours
 
 **By Phase:**
 
@@ -35,10 +35,11 @@ Progress: [####......] 40%
 | Phase 02 P03 | 5min | 2 tasks | 12 files |
 | Phase 02 P04 | 4min | 2 tasks | 9 files |
 | Phase 03 P01 | 3min | 2 tasks | 7 files |
+| Phase 03 P02 | 8min | 2 tasks | 11 files |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 4min, 5min, 4min, 3min
-- Trend: stable
+- Last 5 plans: 4min, 5min, 4min, 3min, 8min
+- Trend: stable (P02 longer due to UI components)
 
 *Updated after each plan completion*
 
@@ -73,6 +74,10 @@ Recent decisions affecting current work:
 - [Phase 03]: getVehicleDetail does not filter by status=Available -- employees see detail even if unavailable
 - [Phase 03]: cancelBooking validates startTime > now -- cannot cancel already-started bookings
 - [Phase 03]: SQL Server deadlock error 1205 treated as conflict (409) not server error (500)
+- [Phase 03]: ES5-compatible timezone: formatToParts/padStart unavailable, used formatted string parsing and pad2() instead
+- [Phase 03]: localToUtcIso offset via Intl.DateTimeFormat formatted date parsing (no formatToParts needed)
+- [Phase 03]: postWithConflict helper prefixes 409 errors with 'CONFLICT:' for UI conflict detection
+- [Phase 03]: Frontend ILocation extended with optional timezone field to match backend
 
 ### Pending Todos
 
@@ -86,5 +91,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-core-booking-flow/03-01-SUMMARY.md
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-core-booking-flow/03-02-SUMMARY.md
