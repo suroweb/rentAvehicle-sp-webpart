@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 3: Core Booking Flow -- Plan 2 complete, continuing to Plan 3
+**Current focus:** Phase 3: Core Booking Flow -- COMPLETE. Ready for Phase 4.
 
 ## Current Position
 
-Phase: 3 of 7 (Core Booking Flow)
-Plan: 3 of 3 in current phase (03-01, 03-02 complete, starting 03-03)
-Status: In Progress
-Last activity: 2026-02-23 -- Completed 03-02-PLAN.md (search-to-book frontend: VehicleBrowse, VehicleDetail, BookingForm)
+Phase: 3 of 7 (Core Booking Flow) -- COMPLETE
+Plan: 3 of 3 in current phase (03-01, 03-02, 03-03 all complete)
+Status: Phase Complete
+Last activity: 2026-02-23 -- Completed 03-03-PLAN.md (MyBookings page, AppShell routing)
 
-Progress: [#####.....] 50%
+Progress: [######....] 57%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 5.8min
-- Total execution time: 0.87 hours
+- Total plans completed: 10
+- Average duration: 5.6min
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
@@ -36,10 +36,11 @@ Progress: [#####.....] 50%
 | Phase 02 P04 | 4min | 2 tasks | 9 files |
 | Phase 03 P01 | 3min | 2 tasks | 7 files |
 | Phase 03 P02 | 8min | 2 tasks | 11 files |
+| Phase 03 P03 | 5min | 2 tasks | 5 files |
 
 **Recent Trend:**
-- Last 5 plans: 4min, 5min, 4min, 3min, 8min
-- Trend: stable (P02 longer due to UI components)
+- Last 5 plans: 5min, 4min, 3min, 8min, 5min
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 03]: localToUtcIso offset via Intl.DateTimeFormat formatted date parsing (no formatToParts needed)
 - [Phase 03]: postWithConflict helper prefixes 409 errors with 'CONFLICT:' for UI conflict detection
 - [Phase 03]: Frontend ILocation extended with optional timezone field to match backend
+- [Phase 03]: Booking categorization derives Active from time comparison (no explicit Active status in Phase 3)
+- [Phase 03]: Sub-navigation uses selectedVehicleId state in AppShell (browse->detail), not URL routing
+- [Phase 03]: Cancel flow re-fetches full booking list after API cancel (data consistency over optimistic update)
 
 ### Pending Todos
 
@@ -91,5 +95,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 03-02-PLAN.md
-Resume file: .planning/phases/03-core-booking-flow/03-02-SUMMARY.md
+Stopped at: Completed 03-03-PLAN.md (Phase 3 complete)
+Resume file: .planning/phases/03-core-booking-flow/03-03-SUMMARY.md
