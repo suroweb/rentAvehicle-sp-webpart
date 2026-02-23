@@ -16,6 +16,7 @@ import { ILocation } from '../../models/ILocation';
 import { VehicleTable } from './VehicleTable';
 import { VehicleFilterBar } from './VehicleFilterBar';
 import { ConfirmDialog } from '../ConfirmDialog/ConfirmDialog';
+import { VehicleForm } from '../VehicleForm/VehicleForm';
 
 export interface IFleetManagementProps {
   apiService: ApiService;
@@ -67,6 +68,10 @@ export const FleetManagement: React.FC<IFleetManagementProps> = ({ apiService })
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [confirmDialog, setConfirmDialog] =
     React.useState<IConfirmDialogState>(defaultConfirmState);
+
+  // Vehicle form state
+  const [showForm, setShowForm] = React.useState<boolean>(false);
+  const [editingVehicle, setEditingVehicle] = React.useState<IVehicle | null>(null);
 
   // Status change picker dialog state
   const [statusPickerVehicle, setStatusPickerVehicle] = React.useState<IVehicle | undefined>(
@@ -145,8 +150,9 @@ export const FleetManagement: React.FC<IFleetManagementProps> = ({ apiService })
     setFilters(newFilters);
   }, []);
 
-  const handleEdit = React.useCallback((_vehicle: IVehicle): void => {
-    // Placeholder: navigate to edit form (Plan 04)
+  const handleEdit = React.useCallback((vehicle: IVehicle): void => {
+    setEditingVehicle(vehicle);
+    setShowForm(true);
   }, []);
 
   const handleChangeStatus = React.useCallback((vehicle: IVehicle): void => {
@@ -226,7 +232,20 @@ export const FleetManagement: React.FC<IFleetManagementProps> = ({ apiService })
   );
 
   const handleAddVehicle = React.useCallback((): void => {
-    // Placeholder: navigate to add vehicle form (Plan 04)
+    setEditingVehicle(null);
+    setShowForm(true);
+  }, []);
+
+  const handleFormSave = React.useCallback((): void => {
+    setShowForm(false);
+    setEditingVehicle(null);
+    // Re-fetch vehicles to reflect the new/updated vehicle
+    fetchVehicles(filters).catch(() => undefined);
+  }, [fetchVehicles, filters]);
+
+  const handleFormCancel = React.useCallback((): void => {
+    setShowForm(false);
+    setEditingVehicle(null);
   }, []);
 
   if (loading) {
@@ -236,6 +255,20 @@ export const FleetManagement: React.FC<IFleetManagementProps> = ({ apiService })
           <Spinner size={SpinnerSize.large} label="Loading fleet data..." />
         </div>
       </div>
+    );
+  }
+
+  // When form is shown, render VehicleForm instead of the table (full-page form per locked decision)
+  if (showForm) {
+    return (
+      <VehicleForm
+        apiService={apiService}
+        vehicle={editingVehicle || undefined}
+        categories={categories}
+        locations={locations}
+        onSave={handleFormSave}
+        onCancel={handleFormCancel}
+      />
     );
   }
 

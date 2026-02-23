@@ -1,0 +1,51 @@
+@import '../../styles/variables.module.scss';
+
+.vehicleForm {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0;
+}
+
+.formContainer {
+  max-width: 600px;
+}
+
+.fieldGroup {
+  margin-bottom: 16px;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #edebe9;
+}
+
+.loadingOverlay {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .formContainer {
+    max-width: 100%;
+  }
+}
