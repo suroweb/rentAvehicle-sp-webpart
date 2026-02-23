@@ -5,3 +5,4 @@ import './functions/me.js';
 import './functions/vehicles.js';
 import './functions/categories.js';
 import './functions/locations.js';
+import './functions/bookings.js';

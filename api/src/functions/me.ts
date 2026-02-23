@@ -25,6 +25,7 @@ export async function me(
       displayName: user.displayName,
       email: user.email,
       role: user.effectiveRole,
+      officeLocation: user.officeLocation || null,
     },
   };
 }
