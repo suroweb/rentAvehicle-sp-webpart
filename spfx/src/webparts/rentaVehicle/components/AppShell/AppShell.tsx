@@ -8,6 +8,8 @@ import { BottomTabBar } from '../BottomTabBar/BottomTabBar';
 import { WelcomeScreen } from '../WelcomeScreen/WelcomeScreen';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FleetManagement } from '../FleetManagement/FleetManagement';
+import { CategoryManagement } from '../CategoryManagement/CategoryManagement';
+import { LocationList } from '../LocationList/LocationList';
 import { ApiService } from '../../services/ApiService';
 import { AadHttpClient } from '@microsoft/sp-http';
 
@@ -55,6 +57,24 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
         return (
           <p className={styles.welcomeText}>
             API connection is not available. Fleet management requires an active API connection.
+          </p>
+        );
+      case 'categories':
+        if (apiService) {
+          return <CategoryManagement apiService={apiService} />;
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. Category management requires an active API connection.
+          </p>
+        );
+      case 'locations':
+        if (apiService && auth.user) {
+          return <LocationList apiService={apiService} userRole={auth.user.role} />;
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. Location management requires an active API connection.
           </p>
         );
       default:

@@ -1,0 +1,81 @@
+@import '../../styles/variables.module.scss';
+
+.categoryManagement {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0;
+}
+
+.addForm {
+  background-color: $color-sidebar-bg;
+  border: 1px solid #edebe9;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.addFormFields {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+
+  > * {
+    flex: 1;
+  }
+}
+
+.addFormActions {
+  display: flex;
+  gap: 8px;
+}
+
+.tableContainer {
+  margin-top: 8px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 0;
+  color: $color-text-secondary;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 8px 0 0 0;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .addFormFields {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
