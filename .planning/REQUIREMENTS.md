@@ -62,9 +62,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform
 
-- [ ] **PLAT-01**: SPFx webpart works in SharePoint pages
-- [ ] **PLAT-02**: SPFx webpart works as a Teams tab
-- [ ] **PLAT-03**: UI is responsive for Teams mobile
+- [x] **PLAT-01**: SPFx webpart works in SharePoint pages
+- [x] **PLAT-02**: SPFx webpart works as a Teams tab
+- [x] **PLAT-03**: UI is responsive for Teams mobile
 
 ## v2 Requirements
 
@@ -137,9 +137,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RPRT-02 | Phase 7 | Pending |
 | RPRT-03 | Phase 7 | Pending |
 | RPRT-04 | Phase 7 | Pending |
-| PLAT-01 | Phase 1 | Pending |
-| PLAT-02 | Phase 1 | Pending |
-| PLAT-03 | Phase 1 | Pending |
+| PLAT-01 | Phase 1 | Complete |
+| PLAT-02 | Phase 1 | Complete |
+| PLAT-03 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 35 total
