@@ -33,8 +33,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
   const [selectedVehicleId, setSelectedVehicleId] = React.useState<number | null>(null);
 
   const apiService = React.useMemo(() => {
-    if (!apiClient) return null;
-    return new ApiService(apiClient);
+    return new ApiService(apiClient || null);
   }, [apiClient]);
 
   const handleNavigate = (key: string): void => {

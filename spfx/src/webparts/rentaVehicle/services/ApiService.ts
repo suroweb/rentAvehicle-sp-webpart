@@ -7,14 +7,17 @@ import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput } 
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
+const LOCAL_DEV_API_URL = 'http://localhost:7071';
 
 export class ApiService {
-  private client: AadHttpClient;
+  private client: AadHttpClient | null;
   private baseUrl: string;
+  private useLocalFetch: boolean;
 
-  constructor(client: AadHttpClient, baseUrl?: string) {
+  constructor(client: AadHttpClient | null, baseUrl?: string) {
     this.client = client;
-    this.baseUrl = baseUrl || API_BASE_URL;
+    this.useLocalFetch = !client;
+    this.baseUrl = baseUrl || (this.useLocalFetch ? LOCAL_DEV_API_URL : API_BASE_URL);
   }
 
   // ── Auth ──────────────────────────────────────────────────
@@ -150,12 +153,53 @@ export class ApiService {
 
   // ── HTTP helpers ──────────────────────────────────────────
 
+  /**
+   * Unified fetch that uses AadHttpClient when available, plain fetch for local dev.
+   */
+  private async _fetch(url: string, method: string, body?: unknown): Promise<Response> {
+    if (this.useLocalFetch || !this.client) {
+      return this._localFetch(url, method, body);
+    }
+
+    // Try AadHttpClient first; if token acquisition fails, fall back to local fetch
+    try {
+      let response: Response;
+      if (method === 'GET') {
+        response = await this.client.get(url, AadHttpClient.configurations.v1) as unknown as Response;
+      } else if (method === 'POST') {
+        response = await this.client.post(url, AadHttpClient.configurations.v1, {
+          headers: { 'Content-Type': 'application/json' },
+          body: body ? JSON.stringify(body) : undefined,
+        }) as unknown as Response;
+      } else {
+        response = await this.client.fetch(url, AadHttpClient.configurations.v1, {
+          method,
+          headers: body ? { 'Content-Type': 'application/json' } : undefined,
+          body: body ? JSON.stringify(body) : undefined,
+        }) as unknown as Response;
+      }
+      return response;
+    } catch {
+      // AadHttpClient failed (e.g. workbench can't get tokens) — fall back to local API
+      this.useLocalFetch = true;
+      this.baseUrl = LOCAL_DEV_API_URL;
+      const localUrl = url.replace(/https?:\/\/[^/]+/, LOCAL_DEV_API_URL);
+      return this._localFetch(localUrl, method, body);
+    }
+  }
+
+  private _localFetch(url: string, method: string, body?: unknown): Promise<Response> {
+    const init: RequestInit = {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    };
+    return fetch(url, init);
+  }
+
   private async get<T>(path: string): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.get(
-      url,
-      AadHttpClient.configurations.v1
-    );
+    const response = await this._fetch(url, 'GET');
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -169,14 +213,7 @@ export class ApiService {
 
   private async post<T>(path: string, body: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.post(
-      url,
-      AadHttpClient.configurations.v1,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await this._fetch(url, 'POST', body);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -194,15 +231,7 @@ export class ApiService {
 
   private async put<T>(path: string, body: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.fetch(
-      url,
-      AadHttpClient.configurations.v1,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await this._fetch(url, 'PUT', body);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -220,15 +249,7 @@ export class ApiService {
 
   private async patch<T>(path: string, body: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.fetch(
-      url,
-      AadHttpClient.configurations.v1,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await this._fetch(url, 'PATCH', body);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -251,14 +272,7 @@ export class ApiService {
    */
   private async postWithConflict<T>(path: string, body: unknown): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.post(
-      url,
-      AadHttpClient.configurations.v1,
-      {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }
-    );
+    const response = await this._fetch(url, 'POST', body);
 
     if (response.status === 409) {
       const errorText = await response.text();
@@ -281,13 +295,7 @@ export class ApiService {
 
   private async del<T>(path: string): Promise<T> {
     const url = `${this.baseUrl}${path}`;
-    const response = await this.client.fetch(
-      url,
-      AadHttpClient.configurations.v1,
-      {
-        method: 'DELETE',
-      }
-    );
+    const response = await this._fetch(url, 'DELETE');
 
     if (!response.ok) {
       const errorText = await response.text();

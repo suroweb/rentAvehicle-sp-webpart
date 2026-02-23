@@ -128,6 +128,7 @@ export function getLocalDevUser(): UserContext | null {
     email: process.env.LOCAL_DEV_EMAIL || 'dev@localhost',
     roles: [effectiveRole],
     effectiveRole,
+    officeLocation: process.env.LOCAL_DEV_OFFICE_LOCATION || null,
   };
 }
 

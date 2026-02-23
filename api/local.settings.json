@@ -1,17 +1,22 @@
 {
   "IsEncrypted": false,
+  "Host": {
+    "CORS": "https://localhost:4321,http://localhost:4321,https://contoso.sharepoint.com",
+    "CORSCredentials": false
+  },
   "Values": {
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "LOCAL_DEV": "true",
     "LOCAL_DEV_NAME": "Test User",
     "LOCAL_DEV_EMAIL": "test@contoso.com",
-    "LOCAL_DEV_ROLE": "Employee",
-    "AZURE_SQL_SERVER": "",
-    "AZURE_SQL_DATABASE": "",
+    "LOCAL_DEV_ROLE": "Admin",
+    "LOCAL_DEV_OFFICE_LOCATION": "Bucharest",
+    "AZURE_SQL_SERVER": "localhost",
+    "AZURE_SQL_DATABASE": "RentAVehicle",
     "AZURE_SQL_PORT": "1433",
-    "AZURE_SQL_USER": "",
-    "AZURE_SQL_PASSWORD": "",
+    "AZURE_SQL_USER": "sa",
+    "AZURE_SQL_PASSWORD": "YourStrong!Pass123",
     "AZURE_TENANT_ID": "",
     "AZURE_CLIENT_ID": "",
     "AZURE_CLIENT_SECRET": ""
