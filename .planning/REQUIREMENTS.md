@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User is authenticated via Microsoft Entra ID SSO — no separate login
-- [ ] **AUTH-02**: User role (Employee, Manager, Admin) determined from Entra ID App Roles
-- [ ] **AUTH-03**: API endpoints enforce role-based access — employees cannot access admin functions
+- [x] **AUTH-01**: User is authenticated via Microsoft Entra ID SSO — no separate login
+- [x] **AUTH-02**: User role (Employee, Manager, Admin) determined from Entra ID App Roles
+- [x] **AUTH-03**: API endpoints enforce role-based access — employees cannot access admin functions
 
 ### Vehicle Management
 
@@ -105,9 +105,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
 | VHCL-01 | Phase 2 | Pending |
 | VHCL-02 | Phase 2 | Pending |
 | VHCL-03 | Phase 2 | Pending |
