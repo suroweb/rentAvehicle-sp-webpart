@@ -95,3 +95,12 @@ IF @constraintName IS NOT NULL
 
 ALTER TABLE Bookings ADD CONSTRAINT CK_Bookings_Status
   CHECK (status IN ('Confirmed', 'Active', 'Completed', 'Cancelled', 'Overdue'));
+
+-- Phase 5: M365 Calendar Integration
+
+-- Add resource mailbox email to Vehicles table (set by admin after Exchange provisioning)
+ALTER TABLE Vehicles ADD resourceMailboxEmail NVARCHAR(255) NULL;
+
+-- Add calendar event IDs to Bookings table (for later PATCH updates)
+ALTER TABLE Bookings ADD vehicleCalendarEventId NVARCHAR(255) NULL;
+ALTER TABLE Bookings ADD employeeCalendarEventId NVARCHAR(255) NULL;

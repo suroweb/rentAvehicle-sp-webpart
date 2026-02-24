@@ -21,7 +21,7 @@ import type { TokenCredential } from '@azure/identity';
  * For local dev (AZURE_CLIENT_SECRET set), uses ClientSecretCredential.
  * For production, uses DefaultAzureCredential (Managed Identity).
  */
-async function getGraphClient(): Promise<Client> {
+export async function getGraphClient(): Promise<Client> {
   let credential: TokenCredential;
 
   if (process.env.AZURE_CLIENT_SECRET) {

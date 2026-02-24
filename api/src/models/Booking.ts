@@ -60,6 +60,8 @@ export interface IBooking {
   checkedOutAt: string | null;
   checkedInAt: string | null;
   cancelReason: string | null;
+  vehicleCalendarEventId: string | null;
+  employeeCalendarEventId: string | null;
 }
 
 /**
@@ -80,6 +82,7 @@ export interface IAvailableVehicle {
   capacity: number;
   photoUrl: string | null;
   status: string;
+  resourceMailboxEmail: string | null;
 }
 
 /**
