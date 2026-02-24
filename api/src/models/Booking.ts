@@ -53,10 +53,13 @@ export interface IBooking {
   userDisplayName: string | null;
   startTime: string;
   endTime: string;
-  status: 'Confirmed' | 'Active' | 'Completed' | 'Cancelled';
+  status: 'Confirmed' | 'Active' | 'Completed' | 'Cancelled' | 'Overdue';
   createdAt: string;
   cancelledAt: string | null;
   cancelledBy: string | null;
+  checkedOutAt: string | null;
+  checkedInAt: string | null;
+  cancelReason: string | null;
 }
 
 /**
@@ -88,3 +91,41 @@ export interface IVehicleAvailabilitySlot {
   endTime: string;
   status: string;
 }
+
+/**
+ * A booking slot for the calendar timeline day-view.
+ * Represents one booking block on the timeline grid.
+ */
+export interface ITimelineSlot {
+  bookingId: number;
+  vehicleId: number;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleLicensePlate: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  userId: string;
+  userDisplayName: string | null;
+}
+
+/**
+ * A suggestion returned when a booking attempt conflicts (409).
+ * Can be a time shift (same vehicle, different time) or an alternative vehicle.
+ */
+export interface IBookingSuggestion {
+  type: 'time_shift' | 'alt_vehicle';
+  vehicleId: number;
+  vehicleName: string;
+  startTime: string;
+  endTime: string;
+  label: string;
+}
+
+/**
+ * Zod validation schema for admin cancel input.
+ * Requires a non-empty reason string (max 500 chars).
+ */
+export const AdminCancelInputSchema = z.object({
+  cancelReason: z.string().min(1).max(500).trim(),
+});

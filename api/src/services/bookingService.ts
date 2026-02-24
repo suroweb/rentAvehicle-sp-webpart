@@ -11,7 +11,48 @@ import {
   IAvailableVehicle,
   IVehicleAvailabilitySlot,
   IBooking,
+  ITimelineSlot,
+  IBookingSuggestion,
 } from '../models/Booking.js';
+
+/**
+ * Auto-expire bookings on access (lazy expiration pattern).
+ *
+ * 1. Auto-cancel: Confirmed bookings where startTime + 1 hour < now (no checkout within window).
+ * 2. Mark overdue: Active bookings where endTime < now (vehicle not returned on time).
+ *
+ * Called at the start of getMyBookings and getAvailableVehicles to keep statuses fresh.
+ * NOT called on browseAvailableVehicles or getVehicleAvailability per research pitfall #4.
+ */
+export async function autoExpireBookings(): Promise<void> {
+  const pool = await getPool();
+  const now = new Date();
+
+  // Auto-cancel: Confirmed bookings where startTime + 1 hour < now
+  await pool.request()
+    .input('expiryCutoff', sql.DateTime2, new Date(now.getTime() - 60 * 60 * 1000))
+    .query(`
+      UPDATE Bookings
+      SET status = 'Cancelled',
+          cancelledAt = GETUTCDATE(),
+          cancelledBy = 'SYSTEM',
+          cancelReason = 'Auto-cancelled: no checkout within 1 hour of start time',
+          updatedAt = GETUTCDATE()
+      WHERE status = 'Confirmed'
+        AND startTime < @expiryCutoff
+    `);
+
+  // Mark overdue: Active bookings where endTime < now
+  await pool.request()
+    .input('now', sql.DateTime2, now)
+    .query(`
+      UPDATE Bookings
+      SET status = 'Overdue',
+          updatedAt = GETUTCDATE()
+      WHERE status = 'Active'
+        AND endTime < @now
+    `);
+}
 
 /**
  * Get vehicles available at a specific location during a time range.
@@ -24,6 +65,7 @@ export async function getAvailableVehicles(
   endTime: Date,
   categoryId?: number
 ): Promise<IAvailableVehicle[]> {
+  await autoExpireBookings();
   const pool = await getPool();
   const request = pool.request();
 
@@ -213,11 +255,13 @@ export async function createBooking(
 }
 
 /**
- * Get all bookings for a specific user (non-cancelled).
+ * Get all bookings for a specific user (all statuses including Cancelled).
  * Joins Vehicles, Categories, and Locations for display-ready data.
  * Returns all fields the frontend needs without additional API calls.
+ * Includes cancelled bookings so the frontend can show admin cancel reasons.
  */
 export async function getMyBookings(userId: string): Promise<IBooking[]> {
+  await autoExpireBookings();
   const pool = await getPool();
   const request = pool.request();
   request.input('userId', sql.NVarChar(255), userId);
@@ -244,13 +288,15 @@ export async function getMyBookings(userId: string): Promise<IBooking[]> {
       b.status,
       b.createdAt,
       b.cancelledAt,
-      b.cancelledBy
+      b.cancelledBy,
+      b.checkedOutAt,
+      b.checkedInAt,
+      b.cancelReason
     FROM Bookings b
     LEFT JOIN Vehicles v ON b.vehicleId = v.id
     LEFT JOIN Categories c ON v.categoryId = c.id
     LEFT JOIN Locations l ON v.locationId = l.id
     WHERE b.userId = @userId
-      AND b.status != 'Cancelled'
     ORDER BY b.startTime DESC
   `);
 

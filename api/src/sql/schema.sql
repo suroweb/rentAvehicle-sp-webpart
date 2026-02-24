@@ -75,3 +75,23 @@ CREATE TABLE Bookings (
 CREATE INDEX IX_Bookings_VehicleId_Status ON Bookings(vehicleId, status) INCLUDE (startTime, endTime);
 CREATE INDEX IX_Bookings_UserId ON Bookings(userId) INCLUDE (status, startTime, endTime);
 CREATE INDEX IX_Bookings_StartTime ON Bookings(startTime) WHERE status IN ('Confirmed', 'Active');
+
+-- Phase 4: Booking Lifecycle and Admin Oversight
+
+-- Add lifecycle columns to Bookings table
+ALTER TABLE Bookings ADD checkedOutAt DATETIME2 NULL;
+ALTER TABLE Bookings ADD checkedInAt DATETIME2 NULL;
+ALTER TABLE Bookings ADD cancelReason NVARCHAR(500) NULL;
+
+-- Update status CHECK constraint to include 'Overdue'
+-- Must find and drop the existing inline CHECK constraint by querying system tables
+DECLARE @constraintName NVARCHAR(200);
+SELECT @constraintName = cc.name
+FROM sys.check_constraints cc
+INNER JOIN sys.columns c ON cc.parent_object_id = c.object_id AND cc.parent_column_id = c.column_id
+WHERE cc.parent_object_id = OBJECT_ID('Bookings') AND c.name = 'status';
+IF @constraintName IS NOT NULL
+  EXEC('ALTER TABLE Bookings DROP CONSTRAINT ' + @constraintName);
+
+ALTER TABLE Bookings ADD CONSTRAINT CK_Bookings_Status
+  CHECK (status IN ('Confirmed', 'Active', 'Completed', 'Cancelled', 'Overdue'));
