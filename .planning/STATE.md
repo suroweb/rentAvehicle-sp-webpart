@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Plan 01 complete.
+**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Plan 02 complete.
 
 ## Current Position
 
 Phase: 4 of 7 (Booking Lifecycle and Admin Oversight)
-Plan: 1 of 3 in current phase (04-01 complete)
+Plan: 2 of 3 in current phase (04-02 complete)
 Status: In Progress
-Last activity: 2026-02-24 -- Completed 04-01-PLAN.md (Backend API: state machine, endpoints, admin)
+Last activity: 2026-02-24 -- Completed 04-02-PLAN.md (Employee Frontend: timeline, lifecycle, suggestions)
 
-Progress: [######....] 63%
+Progress: [######....] 68%
 
 ## Performance Metrics
 
@@ -38,9 +38,10 @@ Progress: [######....] 63%
 | Phase 03 P02 | 8min | 2 tasks | 11 files |
 | Phase 03 P03 | 5min | 2 tasks | 5 files |
 | Phase 04 P01 | 4min | 2 tasks | 6 files |
+| Phase 04 P02 | 9min | 2 tasks | 11 files |
 
 **Recent Trend:**
-- Last 5 plans: 4min, 3min, 8min, 5min, 4min
+- Last 5 plans: 3min, 8min, 5min, 4min, 9min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -89,10 +90,13 @@ Recent decisions affecting current work:
 - [Phase 04]: Atomic UPDATE with WHERE status check for checkout/checkin (no SERIALIZABLE needed for single-row)
 - [Phase 04]: Suggestions: up to 2 time shifts (+/-1h through +/-4h), remaining slots filled with alt vehicles
 - [Phase 04]: Dynamic WHERE clause for getAllBookings admin filters
+- [Phase 04]: postWithConflict returns structured IConflictResponse instead of throwing, enabling suggestions display
+- [Phase 04]: MyBookings uses explicit backend statuses (Active/Overdue/Cancelled) replacing Phase 3 time-based Active derivation
+- [Phase 04]: Suggestions inline below conflict MessageBar -- time_shift updates form, alt_vehicle navigates to vehicle
 
 ### Pending Todos
 
-2 pending todo(s) in `.planning/todos/pending/`
+1 pending todo(s) in `.planning/todos/pending/`
 
 ### Blockers/Concerns
 
@@ -102,5 +106,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-01-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-02-SUMMARY.md
