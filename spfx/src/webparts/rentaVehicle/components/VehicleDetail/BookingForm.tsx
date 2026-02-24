@@ -6,6 +6,7 @@ import { DayOfWeek } from '@fluentui/react/lib/Calendar';
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import styles from './VehicleDetail.module.scss';
+import suggestionStyles from '../MyBookings/MyBookings.module.scss';
 import { ApiService } from '../../services/ApiService';
 import { IConflictResponse, IBookingSuggestion } from '../../models/IBooking';
 import { useTimezone, localToUtcIso } from '../../hooks/useTimezone';
@@ -268,11 +269,57 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
         <MessageBar
           messageBarType={MessageBarType.error}
           isMultiline={false}
-          onDismiss={function dismissError(): void { setError(undefined); }}
+          onDismiss={function dismissError(): void { setError(undefined); setSuggestions([]); }}
           dismissButtonAriaLabel="Close"
         >
           {error}
         </MessageBar>
+      )}
+
+      {/* Inline suggestions on 409 conflict */}
+      {suggestions.length > 0 && (
+        <div className={suggestionStyles.suggestionsSection}>
+          <div className={suggestionStyles.suggestionsTitle}>Available alternatives:</div>
+          {suggestions.map(function renderSuggestion(suggestion: IBookingSuggestion, idx: number): React.ReactElement {
+            const handleSuggestionClick = function onSuggestionClick(): void {
+              if (suggestion.type === 'time_shift') {
+                // Parse suggestion times and update form
+                const sugStart = new Date(suggestion.startTime);
+                const sugEnd = new Date(suggestion.endTime);
+                setStartDate(new Date(sugStart.getFullYear(), sugStart.getMonth(), sugStart.getDate()));
+                setEndDate(new Date(sugEnd.getFullYear(), sugEnd.getMonth(), sugEnd.getDate()));
+                setStartHour(sugStart.getHours());
+                setEndHour(sugEnd.getHours());
+                setSuggestions([]);
+                setError(undefined);
+              } else if (suggestion.type === 'alt_vehicle' && onNavigateToVehicle) {
+                onNavigateToVehicle(suggestion.vehicleId);
+              }
+            };
+
+            const timeLabel = suggestion.type === 'time_shift'
+              ? (tz.formatDateTime(suggestion.startTime) + ' - ' + tz.formatDateTime(suggestion.endTime) + ' (' + tz.timezoneAbbr + ')')
+              : (suggestion.vehicleName + ', same time');
+
+            return (
+              <div
+                key={idx}
+                className={suggestionStyles.suggestionCard}
+                onClick={handleSuggestionClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={function onKey(e: React.KeyboardEvent): void {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSuggestionClick();
+                  }
+                }}
+              >
+                <div className={suggestionStyles.suggestionLabel}>{suggestion.label}</div>
+                <div className={suggestionStyles.suggestionDetail}>{timeLabel}</div>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       <div className={styles.formFields}>

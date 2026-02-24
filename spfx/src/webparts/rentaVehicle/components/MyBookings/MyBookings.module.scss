@@ -177,6 +177,8 @@
   font-size: 12px;
 }
 
+/* -- Status badges -------------------------------------- */
+
 .entryCancelledBadge {
   display: inline-block;
   margin-top: 6px;
@@ -188,11 +190,83 @@
   border-radius: 10px;
 }
 
+.entryOverdueBadge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #d13438;
+  border-radius: 10px;
+}
+
+.entryActiveBadge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #107c10;
+  border-radius: 10px;
+}
+
+.entryConfirmedBadge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: $color-primary;
+  background: rgba(0, 120, 212, 0.1);
+  border-radius: 10px;
+}
+
+.entryCompletedBadge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: $color-text-secondary;
+  background: #f3f2f1;
+  border-radius: 10px;
+}
+
+/* -- Overdue warning ------------------------------------ */
+
+.overdueWarning {
+  margin-top: 8px;
+}
+
+/* -- Admin cancel reason -------------------------------- */
+
+.adminCancelReason {
+  margin-top: 8px;
+}
+
+/* -- Action error --------------------------------------- */
+
+.actionError {
+  margin-top: 8px;
+}
+
+/* -- Action buttons area -------------------------------- */
+
+.entryActions {
+  flex: 0 0 auto;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
 /* -- Cancel action -------------------------------------- */
 
 .entryCancelAction {
   flex: 0 0 auto;
-  align-self: center;
 }
 
 .cancelButton {
@@ -213,6 +287,54 @@
   flex-direction: column;
 }
 
+/* -- Suggestions area (used by BookingForm) ------------- */
+
+.suggestionsSection {
+  margin-top: 12px;
+  padding: 12px;
+  background: #faf9f8;
+  border-radius: 6px;
+  border: 1px solid #edebe9;
+}
+
+.suggestionsTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 8px 0;
+}
+
+.suggestionCard {
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #edebe9;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: #f3f2f1;
+    border-color: $color-primary;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.suggestionLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: $color-text-primary;
+}
+
+.suggestionDetail {
+  font-size: 12px;
+  color: $color-text-secondary;
+  margin-top: 2px;
+}
+
 /* -- Mobile responsive ---------------------------------- */
 
 @media (max-width: $mobile-breakpoint) {
@@ -228,9 +350,15 @@
     border-radius: 6px;
   }
 
+  .entryActions {
+    align-self: flex-start;
+    flex-direction: row;
+    margin-top: 8px;
+  }
+
   .entryCancelAction {
     align-self: flex-start;
-    margin-top: 8px;
+    margin-top: 0;
   }
 
   .header {

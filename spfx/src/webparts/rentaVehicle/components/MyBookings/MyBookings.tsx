@@ -15,27 +15,39 @@ export interface IMyBookingsProps {
   onNavigateToBrowse: () => void;
 }
 
-type BookingTab = 'upcoming' | 'active' | 'past';
+type BookingTab = 'upcoming' | 'active' | 'past' | 'cancelled';
 
+/**
+ * Categorize bookings into tabs using explicit backend statuses.
+ * Phase 4 provides explicit Active/Overdue statuses from check-out/expiry,
+ * replacing the Phase 3 time-based Active derivation.
+ */
 function categorizeBookings(
   bookings: IBooking[]
-): { upcoming: IBooking[]; active: IBooking[]; past: IBooking[] } {
+): { upcoming: IBooking[]; active: IBooking[]; past: IBooking[]; cancelled: IBooking[] } {
   const now = new Date();
   const upcoming: IBooking[] = [];
   const active: IBooking[] = [];
   const past: IBooking[] = [];
+  const cancelled: IBooking[] = [];
 
   for (let i = 0; i < bookings.length; i++) {
     const b = bookings[i];
-    const start = new Date(b.startTime);
-    const end = new Date(b.endTime);
 
-    if (b.status === 'Cancelled' || end <= now) {
+    if (b.status === 'Cancelled') {
+      cancelled.push(b);
+    } else if (b.status === 'Completed') {
       past.push(b);
-    } else if (b.status === 'Confirmed' && start > now) {
-      upcoming.push(b);
-    } else if (b.status === 'Confirmed' && start <= now && end > now) {
+    } else if (b.status === 'Active' || b.status === 'Overdue') {
       active.push(b);
+    } else if (b.status === 'Confirmed') {
+      const start = new Date(b.startTime);
+      if (start > now) {
+        upcoming.push(b);
+      } else {
+        // Confirmed but past start time -- awaiting check-out or auto-cancel
+        upcoming.push(b);
+      }
     } else {
       // Fallback: treat as past
       past.push(b);
@@ -57,63 +69,60 @@ function categorizeBookings(
     return new Date(bk.endTime).getTime() - new Date(a.endTime).getTime();
   });
 
-  return { upcoming: upcoming, active: active, past: past };
+  // Sort cancelled by most recent first (using cancelledAt or startTime)
+  cancelled.sort(function sortCancelled(a: IBooking, bk: IBooking): number {
+    const aTime = a.cancelledAt ? new Date(a.cancelledAt).getTime() : new Date(a.startTime).getTime();
+    const bTime = bk.cancelledAt ? new Date(bk.cancelledAt).getTime() : new Date(bk.startTime).getTime();
+    return bTime - aTime;
+  });
+
+  return { upcoming: upcoming, active: active, past: past, cancelled: cancelled };
 }
 
-export const MyBookings: React.FC<IMyBookingsProps> = ({
-  apiService,
-  onNavigateToBrowse,
-}) => {
+export const MyBookings: React.FC<IMyBookingsProps> = function MyBookings(props) {
+  const apiService = props.apiService;
+  const onNavigateToBrowse = props.onNavigateToBrowse;
+
   const [bookings, setBookings] = React.useState<IBooking[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = React.useState<BookingTab>('upcoming');
-  const [cancellingId, setCancellingId] = React.useState<number | null>(null);
-  const [confirmDialogBookingId, setConfirmDialogBookingId] = React.useState<number | null>(null);
+  const [cancellingId, setCancellingId] = React.useState<number | undefined>(undefined);
+  const [confirmDialogBookingId, setConfirmDialogBookingId] = React.useState<number | undefined>(undefined);
+
+  // Fetch bookings function (shared by initial load and refresh)
+  const fetchBookings = React.useCallback(function fetchBookingsFn(): void {
+    setLoading(true);
+    setError(undefined);
+
+    apiService.getMyBookings()
+      .then(function onSuccess(data: IBooking[]): void {
+        setBookings(data);
+        setLoading(false);
+      })
+      .catch(function onError(err: unknown): void {
+        const message = err instanceof Error ? err.message : 'Failed to load bookings';
+        setError(message);
+        setLoading(false);
+      });
+  }, [apiService]);
 
   // Fetch bookings on mount
-  React.useEffect(function loadBookings(): () => void {
-    let cancelled = false;
+  React.useEffect(function loadBookings(): void {
+    fetchBookings();
+  }, [fetchBookings]);
 
-    const fetchData = async (): Promise<void> => {
-      setLoading(true);
-      setError(undefined);
-
-      try {
-        const data = await apiService.getMyBookings();
-        if (!cancelled) {
-          setBookings(data);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          const message =
-            err instanceof Error ? err.message : 'Failed to load bookings';
-          setError(message);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData().catch(function onUnexpected(): void {
-      if (!cancelled) {
-        setLoading(false);
-        setError('Unexpected error loading bookings');
-      }
-    });
-
-    return function cleanup(): void {
-      cancelled = true;
-    };
-  }, [apiService]);
+  // Refresh callback for BookingEntry lifecycle actions
+  const handleRefresh = React.useCallback(function onRefresh(): void {
+    fetchBookings();
+  }, [fetchBookings]);
 
   // Categorize bookings
   const categorized = React.useMemo(function computeCategories(): {
     upcoming: IBooking[];
     active: IBooking[];
     past: IBooking[];
+    cancelled: IBooking[];
   } {
     return categorizeBookings(bookings);
   }, [bookings]);
@@ -139,10 +148,10 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
   // Cancel flow: confirm cancellation
   const handleCancelConfirm = React.useCallback(
     function onCancelConfirm(): void {
-      if (confirmDialogBookingId === null) return;
+      if (confirmDialogBookingId === undefined) return;
 
       const bookingId = confirmDialogBookingId;
-      setConfirmDialogBookingId(null);
+      setConfirmDialogBookingId(undefined);
       setCancellingId(bookingId);
 
       apiService
@@ -153,13 +162,13 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
         })
         .then(function onRefreshSuccess(data: IBooking[]): void {
           setBookings(data);
-          setCancellingId(null);
+          setCancellingId(undefined);
         })
         .catch(function onCancelError(err: unknown): void {
           const message =
             err instanceof Error ? err.message : 'Failed to cancel booking';
           setError(message);
-          setCancellingId(null);
+          setCancellingId(undefined);
         });
     },
     [confirmDialogBookingId, apiService]
@@ -167,7 +176,7 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
 
   // Cancel flow: dismiss dialog
   const handleCancelDismiss = React.useCallback(function onCancelDismiss(): void {
-    setConfirmDialogBookingId(null);
+    setConfirmDialogBookingId(undefined);
   }, []);
 
   // Check if all tabs are empty (no bookings at all)
@@ -217,7 +226,7 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
     if (list.length === 0) {
       return (
         <div className={styles.emptyStateTab}>
-          No {tabName} bookings
+          {tabName === 'cancelled' ? 'No cancelled bookings' : ('No ' + tabName + ' bookings')}
         </div>
       );
     }
@@ -229,7 +238,9 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
             <BookingEntry
               key={booking.id}
               booking={booking}
+              apiService={apiService}
               onCancel={showCancel ? handleCancelClick : undefined}
+              onRefresh={handleRefresh}
               showCancel={showCancel}
               isCancelling={cancellingId === booking.id}
             />
@@ -289,11 +300,19 @@ export const MyBookings: React.FC<IMyBookingsProps> = ({
             {renderBookingList(categorized.past, 'past', false)}
           </div>
         </PivotItem>
+        <PivotItem
+          headerText={'Cancelled (' + String(categorized.cancelled.length) + ')'}
+          itemKey="cancelled"
+        >
+          <div className={styles.tabContent}>
+            {renderBookingList(categorized.cancelled, 'cancelled', false)}
+          </div>
+        </PivotItem>
       </Pivot>
 
       {/* Confirm cancel dialog */}
       <ConfirmDialog
-        hidden={confirmDialogBookingId === null}
+        hidden={confirmDialogBookingId === undefined}
         title="Cancel Booking"
         message="Are you sure you want to cancel this booking?"
         confirmLabel="Yes, Cancel"
