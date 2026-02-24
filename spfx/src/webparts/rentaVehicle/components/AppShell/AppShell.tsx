@@ -13,7 +13,9 @@ import { LocationList } from '../LocationList/LocationList';
 import { VehicleBrowse } from '../VehicleBrowse/VehicleBrowse';
 import { VehicleDetail } from '../VehicleDetail/VehicleDetail';
 import { MyBookings } from '../MyBookings/MyBookings';
+import { AllBookings } from '../AllBookings/AllBookings';
 import { ApiService } from '../../services/ApiService';
+import { ILocation } from '../../models/ILocation';
 import { AadHttpClient } from '@microsoft/sp-http';
 
 interface IAppShellContentProps {
@@ -35,6 +37,16 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
   const apiService = React.useMemo(() => {
     return new ApiService(apiClient || null);
   }, [apiClient]);
+
+  // Locations loaded for admin pages (AllBookings)
+  const [adminLocations, setAdminLocations] = React.useState<ILocation[]>([]);
+  React.useEffect(() => {
+    if (auth.user && (auth.user.role === 'Admin' || auth.user.role === 'SuperAdmin') && apiService) {
+      apiService.getLocations()
+        .then((locs: ILocation[]) => { setAdminLocations(locs); })
+        .catch(() => { /* Locations load failure is non-blocking */ });
+    }
+  }, [auth.user, apiService]);
 
   const handleNavigate = (key: string): void => {
     setActiveNavKey(key);
@@ -123,6 +135,20 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
         return (
           <p className={styles.welcomeText}>
             API connection is not available. My Bookings requires an active API connection.
+          </p>
+        );
+      case 'allBookings':
+        if (apiService) {
+          return (
+            <AllBookings
+              apiService={apiService}
+              locations={adminLocations}
+            />
+          );
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection is not available. All Bookings requires an active API connection.
           </p>
         );
       default:

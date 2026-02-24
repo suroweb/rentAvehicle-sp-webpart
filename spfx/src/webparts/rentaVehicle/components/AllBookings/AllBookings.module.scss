@@ -1,0 +1,120 @@
+@import '../../styles/variables.module.scss';
+
+.allBookings {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.filterActions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.tableContainer {
+  margin-top: 8px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 0;
+  color: $color-text-secondary;
+}
+
+.emptyStateText {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 8px 0 0 0;
+}
+
+// Status badges
+.statusBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusConfirmed {
+  background-color: #deecf9;
+  color: #0078d4;
+}
+
+.statusActive {
+  background-color: #dff6dd;
+  color: #107c10;
+}
+
+.statusOverdue {
+  background-color: #fde7e9;
+  color: #d13438;
+}
+
+.statusCompleted {
+  background-color: #f3f2f1;
+  color: #a19f9d;
+}
+
+.statusCancelled {
+  background-color: #f3f2f1;
+  color: #605e5c;
+  text-decoration: line-through;
+}
+
+// Cancel dialog
+.cancelReasonField {
+  margin-top: 12px;
+}
+
+.dialogError {
+  margin-top: 8px;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
