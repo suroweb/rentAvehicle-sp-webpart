@@ -81,7 +81,7 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
       try {
         const [locs, cats] = await Promise.all([
           apiService.getLocationsPublic(),
-          apiService.getCategories(),
+          apiService.getCategoriesPublic(),
         ]);
 
         if (cancelled) return;

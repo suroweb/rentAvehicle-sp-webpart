@@ -102,7 +102,41 @@ async function syncLocationsTrigger(
   }
 }
 
+/**
+ * GET /api/locations
+ * Public read-only endpoint for all authenticated users.
+ * Returns active locations with vehicle counts (no lazy-sync trigger).
+ */
+async function listLocationsPublic(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+
+    const locations = await getLocationsWithVehicleCounts();
+    const active = locations.filter((l: { isActive: boolean }) => l.isActive);
+    return { jsonBody: active };
+  } catch (error) {
+    context.error('listLocationsPublic failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
 // Register location endpoints
+app.http('listLocationsPublic', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'locations',
+  handler: listLocationsPublic,
+});
+
 app.http('listLocations', {
   methods: ['GET'],
   authLevel: 'anonymous',

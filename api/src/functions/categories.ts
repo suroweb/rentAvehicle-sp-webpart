@@ -195,7 +195,40 @@ async function removeCategory(
   }
 }
 
-// Register all 4 category endpoints
+/**
+ * GET /api/categories
+ * Public read-only endpoint for all authenticated users.
+ * Returns active categories.
+ */
+async function listCategoriesPublic(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+
+    const categories = await getCategories();
+    return { jsonBody: categories };
+  } catch (error) {
+    context.error('listCategoriesPublic failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
+// Register all category endpoints
+app.http('listCategoriesPublic', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'categories',
+  handler: listCategoriesPublic,
+});
+
 app.http('listCategories', {
   methods: ['GET'],
   authLevel: 'anonymous',

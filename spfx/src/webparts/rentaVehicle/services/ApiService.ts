@@ -79,6 +79,10 @@ export class ApiService {
     return this.get<ICategory[]>('/api/backoffice/categories');
   }
 
+  public async getCategoriesPublic(): Promise<ICategory[]> {
+    return this.get<ICategory[]>('/api/categories');
+  }
+
   public async createCategory(input: ICategoryInput): Promise<{ id: number }> {
     return this.post<{ id: number }>('/api/backoffice/categories', input);
   }
@@ -148,7 +152,7 @@ export class ApiService {
   // ── Locations (public read) ─────────────────────────────
 
   public async getLocationsPublic(): Promise<ILocation[]> {
-    return this.get<ILocation[]>('/api/backoffice/locations');
+    return this.get<ILocation[]>('/api/locations');
   }
 
   // ── Employee: Booking Lifecycle ────────────────────────
