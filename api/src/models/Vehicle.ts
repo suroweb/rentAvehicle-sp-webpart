@@ -12,6 +12,7 @@ export const VehicleInputSchema = z.object({
   categoryId: z.number().int().positive(),
   capacity: z.number().int().min(1).max(50),
   photoUrl: z.string().url().max(500).nullable().optional(),
+  resourceMailboxEmail: z.string().email().max(255).nullable().optional(),
 });
 
 /**
@@ -20,6 +21,14 @@ export const VehicleInputSchema = z.object({
  */
 export const VehicleStatusSchema = z.object({
   status: z.enum(['Available', 'InMaintenance', 'Retired']),
+});
+
+/**
+ * Zod validation schema for setting a vehicle's resource mailbox email
+ * after Exchange Online provisioning.
+ */
+export const VehicleMailboxSchema = z.object({
+  resourceMailboxEmail: z.string().email().max(255),
 });
 
 /** Inferred type from VehicleInputSchema */
@@ -50,6 +59,7 @@ export interface IVehicle {
   updatedAt: string;
   createdBy: string | null;
   updatedBy: string | null;
+  resourceMailboxEmail: string | null;
 }
 
 /**

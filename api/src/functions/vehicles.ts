@@ -28,8 +28,9 @@ import {
   updateVehicle,
   archiveVehicle,
   updateVehicleStatus,
+  updateVehicleMailbox,
 } from '../services/vehicleService.js';
-import { VehicleInputSchema, VehicleStatusSchema } from '../models/Vehicle.js';
+import { VehicleInputSchema, VehicleStatusSchema, VehicleMailboxSchema } from '../models/Vehicle.js';
 
 const isAuthorized = requireRole('Admin', 'SuperAdmin');
 
@@ -340,7 +341,61 @@ async function changeVehicleStatus(
   }
 }
 
-// Register all 6 vehicle endpoints
+/**
+ * PATCH /api/backoffice/vehicles/{id}/mailbox
+ * Set a vehicle's resource mailbox email after Exchange provisioning.
+ * Requires Admin or SuperAdmin role.
+ * Returns 200 on success, 404 if not found.
+ */
+async function setVehicleMailbox(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+    if (!isAuthorized(user)) {
+      return {
+        status: 403,
+        jsonBody: { error: 'Admin or SuperAdmin role required' },
+      };
+    }
+
+    const id = parseInt(request.params.id, 10);
+    if (isNaN(id)) {
+      return { status: 400, jsonBody: { error: 'Invalid vehicle ID' } };
+    }
+
+    const body = await request.json();
+    const parsed = VehicleMailboxSchema.safeParse(body);
+    if (!parsed.success) {
+      return {
+        status: 400,
+        jsonBody: {
+          error: 'Validation failed',
+          details: parsed.error.flatten(),
+        },
+      };
+    }
+
+    const updated = await updateVehicleMailbox(id, parsed.data.resourceMailboxEmail);
+    if (!updated) {
+      return { status: 404, jsonBody: { error: 'Vehicle not found' } };
+    }
+
+    return { jsonBody: { success: true } };
+  } catch (error) {
+    context.error('setVehicleMailbox failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
+// Register all 7 vehicle endpoints
 app.http('listVehicles', {
   methods: ['GET'],
   authLevel: 'anonymous',
@@ -381,4 +436,11 @@ app.http('changeVehicleStatus', {
   authLevel: 'anonymous',
   route: 'backoffice/vehicles/{id}/status',
   handler: changeVehicleStatus,
+});
+
+app.http('setVehicleMailbox', {
+  methods: ['PATCH'],
+  authLevel: 'anonymous',
+  route: 'backoffice/vehicles/{id}/mailbox',
+  handler: setVehicleMailbox,
 });

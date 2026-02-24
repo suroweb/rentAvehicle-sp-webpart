@@ -68,7 +68,8 @@ export async function getVehicles(
       v.categoryId, c.name AS categoryName,
       v.capacity, v.photoUrl, v.status,
       v.isArchived, v.archivedAt,
-      v.createdAt, v.updatedAt, v.createdBy, v.updatedBy
+      v.createdAt, v.updatedAt, v.createdBy, v.updatedBy,
+      v.resourceMailboxEmail
     FROM Vehicles v
     LEFT JOIN Categories c ON v.categoryId = c.id
     LEFT JOIN Locations l ON v.locationId = l.id
@@ -95,7 +96,8 @@ export async function getVehicleById(id: number): Promise<IVehicle | null> {
       v.categoryId, c.name AS categoryName,
       v.capacity, v.photoUrl, v.status,
       v.isArchived, v.archivedAt,
-      v.createdAt, v.updatedAt, v.createdBy, v.updatedBy
+      v.createdAt, v.updatedAt, v.createdBy, v.updatedBy,
+      v.resourceMailboxEmail
     FROM Vehicles v
     LEFT JOIN Categories c ON v.categoryId = c.id
     LEFT JOIN Locations l ON v.locationId = l.id
@@ -128,13 +130,14 @@ export async function createVehicle(
   request.input('categoryId', sql.Int, vehicle.categoryId);
   request.input('capacity', sql.Int, vehicle.capacity);
   request.input('photoUrl', sql.NVarChar(500), vehicle.photoUrl || null);
+  request.input('resourceMailboxEmail', sql.NVarChar(255), vehicle.resourceMailboxEmail || null);
   request.input('status', sql.NVarChar(20), 'Available');
   request.input('createdBy', sql.NVarChar(255), createdBy);
 
   const result = await request.query(`
-    INSERT INTO Vehicles (make, model, year, licensePlate, locationId, categoryId, capacity, photoUrl, status, createdBy)
+    INSERT INTO Vehicles (make, model, year, licensePlate, locationId, categoryId, capacity, photoUrl, resourceMailboxEmail, status, createdBy)
     OUTPUT INSERTED.id
-    VALUES (@make, @model, @year, @licensePlate, @locationId, @categoryId, @capacity, @photoUrl, @status, @createdBy)
+    VALUES (@make, @model, @year, @licensePlate, @locationId, @categoryId, @capacity, @photoUrl, @resourceMailboxEmail, @status, @createdBy)
   `);
 
   return result.recordset[0].id;
@@ -161,13 +164,15 @@ export async function updateVehicle(
   request.input('categoryId', sql.Int, vehicle.categoryId);
   request.input('capacity', sql.Int, vehicle.capacity);
   request.input('photoUrl', sql.NVarChar(500), vehicle.photoUrl || null);
+  request.input('resourceMailboxEmail', sql.NVarChar(255), vehicle.resourceMailboxEmail || null);
   request.input('updatedBy', sql.NVarChar(255), updatedBy);
 
   const result = await request.query(`
     UPDATE Vehicles
     SET make = @make, model = @model, year = @year, licensePlate = @licensePlate,
         locationId = @locationId, categoryId = @categoryId, capacity = @capacity,
-        photoUrl = @photoUrl, updatedAt = GETUTCDATE(), updatedBy = @updatedBy
+        photoUrl = @photoUrl, resourceMailboxEmail = @resourceMailboxEmail,
+        updatedAt = GETUTCDATE(), updatedBy = @updatedBy
     WHERE id = @id AND isArchived = 0
   `);
 
@@ -194,6 +199,29 @@ export async function archiveVehicle(
     WHERE id = @id AND isArchived = 0
   `);
 
+  return (result.rowsAffected[0] ?? 0) > 0;
+}
+
+/**
+ * Update a vehicle's status.
+ * Does NOT allow status change on archived vehicles.
+ * Returns true if a row was updated, false if not found or archived.
+ */
+/**
+ * Update a vehicle's resource mailbox email after Exchange provisioning.
+ * This is called by the admin endpoint that links a provisioned Exchange
+ * equipment mailbox to a vehicle record.
+ * Returns true if a row was updated, false if not found.
+ */
+export async function updateVehicleMailbox(
+  vehicleId: number,
+  resourceMailboxEmail: string
+): Promise<boolean> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('vehicleId', sql.Int, vehicleId)
+    .input('resourceMailboxEmail', sql.NVarChar(255), resourceMailboxEmail)
+    .query('UPDATE Vehicles SET resourceMailboxEmail = @resourceMailboxEmail, updatedAt = GETUTCDATE() WHERE id = @vehicleId AND isArchived = 0');
   return (result.rowsAffected[0] ?? 0) > 0;
 }
 

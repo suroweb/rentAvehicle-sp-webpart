@@ -7,3 +7,4 @@ import './functions/categories.js';
 import './functions/locations.js';
 import './functions/bookings.js';
 import './functions/adminBookings.js';
+import './functions/calendarAdmin.js';
