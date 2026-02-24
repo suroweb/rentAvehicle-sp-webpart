@@ -1,13 +1,16 @@
 /**
  * HTTP endpoints for employee-facing booking operations.
  *
- * 6 endpoints registered:
+ * 9 endpoints registered:
  * - GET    vehicles/available           (browse available vehicles with filters)
  * - GET    vehicles/{id}/detail         (vehicle detail with joins)
  * - GET    vehicles/{id}/availability   (7-day availability slots)
- * - POST   bookings                     (create booking)
- * - GET    bookings/my                  (list user's bookings)
+ * - GET    vehicles/timeline            (calendar timeline for location + day)
+ * - POST   bookings                     (create booking, 409 includes suggestions)
+ * - GET    bookings/my                  (list user's bookings, all statuses)
  * - DELETE bookings/{id}               (cancel own booking)
+ * - PATCH  bookings/{id}/checkout       (check out vehicle)
+ * - PATCH  bookings/{id}/return         (return vehicle)
  *
  * All endpoints require authentication (Employee minimum role).
  * No role check needed beyond authentication -- all authenticated users can use these.
@@ -26,6 +29,10 @@ import {
   createBooking,
   getMyBookings,
   cancelBooking,
+  checkOutBooking,
+  checkInBooking,
+  getLocationTimeline,
+  getBookingSuggestions,
 } from '../services/bookingService.js';
 import { BookingInputSchema } from '../models/Booking.js';
 
@@ -188,19 +195,39 @@ async function createBookingEndpoint(
       };
     }
 
+    const startTimeDate = new Date(parsed.data.startTime);
+    const endTimeDate = new Date(parsed.data.endTime);
+
     const result = await createBooking(
       parsed.data.vehicleId,
       user.userId,
       user.email,
       user.displayName,
-      new Date(parsed.data.startTime),
-      new Date(parsed.data.endTime)
+      startTimeDate,
+      endTimeDate
     );
 
     if ('conflict' in result) {
+      // Get the vehicle's locationId for suggestions query
+      const vehicle = await getVehicleDetail(parsed.data.vehicleId);
+      const locationId = vehicle ? vehicle.locationId : 0;
+
+      let suggestions: unknown[] = [];
+      if (locationId > 0) {
+        suggestions = await getBookingSuggestions(
+          parsed.data.vehicleId,
+          locationId,
+          startTimeDate,
+          endTimeDate
+        );
+      }
+
       return {
         status: 409,
-        jsonBody: { error: 'This slot was just booked by someone else' },
+        jsonBody: {
+          error: 'This slot was just booked by someone else',
+          suggestions,
+        },
       };
     }
 
@@ -288,7 +315,179 @@ async function cancelBookingEndpoint(
   }
 }
 
-// Register all 6 employee-facing booking endpoints
+/**
+ * PATCH /api/bookings/{id}/checkout
+ * Check out a vehicle for a confirmed booking.
+ * Available 30 minutes before the scheduled start time.
+ * Transitions booking from Confirmed to Active.
+ */
+async function checkOutBookingEndpoint(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+
+    const id = parseInt(request.params.id, 10);
+    if (isNaN(id)) {
+      return { status: 400, jsonBody: { error: 'Invalid booking ID' } };
+    }
+
+    const result = await checkOutBooking(id, user.userId);
+
+    switch (result) {
+      case 'checked_out':
+        return { jsonBody: { success: true } };
+      case 'not_found':
+        return { status: 404, jsonBody: { error: 'Booking not found' } };
+      case 'not_yours':
+        return {
+          status: 403,
+          jsonBody: { error: 'You can only check out your own bookings' },
+        };
+      case 'too_early':
+        return {
+          status: 422,
+          jsonBody: {
+            error: 'Check out available 30 minutes before start time',
+          },
+        };
+      case 'expired':
+        return {
+          status: 410,
+          jsonBody: {
+            error: 'Booking expired (no checkout within 1 hour)',
+          },
+        };
+      case 'wrong_status':
+        return {
+          status: 409,
+          jsonBody: {
+            error: 'Booking is not in a valid state for checkout',
+          },
+        };
+    }
+  } catch (error) {
+    context.error('checkOutBookingEndpoint failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
+/**
+ * PATCH /api/bookings/{id}/return
+ * Return (check in) a vehicle for an active or overdue booking.
+ * Transitions booking from Active/Overdue to Completed.
+ */
+async function checkInBookingEndpoint(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+
+    const id = parseInt(request.params.id, 10);
+    if (isNaN(id)) {
+      return { status: 400, jsonBody: { error: 'Invalid booking ID' } };
+    }
+
+    const result = await checkInBooking(id, user.userId);
+
+    switch (result) {
+      case 'checked_in':
+        return { jsonBody: { success: true } };
+      case 'not_found':
+        return { status: 404, jsonBody: { error: 'Booking not found' } };
+      case 'not_yours':
+        return {
+          status: 403,
+          jsonBody: { error: 'You can only return your own bookings' },
+        };
+      case 'wrong_status':
+        return {
+          status: 409,
+          jsonBody: {
+            error: 'Booking is not in a valid state for return',
+          },
+        };
+    }
+  } catch (error) {
+    context.error('checkInBookingEndpoint failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
+/**
+ * GET /api/vehicles/timeline?locationId=N&date=YYYY-MM-DD
+ * Get calendar timeline data (vehicles + bookings) for a location on a given day.
+ */
+async function getTimelineEndpoint(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+
+    const locationIdParam = request.query.get('locationId');
+    const dateParam = request.query.get('date');
+
+    if (!locationIdParam || !dateParam) {
+      return {
+        status: 400,
+        jsonBody: {
+          error: 'locationId and date query parameters are required',
+        },
+      };
+    }
+
+    const locationId = parseInt(locationIdParam, 10);
+    if (isNaN(locationId)) {
+      return { status: 400, jsonBody: { error: 'Invalid locationId' } };
+    }
+
+    // Validate date format YYYY-MM-DD
+    const dateMatch = dateParam.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!dateMatch) {
+      return {
+        status: 400,
+        jsonBody: { error: 'Invalid date format (expected YYYY-MM-DD)' },
+      };
+    }
+
+    // Compute day boundaries in UTC
+    const dayStart = new Date(dateParam + 'T00:00:00.000Z');
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+
+    if (isNaN(dayStart.getTime())) {
+      return { status: 400, jsonBody: { error: 'Invalid date' } };
+    }
+
+    const timeline = await getLocationTimeline(locationId, dayStart, dayEnd);
+    return { jsonBody: timeline };
+  } catch (error) {
+    context.error('getTimelineEndpoint failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
+// Register all 9 employee-facing booking endpoints
 app.http('browseAvailableVehicles', {
   methods: ['GET'],
   authLevel: 'anonymous',
@@ -329,4 +528,25 @@ app.http('cancelBookingEndpoint', {
   authLevel: 'anonymous',
   route: 'bookings/{id}',
   handler: cancelBookingEndpoint,
+});
+
+app.http('checkOutBookingEndpoint', {
+  methods: ['PATCH'],
+  authLevel: 'anonymous',
+  route: 'bookings/{id}/checkout',
+  handler: checkOutBookingEndpoint,
+});
+
+app.http('checkInBookingEndpoint', {
+  methods: ['PATCH'],
+  authLevel: 'anonymous',
+  route: 'bookings/{id}/return',
+  handler: checkInBookingEndpoint,
+});
+
+app.http('getTimelineEndpoint', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'vehicles/timeline',
+  handler: getTimelineEndpoint,
 });

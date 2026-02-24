@@ -358,3 +358,366 @@ export async function cancelBooking(
 
   return 'cancelled';
 }
+
+/**
+ * Check out a booking (Confirmed -> Active transition).
+ *
+ * Validates:
+ * - Booking exists
+ * - User owns the booking
+ * - Status is Confirmed
+ * - Current time is within the checkout window (startTime - 30min to startTime + 60min)
+ *
+ * Uses atomic UPDATE with WHERE status='Confirmed' to prevent race conditions.
+ */
+export async function checkOutBooking(
+  bookingId: number,
+  userId: string
+): Promise<'checked_out' | 'not_found' | 'not_yours' | 'too_early' | 'expired' | 'wrong_status'> {
+  const pool = await getPool();
+
+  // Fetch booking to validate
+  const check = await pool.request()
+    .input('bookingId', sql.Int, bookingId)
+    .query('SELECT id, userId, startTime, status FROM Bookings WHERE id = @bookingId');
+
+  if (check.recordset.length === 0) return 'not_found';
+  const booking = check.recordset[0];
+  if (booking.userId !== userId) return 'not_yours';
+  if (booking.status !== 'Confirmed') return 'wrong_status';
+
+  const now = new Date();
+  const startTime = new Date(booking.startTime);
+  const thirtyMinBefore = new Date(startTime.getTime() - 30 * 60 * 1000);
+  const oneHourAfter = new Date(startTime.getTime() + 60 * 60 * 1000);
+
+  if (now < thirtyMinBefore) return 'too_early';
+  if (now > oneHourAfter) return 'expired';
+
+  // Atomic status transition -- WHERE status='Confirmed' prevents double checkout
+  const result = await pool.request()
+    .input('bookingId', sql.Int, bookingId)
+    .query(`
+      UPDATE Bookings
+      SET status = 'Active', checkedOutAt = GETUTCDATE(), updatedAt = GETUTCDATE()
+      WHERE id = @bookingId AND status = 'Confirmed'
+    `);
+
+  return result.rowsAffected[0] > 0 ? 'checked_out' : 'wrong_status';
+}
+
+/**
+ * Check in (return) a booking (Active/Overdue -> Completed transition).
+ *
+ * Validates:
+ * - Booking exists
+ * - User owns the booking
+ * - Status is Active or Overdue
+ *
+ * Uses atomic UPDATE with WHERE status IN ('Active', 'Overdue').
+ */
+export async function checkInBooking(
+  bookingId: number,
+  userId: string
+): Promise<'checked_in' | 'not_found' | 'not_yours' | 'wrong_status'> {
+  const pool = await getPool();
+
+  // Fetch booking to validate
+  const check = await pool.request()
+    .input('bookingId', sql.Int, bookingId)
+    .query('SELECT id, userId, status FROM Bookings WHERE id = @bookingId');
+
+  if (check.recordset.length === 0) return 'not_found';
+  const booking = check.recordset[0];
+  if (booking.userId !== userId) return 'not_yours';
+
+  // Atomic status transition
+  const result = await pool.request()
+    .input('bookingId', sql.Int, bookingId)
+    .query(`
+      UPDATE Bookings
+      SET status = 'Completed', checkedInAt = GETUTCDATE(), updatedAt = GETUTCDATE()
+      WHERE id = @bookingId AND status IN ('Active', 'Overdue')
+    `);
+
+  return result.rowsAffected[0] > 0 ? 'checked_in' : 'wrong_status';
+}
+
+/**
+ * Get calendar timeline data for a location on a given day.
+ * Returns all non-archived Available vehicles and all overlapping bookings.
+ * Used by the day-view calendar timeline component.
+ */
+export async function getLocationTimeline(
+  locationId: number,
+  dayStart: Date,
+  dayEnd: Date
+): Promise<{ vehicles: IAvailableVehicle[]; bookings: ITimelineSlot[] }> {
+  const pool = await getPool();
+
+  // Get all non-archived Available vehicles at this location
+  const vehiclesResult = await pool.request()
+    .input('locationId', sql.Int, locationId)
+    .query(`
+      SELECT
+        v.id, v.make, v.model, v.year, v.licensePlate,
+        v.locationId, l.name AS locationName, l.timezone AS locationTimezone,
+        v.categoryId, c.name AS categoryName,
+        v.capacity, v.photoUrl, v.status
+      FROM Vehicles v
+      LEFT JOIN Categories c ON v.categoryId = c.id
+      LEFT JOIN Locations l ON v.locationId = l.id
+      WHERE v.isArchived = 0
+        AND v.status = 'Available'
+        AND v.locationId = @locationId
+      ORDER BY v.make, v.model
+    `);
+
+  // Get all bookings overlapping this day for vehicles at this location
+  const bookingsResult = await pool.request()
+    .input('locationId', sql.Int, locationId)
+    .input('dayStart', sql.DateTime2, dayStart)
+    .input('dayEnd', sql.DateTime2, dayEnd)
+    .query(`
+      SELECT
+        b.id AS bookingId, b.vehicleId,
+        v.make AS vehicleMake, v.model AS vehicleModel,
+        v.licensePlate AS vehicleLicensePlate,
+        b.startTime, b.endTime, b.status,
+        b.userId, b.userDisplayName
+      FROM Bookings b
+      INNER JOIN Vehicles v ON b.vehicleId = v.id
+      WHERE v.locationId = @locationId
+        AND v.isArchived = 0
+        AND b.status IN ('Confirmed', 'Active', 'Overdue')
+        AND b.startTime < @dayEnd
+        AND b.endTime > @dayStart
+      ORDER BY v.make, v.model, b.startTime
+    `);
+
+  return {
+    vehicles: vehiclesResult.recordset,
+    bookings: bookingsResult.recordset,
+  };
+}
+
+/**
+ * Get booking suggestions when a conflict occurs.
+ * Returns a mix of time-shifted slots (same vehicle) and alternative vehicles (same time).
+ *
+ * Time shifts: checks offsets of +1h, -1h, +2h, -2h, +3h, -3h, +4h, -4h.
+ * Alt vehicles: finds available vehicles at the same location with no overlapping bookings.
+ * Returns up to maxSuggestions total (default 3).
+ */
+export async function getBookingSuggestions(
+  vehicleId: number,
+  locationId: number,
+  startTime: Date,
+  endTime: Date,
+  maxSuggestions: number = 3
+): Promise<IBookingSuggestion[]> {
+  const pool = await getPool();
+  const duration = endTime.getTime() - startTime.getTime();
+  const suggestions: IBookingSuggestion[] = [];
+
+  // Get vehicle name for time_shift labels
+  const vehicleResult = await pool.request()
+    .input('vehicleId', sql.Int, vehicleId)
+    .query('SELECT make, model FROM Vehicles WHERE id = @vehicleId');
+  const vehicleName = vehicleResult.recordset.length > 0
+    ? vehicleResult.recordset[0].make + ' ' + vehicleResult.recordset[0].model
+    : 'Unknown Vehicle';
+
+  // 1. Time shifts: check offsets for the same vehicle
+  const timeShifts = [1, -1, 2, -2, 3, -3, 4, -4];
+  for (const shift of timeShifts) {
+    if (suggestions.length >= 2) break; // Max 2 time shifts
+    const shiftedStart = new Date(startTime.getTime() + shift * 3600000);
+    const shiftedEnd = new Date(shiftedStart.getTime() + duration);
+
+    const overlap = await pool.request()
+      .input('vehicleId', sql.Int, vehicleId)
+      .input('start', sql.DateTime2, shiftedStart)
+      .input('end', sql.DateTime2, shiftedEnd)
+      .query(`
+        SELECT COUNT(*) AS cnt FROM Bookings
+        WHERE vehicleId = @vehicleId
+          AND status IN ('Confirmed', 'Active', 'Overdue')
+          AND startTime < @end AND endTime > @start
+      `);
+
+    if (overlap.recordset[0].cnt === 0) {
+      suggestions.push({
+        type: 'time_shift',
+        vehicleId,
+        vehicleName,
+        startTime: shiftedStart.toISOString(),
+        endTime: shiftedEnd.toISOString(),
+        label: (shift > 0 ? '+' : '') + shift + 'h from requested time',
+      });
+    }
+  }
+
+  // 2. Alt vehicles at same location for original time
+  const remaining = maxSuggestions - suggestions.length;
+  if (remaining > 0) {
+    const altVehicles = await pool.request()
+      .input('locationId', sql.Int, locationId)
+      .input('vehicleId', sql.Int, vehicleId)
+      .input('start', sql.DateTime2, startTime)
+      .input('end', sql.DateTime2, endTime)
+      .query(`
+        SELECT TOP ${remaining} v.id, v.make, v.model
+        FROM Vehicles v
+        WHERE v.locationId = @locationId
+          AND v.id != @vehicleId
+          AND v.isArchived = 0
+          AND v.status = 'Available'
+          AND NOT EXISTS (
+            SELECT 1 FROM Bookings b
+            WHERE b.vehicleId = v.id
+              AND b.status IN ('Confirmed', 'Active', 'Overdue')
+              AND b.startTime < @end AND b.endTime > @start
+          )
+      `);
+
+    for (const alt of altVehicles.recordset) {
+      if (suggestions.length >= maxSuggestions) break;
+      suggestions.push({
+        type: 'alt_vehicle',
+        vehicleId: alt.id,
+        vehicleName: alt.make + ' ' + alt.model,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        label: alt.make + ' ' + alt.model + ', same time',
+      });
+    }
+  }
+
+  return suggestions.slice(0, maxSuggestions);
+}
+
+/**
+ * Get all bookings with optional filters (admin use).
+ * Calls autoExpireBookings() first to ensure fresh statuses.
+ *
+ * Filters: locationId, status, dateFrom, dateTo, employeeSearch (LIKE on userDisplayName).
+ * Returns full booking records with vehicle and location display data.
+ */
+export async function getAllBookings(filters: {
+  locationId?: number;
+  status?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  employeeSearch?: string;
+}): Promise<IBooking[]> {
+  await autoExpireBookings();
+  const pool = await getPool();
+  const request = pool.request();
+
+  // Build dynamic WHERE conditions
+  const conditions: string[] = [];
+
+  if (filters.locationId) {
+    request.input('locationId', sql.Int, filters.locationId);
+    conditions.push('v.locationId = @locationId');
+  }
+
+  if (filters.status) {
+    request.input('status', sql.NVarChar(20), filters.status);
+    conditions.push('b.status = @status');
+  }
+
+  if (filters.dateFrom) {
+    request.input('dateFrom', sql.DateTime2, filters.dateFrom);
+    conditions.push('b.startTime >= @dateFrom');
+  }
+
+  if (filters.dateTo) {
+    request.input('dateTo', sql.DateTime2, filters.dateTo);
+    conditions.push('b.endTime <= @dateTo');
+  }
+
+  if (filters.employeeSearch) {
+    request.input('employeeSearch', sql.NVarChar(255), '%' + filters.employeeSearch + '%');
+    conditions.push('b.userDisplayName LIKE @employeeSearch');
+  }
+
+  const whereClause = conditions.length > 0
+    ? 'WHERE ' + conditions.join(' AND ')
+    : '';
+
+  const result = await request.query(`
+    SELECT
+      b.id,
+      b.vehicleId,
+      v.make AS vehicleMake,
+      v.model AS vehicleModel,
+      v.year AS vehicleYear,
+      v.licensePlate AS vehicleLicensePlate,
+      c.name AS vehicleCategoryName,
+      v.capacity AS vehicleCapacity,
+      v.photoUrl AS vehiclePhotoUrl,
+      v.locationId AS locationId,
+      l.name AS locationName,
+      l.timezone AS locationTimezone,
+      b.userId,
+      b.userEmail,
+      b.userDisplayName,
+      b.startTime,
+      b.endTime,
+      b.status,
+      b.createdAt,
+      b.cancelledAt,
+      b.cancelledBy,
+      b.checkedOutAt,
+      b.checkedInAt,
+      b.cancelReason
+    FROM Bookings b
+    LEFT JOIN Vehicles v ON b.vehicleId = v.id
+    LEFT JOIN Categories c ON v.categoryId = c.id
+    LEFT JOIN Locations l ON v.locationId = l.id
+    ${whereClause}
+    ORDER BY b.startTime DESC
+  `);
+
+  return result.recordset;
+}
+
+/**
+ * Admin cancel a booking with a required reason.
+ * Works on Confirmed, Active, and Overdue bookings.
+ * Returns 'not_found' if booking doesn't exist, 'already_done' if already completed/cancelled.
+ */
+export async function adminCancelBooking(
+  bookingId: number,
+  adminUserId: string,
+  cancelReason: string
+): Promise<'cancelled' | 'not_found' | 'already_done'> {
+  const pool = await getPool();
+
+  const result = await pool.request()
+    .input('bookingId', sql.Int, bookingId)
+    .input('adminUserId', sql.NVarChar(255), adminUserId)
+    .input('cancelReason', sql.NVarChar(500), cancelReason)
+    .query(`
+      UPDATE Bookings
+      SET status = 'Cancelled',
+          cancelledAt = GETUTCDATE(),
+          cancelledBy = @adminUserId,
+          cancelReason = @cancelReason,
+          updatedAt = GETUTCDATE()
+      WHERE id = @bookingId
+        AND status IN ('Confirmed', 'Active', 'Overdue')
+    `);
+
+  if (result.rowsAffected[0] === 0) {
+    // Check if booking exists at all
+    const check = await pool.request()
+      .input('bookingId', sql.Int, bookingId)
+      .query('SELECT id FROM Bookings WHERE id = @bookingId');
+    return check.recordset.length === 0 ? 'not_found' : 'already_done';
+  }
+
+  return 'cancelled';
+}
