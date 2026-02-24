@@ -89,9 +89,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Backend: DB schema migration (checkedOutAt, checkedInAt, cancelReason, Overdue status), booking state machine, check-out/check-in/timeline/suggestions/admin endpoints
-- [ ] 04-02-PLAN.md -- Frontend: AvailabilityTimeline CSS Grid day-view, BookingEntry lifecycle buttons, BookingForm conflict suggestions, cancelled bookings tab
-- [ ] 04-03-PLAN.md -- Frontend: Admin AllBookings page with DetailsList filters and cancel-with-reason dialog, AppShell routing, human verification
+- [x] 04-01-PLAN.md -- Backend: DB schema migration (checkedOutAt, checkedInAt, cancelReason, Overdue status), booking state machine, check-out/check-in/timeline/suggestions/admin endpoints
+- [x] 04-02-PLAN.md -- Frontend: AvailabilityTimeline CSS Grid day-view, BookingEntry lifecycle buttons, BookingForm conflict suggestions, cancelled bookings tab
+- [x] 04-03-PLAN.md -- Frontend: Admin AllBookings page with DetailsList filters and cancel-with-reason dialog, AppShell routing, human verification
 
 ### Phase 5: M365 Calendar Integration
 **Goal**: Vehicle bookings are natively visible in Outlook -- each vehicle has a resource calendar showing its schedule, and employees see their rentals on their personal Outlook calendar

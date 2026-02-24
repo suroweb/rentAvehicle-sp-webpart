@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Plan 02 complete.
+**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Phase complete (all 3 plans done).
 
 ## Current Position
 
-Phase: 4 of 7 (Booking Lifecycle and Admin Oversight)
-Plan: 2 of 3 in current phase (04-02 complete)
-Status: In Progress
-Last activity: 2026-02-24 -- Completed 04-02-PLAN.md (Employee Frontend: timeline, lifecycle, suggestions)
+Phase: 4 of 7 (Booking Lifecycle and Admin Oversight) -- COMPLETE
+Plan: 3 of 3 in current phase (04-03 complete)
+Status: Phase Complete
+Last activity: 2026-02-24 -- Completed 04-03-PLAN.md (Admin Booking Oversight)
 
-Progress: [######....] 68%
+Progress: [#######...] 74%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 5.5min
-- Total execution time: 1.0 hours
+- Total plans completed: 12
+- Average duration: 5.4min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -39,9 +39,10 @@ Progress: [######....] 68%
 | Phase 03 P03 | 5min | 2 tasks | 5 files |
 | Phase 04 P01 | 4min | 2 tasks | 6 files |
 | Phase 04 P02 | 9min | 2 tasks | 11 files |
+| Phase 04 P03 | 5min | 2 tasks | 3 files |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 8min, 5min, 4min, 9min
+- Last 5 plans: 8min, 5min, 4min, 9min, 5min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -93,6 +94,10 @@ Recent decisions affecting current work:
 - [Phase 04]: postWithConflict returns structured IConflictResponse instead of throwing, enabling suggestions display
 - [Phase 04]: MyBookings uses explicit backend statuses (Active/Overdue/Cancelled) replacing Phase 3 time-based Active derivation
 - [Phase 04]: Suggestions inline below conflict MessageBar -- time_shift updates form, alt_vehicle navigates to vehicle
+- [Phase 04]: Admin locations loaded at AppShell level for shared admin page state (not per-component)
+- [Phase 04]: Inline Intl.DateTimeFormat per cell for admin table -- each row may have different location timezone
+- [Phase 04]: Cancel dialog uses full Dialog (not ConfirmDialog) for embedded TextField with required reason
+- [Phase 04]: Explicit Apply Filters button (not auto-fetch) for admin views to reduce API call volume
 
 ### Pending Todos
 
@@ -106,5 +111,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-02-SUMMARY.md
+Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
+Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-03-SUMMARY.md
