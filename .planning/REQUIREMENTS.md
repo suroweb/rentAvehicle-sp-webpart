@@ -29,15 +29,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BOOK-04**: System prevents double-booking via database-level constraints
 - [x] **BOOK-05**: Employee can view their bookings (upcoming, active, past)
 - [x] **BOOK-06**: All times displayed in user's local timezone (stored as UTC)
-- [ ] **BOOK-07**: Availability shown as both filterable list and visual calendar timeline
-- [ ] **BOOK-08**: Employee can check out a vehicle at pickup time
-- [ ] **BOOK-09**: Employee can check in (return) a vehicle through the system
-- [ ] **BOOK-10**: When desired slot is taken, system suggests nearest available slot or alternative vehicles
+- [x] **BOOK-07**: Availability shown as both filterable list and visual calendar timeline
+- [x] **BOOK-08**: Employee can check out a vehicle at pickup time
+- [x] **BOOK-09**: Employee can check in (return) a vehicle through the system
+- [x] **BOOK-10**: When desired slot is taken, system suggests nearest available slot or alternative vehicles
 
 ### Admin Operations
 
-- [ ] **ADMN-01**: Admin can view all bookings across all locations
-- [ ] **ADMN-02**: Admin can cancel/override employee bookings (with notification to affected employee)
+- [x] **ADMN-01**: Admin can view all bookings across all locations
+- [x] **ADMN-02**: Admin can cancel/override employee bookings (with notification to affected employee)
 
 ### Notifications
 
@@ -119,12 +119,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BOOK-04 | Phase 3 | Complete |
 | BOOK-05 | Phase 3 | Complete |
 | BOOK-06 | Phase 3 | Complete |
-| BOOK-07 | Phase 4 | Pending |
-| BOOK-08 | Phase 4 | Pending |
-| BOOK-09 | Phase 4 | Pending |
-| BOOK-10 | Phase 4 | Pending |
-| ADMN-01 | Phase 4 | Pending |
-| ADMN-02 | Phase 4 | Pending |
+| BOOK-07 | Phase 4 | Complete |
+| BOOK-08 | Phase 4 | Complete |
+| BOOK-09 | Phase 4 | Complete |
+| BOOK-10 | Phase 4 | Complete |
+| ADMN-01 | Phase 4 | Complete |
+| ADMN-02 | Phase 4 | Complete |
 | NOTF-01 | Phase 6 | Pending |
 | NOTF-02 | Phase 6 | Pending |
 | NOTF-03 | Phase 6 | Pending |

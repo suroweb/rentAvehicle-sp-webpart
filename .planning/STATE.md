@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 3: Core Booking Flow -- COMPLETE. Ready for Phase 4.
+**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Plan 01 complete.
 
 ## Current Position
 
-Phase: 3 of 7 (Core Booking Flow) -- COMPLETE
-Plan: 3 of 3 in current phase (03-01, 03-02, 03-03 all complete)
-Status: Phase Complete
-Last activity: 2026-02-23 -- Completed 03-03-PLAN.md (MyBookings page, AppShell routing)
+Phase: 4 of 7 (Booking Lifecycle and Admin Oversight)
+Plan: 1 of 3 in current phase (04-01 complete)
+Status: In Progress
+Last activity: 2026-02-24 -- Completed 04-01-PLAN.md (Backend API: state machine, endpoints, admin)
 
-Progress: [######....] 57%
+Progress: [######....] 63%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 5.6min
-- Total execution time: 0.93 hours
+- Total plans completed: 11
+- Average duration: 5.5min
+- Total execution time: 1.0 hours
 
 **By Phase:**
 
@@ -37,9 +37,10 @@ Progress: [######....] 57%
 | Phase 03 P01 | 3min | 2 tasks | 7 files |
 | Phase 03 P02 | 8min | 2 tasks | 11 files |
 | Phase 03 P03 | 5min | 2 tasks | 5 files |
+| Phase 04 P01 | 4min | 2 tasks | 6 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 4min, 3min, 8min, 5min
+- Last 5 plans: 4min, 3min, 8min, 5min, 4min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -82,6 +83,12 @@ Recent decisions affecting current work:
 - [Phase 03]: Booking categorization derives Active from time comparison (no explicit Active status in Phase 3)
 - [Phase 03]: Sub-navigation uses selectedVehicleId state in AppShell (browse->detail), not URL routing
 - [Phase 03]: Cancel flow re-fetches full booking list after API cancel (data consistency over optimistic update)
+- [Phase 04]: Lazy expiration on access (not timer-based) for auto-cancel and overdue detection
+- [Phase 04]: autoExpireBookings in getMyBookings, getAvailableVehicles, getAllBookings only (not browse/availability)
+- [Phase 04]: getMyBookings returns all statuses including Cancelled (for admin cancel reason display)
+- [Phase 04]: Atomic UPDATE with WHERE status check for checkout/checkin (no SERIALIZABLE needed for single-row)
+- [Phase 04]: Suggestions: up to 2 time shifts (+/-1h through +/-4h), remaining slots filled with alt vehicles
+- [Phase 04]: Dynamic WHERE clause for getAllBookings admin filters
 
 ### Pending Todos
 
@@ -94,6 +101,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed 03-03-PLAN.md (Phase 3 complete)
-Resume file: .planning/phases/03-core-booking-flow/03-03-SUMMARY.md
+Last session: 2026-02-24
+Stopped at: Completed 04-01-PLAN.md
+Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-01-SUMMARY.md
