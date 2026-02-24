@@ -1,0 +1,251 @@
+@import '../../styles/variables.module.scss';
+
+/* -- Timeline container --------------------------------- */
+
+.timelineContainer {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #edebe9;
+}
+
+/* -- Header --------------------------------------------- */
+
+.timelineHeader {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.dayLabel {
+  font-size: 13px;
+  color: $color-text-secondary;
+  background: #f3f2f1;
+  padding: 4px 10px;
+  border-radius: 4px;
+  align-self: center;
+}
+
+/* -- Legend ---------------------------------------------- */
+
+.legend {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: $color-text-secondary;
+}
+
+.legendDotOwn {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #0078d4;
+  display: inline-block;
+}
+
+.legendDotOthers {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #a19f9d;
+  display: inline-block;
+}
+
+.legendDotOverdue {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #d13438;
+  display: inline-block;
+}
+
+.legendDotFree {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: #f3f2f1;
+  border: 1px solid #c8c6c4;
+  display: inline-block;
+}
+
+/* -- Grid wrapper (scrollable) -------------------------- */
+
+.gridWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* -- CSS Grid layout ------------------------------------ */
+
+.timelineGrid {
+  display: grid;
+  grid-template-columns: 180px repeat(12, 1fr);
+  gap: 0;
+  min-width: 800px;
+  position: relative;
+}
+
+/* -- Corner cell (Vehicle header) ----------------------- */
+
+.cornerCell {
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-text-secondary;
+  padding: 8px 12px;
+  border-bottom: 2px solid #edebe9;
+  border-right: 1px solid #edebe9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+/* -- Hour labels ---------------------------------------- */
+
+.hourLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: $color-text-secondary;
+  text-align: center;
+  padding: 8px 2px;
+  border-bottom: 2px solid #edebe9;
+  border-right: 1px solid #f3f2f1;
+  white-space: nowrap;
+}
+
+/* -- Vehicle label -------------------------------------- */
+
+.vehicleLabel {
+  padding: 4px 12px;
+  border-right: 1px solid #edebe9;
+  border-bottom: 1px solid #f3f2f1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.vehicleName {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vehiclePlate {
+  font-size: 11px;
+  font-family: monospace;
+  color: $color-text-secondary;
+}
+
+/* -- Free slot cell ------------------------------------- */
+
+.freeSlot {
+  border-right: 1px solid #f3f2f1;
+  border-bottom: 1px solid #f3f2f1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f3f2f1;
+  }
+}
+
+/* -- Booking blocks ------------------------------------- */
+
+.ownBooking,
+.othersBooking,
+.overdueBooking {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  margin: 2px 1px;
+  z-index: 1;
+}
+
+.ownBooking {
+  background: #0078d4;
+  color: #ffffff;
+}
+
+.othersBooking {
+  background: #a19f9d;
+  color: #ffffff;
+}
+
+.overdueBooking {
+  background: #d13438;
+  color: #ffffff;
+}
+
+/* -- Loading and states --------------------------------- */
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 16px;
+  color: $color-text-secondary;
+  font-size: 14px;
+}
+
+.errorText {
+  text-align: center;
+  padding: 16px;
+  color: #a4262c;
+  font-size: 14px;
+}
+
+/* -- Mobile hint ---------------------------------------- */
+
+.mobileHint {
+  display: none;
+  font-size: 12px;
+  color: $color-text-secondary;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+/* -- Responsive ----------------------------------------- */
+
+@media (max-width: 768px) {
+  .mobileHint {
+    display: block;
+  }
+
+  .timelineGrid {
+    min-width: 700px;
+  }
+
+  .timelineHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .legend {
+    margin-left: 0;
+  }
+}

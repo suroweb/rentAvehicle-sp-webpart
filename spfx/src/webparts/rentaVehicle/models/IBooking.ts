@@ -20,10 +20,13 @@ export interface IBooking {
   userDisplayName: string | null;
   startTime: string;
   endTime: string;
-  status: 'Confirmed' | 'Active' | 'Completed' | 'Cancelled';
+  status: 'Confirmed' | 'Active' | 'Completed' | 'Cancelled' | 'Overdue';
   createdAt: string;
   cancelledAt: string | null;
   cancelledBy: string | null;
+  checkedOutAt?: string;
+  checkedInAt?: string;
+  cancelReason?: string;
 }
 
 /**
@@ -64,4 +67,53 @@ export interface IBookingInput {
   vehicleId: number;
   startTime: string;
   endTime: string;
+}
+
+/**
+ * A suggestion returned by the API on 409 booking conflict.
+ * Either a time shift (same vehicle, different time) or an alternative vehicle (same time, different vehicle).
+ */
+export interface IBookingSuggestion {
+  type: 'time_shift' | 'alt_vehicle';
+  vehicleId: number;
+  vehicleName: string;
+  startTime: string;
+  endTime: string;
+  label: string;
+}
+
+/**
+ * A booking entry for the day-view calendar timeline.
+ * Includes own-booking detection for color coding.
+ */
+export interface ITimelineBooking {
+  bookingId: number;
+  vehicleId: number;
+  vehicleMake: string;
+  vehicleModel: string;
+  vehicleLicensePlate: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  userId: string;
+  userDisplayName: string | null;
+  isOwnBooking: boolean;
+}
+
+/**
+ * Timeline data for a location on a given date.
+ * Contains vehicles at the location and their bookings for the day.
+ */
+export interface ITimelineData {
+  vehicles: IAvailableVehicle[];
+  bookings: ITimelineBooking[];
+}
+
+/**
+ * Structured conflict response from postWithConflict on 409.
+ */
+export interface IConflictResponse {
+  conflict: true;
+  message: string;
+  suggestions: IBookingSuggestion[];
 }

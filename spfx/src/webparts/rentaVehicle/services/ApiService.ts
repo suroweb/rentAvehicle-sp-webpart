@@ -3,7 +3,7 @@ import { IUser } from '../models/IUser';
 import { IVehicle, IVehicleInput, IVehicleFilters } from '../models/IVehicle';
 import { ICategory, ICategoryInput } from '../models/ICategory';
 import { ILocation, ILocationSyncResult } from '../models/ILocation';
-import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput } from '../models/IBooking';
+import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, ITimelineData, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
@@ -133,7 +133,7 @@ export class ApiService {
 
   // ── Employee: Bookings ──────────────────────────────────
 
-  public async createBooking(input: IBookingInput): Promise<{ id: number }> {
+  public async createBooking(input: IBookingInput): Promise<{ id: number } | IConflictResponse> {
     return this.postWithConflict<{ id: number }>('/api/bookings', input);
   }
 
@@ -149,6 +149,61 @@ export class ApiService {
 
   public async getLocationsPublic(): Promise<ILocation[]> {
     return this.get<ILocation[]>('/api/backoffice/locations');
+  }
+
+  // ── Employee: Booking Lifecycle ────────────────────────
+
+  public async checkOutBooking(bookingId: number): Promise<void> {
+    await this.patch<void>('/api/bookings/' + String(bookingId) + '/checkout', {});
+  }
+
+  public async checkInBooking(bookingId: number): Promise<void> {
+    await this.patch<void>('/api/bookings/' + String(bookingId) + '/return', {});
+  }
+
+  // ── Vehicle Timeline ──────────────────────────────────
+
+  public async getTimeline(locationId: number, date: string): Promise<ITimelineData> {
+    return this.get<ITimelineData>(
+      '/api/vehicles/timeline?locationId=' + String(locationId) + '&date=' + date
+    );
+  }
+
+  // ── Admin: Booking Management ─────────────────────────
+
+  public async getAllBookings(filters: {
+    locationId?: number;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    employeeSearch?: string;
+  }): Promise<IBooking[]> {
+    const params = new URLSearchParams();
+    if (filters.locationId !== undefined) {
+      params.append('locationId', String(filters.locationId));
+    }
+    if (filters.status) {
+      params.append('status', filters.status);
+    }
+    if (filters.dateFrom) {
+      params.append('dateFrom', filters.dateFrom);
+    }
+    if (filters.dateTo) {
+      params.append('dateTo', filters.dateTo);
+    }
+    if (filters.employeeSearch) {
+      params.append('employeeSearch', filters.employeeSearch);
+    }
+    const query = params.toString();
+    const path = '/api/backoffice/bookings' + (query ? '?' + query : '');
+    return this.get<IBooking[]>(path);
+  }
+
+  public async adminCancelBooking(bookingId: number, cancelReason: string): Promise<void> {
+    await this.delWithBody<void>(
+      '/api/backoffice/bookings/' + String(bookingId),
+      { cancelReason: cancelReason }
+    );
   }
 
   // ── HTTP helpers ──────────────────────────────────────────
@@ -267,22 +322,63 @@ export class ApiService {
 
   /**
    * POST with specific 409 conflict detection.
-   * Throws an error with message starting with 'CONFLICT:' for 409 responses
-   * so the UI can distinguish booking conflicts from other errors.
+   * Returns a structured IConflictResponse on 409 (with suggestions from the API)
+   * so the UI can distinguish booking conflicts from other errors and show alternatives.
    */
-  private async postWithConflict<T>(path: string, body: unknown): Promise<T> {
-    const url = `${this.baseUrl}${path}`;
+  private async postWithConflict<T>(path: string, body: unknown): Promise<T | IConflictResponse> {
+    const url = this.baseUrl + path;
     const response = await this._fetch(url, 'POST', body);
 
     if (response.status === 409) {
-      const errorText = await response.text();
-      throw new Error(`CONFLICT: ${errorText || 'This slot was just booked by someone else'}`);
+      const responseText = await response.text();
+      let suggestions: IBookingSuggestion[] = [];
+      let conflictMessage = 'This slot was just booked by someone else';
+      try {
+        const parsed = JSON.parse(responseText);
+        if (parsed && parsed.error) {
+          conflictMessage = parsed.error;
+        }
+        if (parsed && parsed.suggestions && Array.isArray(parsed.suggestions)) {
+          suggestions = parsed.suggestions;
+        }
+      } catch (e) {
+        // JSON parse failed -- use raw text as conflict message
+        if (e && responseText) {
+          conflictMessage = responseText;
+        }
+      }
+      return {
+        conflict: true,
+        message: conflictMessage,
+        suggestions: suggestions,
+      };
     }
 
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
-        `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+        'API request failed: ' + String(response.status) + ' ' + response.statusText + ' - ' + errorText
+      );
+    }
+
+    const text = await response.text();
+    if (!text) {
+      return undefined as unknown as T;
+    }
+    return JSON.parse(text) as T;
+  }
+
+  /**
+   * DELETE with JSON body (for admin cancel with reason).
+   */
+  private async delWithBody<T>(path: string, body: unknown): Promise<T> {
+    const url = this.baseUrl + path;
+    const response = await this._fetch(url, 'DELETE', body);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+        'API request failed: ' + String(response.status) + ' ' + response.statusText + ' - ' + errorText
       );
     }
 

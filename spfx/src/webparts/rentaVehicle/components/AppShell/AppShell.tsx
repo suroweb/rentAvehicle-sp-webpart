@@ -88,11 +88,13 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
               <VehicleDetail
                 vehicleId={selectedVehicleId}
                 apiService={apiService}
+                currentUserId={auth.user ? auth.user.userId : ''}
                 onBack={() => setSelectedVehicleId(null)}
                 onNavigateToMyBookings={() => {
                   setSelectedVehicleId(null);
                   setActiveNavKey('myBookings');
                 }}
+                onNavigateToVehicle={(id: number) => setSelectedVehicleId(id)}
               />
             );
           }

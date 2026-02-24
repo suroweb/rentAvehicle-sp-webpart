@@ -7,6 +7,7 @@ import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import styles from './VehicleDetail.module.scss';
 import { ApiService } from '../../services/ApiService';
+import { IConflictResponse, IBookingSuggestion } from '../../models/IBooking';
 import { useTimezone, localToUtcIso } from '../../hooks/useTimezone';
 
 export interface IBookingFormProps {
@@ -17,6 +18,9 @@ export interface IBookingFormProps {
   apiService: ApiService;
   onBookingComplete: (bookingId: number) => void;
   onConflict: () => void;
+  onNavigateToVehicle?: (vehicleId: number) => void;
+  prefillDate?: Date;
+  prefillStartHour?: number;
 }
 
 type FormState = 'selection' | 'review' | 'submitting';
@@ -50,6 +54,9 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   apiService,
   onBookingComplete,
   onConflict,
+  onNavigateToVehicle,
+  prefillDate,
+  prefillStartHour,
 }) => {
   const tz = useTimezone(locationTimezone);
 
@@ -63,6 +70,23 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
     return next >= 23 ? 23 : next + 1;
   });
   const [error, setError] = React.useState<string | undefined>(undefined);
+  const [suggestions, setSuggestions] = React.useState<IBookingSuggestion[]>([]);
+
+  // Apply prefill from timeline slot click
+  React.useEffect(function applyPrefill(): void {
+    if (prefillDate !== undefined) {
+      setStartDate(prefillDate);
+      setEndDate(prefillDate);
+      setFormState('selection');
+      setError(undefined);
+      setSuggestions([]);
+    }
+    if (prefillStartHour !== undefined) {
+      setStartHour(prefillStartHour);
+      const nextHr = prefillStartHour >= 23 ? 23 : prefillStartHour + 1;
+      setEndHour(nextHr);
+    }
+  }, [prefillDate, prefillStartHour]);
 
   // Computed UTC times for review and submission
   const startTimeUtc = React.useMemo(function computeStart(): string {
@@ -87,23 +111,35 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
 
   // Handlers
   const handleStartDateChange = React.useCallback(function onStartDateChange(date: Date | null | undefined): void {
-    if (date) setStartDate(date);
+    if (date) {
+      setStartDate(date);
+      setSuggestions([]);
+    }
   }, []);
 
   const handleEndDateChange = React.useCallback(function onEndDateChange(date: Date | null | undefined): void {
-    if (date) setEndDate(date);
+    if (date) {
+      setEndDate(date);
+      setSuggestions([]);
+    }
   }, []);
 
   const handleStartHourChange = React.useCallback(
     function onStartHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
-      if (option) setStartHour(option.key as number);
+      if (option) {
+        setStartHour(option.key as number);
+        setSuggestions([]);
+      }
     },
     []
   );
 
   const handleEndHourChange = React.useCallback(
     function onEndHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
-      if (option) setEndHour(option.key as number);
+      if (option) {
+        setEndHour(option.key as number);
+        setSuggestions([]);
+      }
     },
     []
   );
@@ -128,6 +164,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   const handleConfirm = React.useCallback(async function onConfirm(): Promise<void> {
     setFormState('submitting');
     setError(undefined);
+    setSuggestions([]);
 
     try {
       const result = await apiService.createBooking({
@@ -135,19 +172,22 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
         startTime: startTimeUtc,
         endTime: endTimeUtc,
       });
-      onBookingComplete(result.id);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create booking';
 
-      // Check for 409 conflict
-      if (message.indexOf('CONFLICT:') === 0) {
-        setError('This slot was just booked by someone else. Please choose a different time.');
+      // Check for conflict response (409 now returns structured object instead of throwing)
+      if (result && 'conflict' in result && (result as IConflictResponse).conflict) {
+        const conflictResult = result as IConflictResponse;
+        setError(conflictResult.message || 'This slot was just booked by someone else. Please choose a different time.');
+        setSuggestions(conflictResult.suggestions || []);
         setFormState('selection');
         onConflict();
       } else {
-        setError(message);
-        setFormState('review');
+        const successResult = result as { id: number };
+        onBookingComplete(successResult.id);
       }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create booking';
+      setError(message);
+      setFormState('review');
     }
   }, [vehicleId, startTimeUtc, endTimeUtc, apiService, onBookingComplete, onConflict]);
 
