@@ -101,11 +101,11 @@ Plans:
   1. Each vehicle in the fleet has a corresponding Exchange equipment mailbox with a resource calendar viewable in Outlook
   2. When an employee books a vehicle, a calendar event appears on that vehicle's resource calendar showing who booked it and when
   3. When an employee books a vehicle, a calendar event appears on the employee's personal Outlook calendar with the vehicle and pickup details
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md -- Calendar service layer: DB schema migration, calendarService.ts with Graph API event CRUD, fire-and-forget sync wired into all booking lifecycle endpoints
+- [ ] 05-02-PLAN.md -- Admin provisioning: PowerShell equipment mailbox script, admin calendar status/backfill endpoints, vehicle model resourceMailboxEmail support, human verification
 
 ### Phase 6: Notifications
 **Goal**: Users receive timely, actionable notifications about booking events through M365 channels -- email confirmations, return reminders, and manager awareness
