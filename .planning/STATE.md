@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 4: Booking Lifecycle and Admin Oversight -- Phase complete (all 3 plans done).
+**Current focus:** Phase 5: M365 Calendar Integration -- In Progress (1 of 2 plans done).
 
 ## Current Position
 
-Phase: 4 of 7 (Booking Lifecycle and Admin Oversight) -- COMPLETE
-Plan: 3 of 3 in current phase (04-03 complete)
-Status: Phase Complete
-Last activity: 2026-02-24 -- Completed 04-03-PLAN.md (Admin Booking Oversight)
+Phase: 5 of 7 (M365 Calendar Integration)
+Plan: 1 of 2 in current phase (05-01 complete)
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 05-01-PLAN.md (Calendar Service and Booking Integration)
 
-Progress: [#######...] 74%
+Progress: [########..] 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 5.4min
-- Total execution time: 1.1 hours
+- Total plans completed: 13
+- Average duration: 5.2min
+- Total execution time: 1.15 hours
 
 **By Phase:**
 
@@ -40,9 +40,10 @@ Progress: [#######...] 74%
 | Phase 04 P01 | 4min | 2 tasks | 6 files |
 | Phase 04 P02 | 9min | 2 tasks | 11 files |
 | Phase 04 P03 | 5min | 2 tasks | 3 files |
+| Phase 05 P01 | 3min | 2 tasks | 6 files |
 
 **Recent Trend:**
-- Last 5 plans: 8min, 5min, 4min, 9min, 5min
+- Last 5 plans: 5min, 4min, 9min, 5min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -98,6 +99,11 @@ Recent decisions affecting current work:
 - [Phase 04]: Inline Intl.DateTimeFormat per cell for admin table -- each row may have different location timezone
 - [Phase 04]: Cancel dialog uses full Dialog (not ConfirmDialog) for embedded TextField with required reason
 - [Phase 04]: Explicit Apply Filters button (not auto-fetch) for admin views to reduce API call volume
+- [Phase 05]: Two separate calendar events (not invitation-based) using application permissions
+- [Phase 05]: Fire-and-forget calendar sync -- calendar failures never block booking operations
+- [Phase 05]: Vehicle resource events showAs=busy, employee events showAs=free (no Teams presence impact)
+- [Phase 05]: Status updates prepend [CANCELLED]/[IN USE]/[RETURNED] to subject (events never deleted)
+- [Phase 05]: time_modified action implemented as future-wiring hook (no endpoint yet)
 
 ### Pending Todos
 
@@ -110,6 +116,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-02-24
-Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
-Resume file: .planning/phases/04-booking-lifecycle-and-admin-oversight/04-03-SUMMARY.md
+Last session: 2026-02-25
+Stopped at: Completed 05-01-PLAN.md
+Resume file: .planning/phases/05-m365-calendar-integration/05-01-SUMMARY.md

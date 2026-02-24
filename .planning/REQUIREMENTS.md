@@ -48,9 +48,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### M365 Integration
 
-- [ ] **M365-01**: Each vehicle has an Exchange equipment mailbox with a resource calendar
-- [ ] **M365-02**: Booking creates a calendar event on the vehicle's resource calendar (visible in Outlook)
-- [ ] **M365-03**: Booking creates a calendar event on the employee's personal Outlook calendar
+- [x] **M365-01**: Each vehicle has an Exchange equipment mailbox with a resource calendar
+- [x] **M365-02**: Booking creates a calendar event on the vehicle's resource calendar (visible in Outlook)
+- [x] **M365-03**: Booking creates a calendar event on the employee's personal Outlook calendar
 - [x] **M365-04**: Locations synced from Entra ID (officeLocation or organizational data)
 
 ### Reporting
@@ -129,9 +129,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-02 | Phase 6 | Pending |
 | NOTF-03 | Phase 6 | Pending |
 | NOTF-04 | Phase 6 | Pending |
-| M365-01 | Phase 5 | Pending |
-| M365-02 | Phase 5 | Pending |
-| M365-03 | Phase 5 | Pending |
+| M365-01 | Phase 5 | Complete |
+| M365-02 | Phase 5 | Complete |
+| M365-03 | Phase 5 | Complete |
 | M365-04 | Phase 2 | Complete |
 | RPRT-01 | Phase 7 | Pending |
 | RPRT-02 | Phase 7 | Pending |
