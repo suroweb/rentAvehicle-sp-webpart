@@ -7,12 +7,17 @@ files:
   - spfx/src/webparts/rentaVehicle/components/MyBookings/BookingEntry.tsx
   - spfx/src/webparts/rentaVehicle/components/MyBookings/MyBookings.tsx
   - spfx/src/webparts/rentaVehicle/components/VehicleDetail/AvailabilityTimeline.tsx
+  - spfx/src/webparts/rentaVehicle/components/AllBookings/AllBookings.tsx
 ---
 
 ## Problem
 
-The core booking lifecycle functionality works (create, check-out, return, cancel, conflict suggestions, calendar timeline) but the overall booking flow needs UX polish. Areas to improve include form interactions, transitions between booking states (Confirmed → Active → Completed), visual feedback during lifecycle actions, and general usability refinements across the booking experience.
+The core booking functionality works for both employee and admin roles, but the overall UX needs polish across both experiences:
+
+**Employee booking flow:** Form interactions, transitions between booking states (Confirmed → Active → Completed), visual feedback during lifecycle actions (check-out, return), calendar timeline usability, and conflict suggestion presentation.
+
+**Admin booking management:** The All Bookings table filters, cancel dialog flow, table sorting/filtering responsiveness, and general admin booking oversight experience need refinement.
 
 ## Solution
 
-TBD — Review the full booking flow end-to-end and identify specific friction points: loading states, success/error feedback, form validation messaging, state transition animations, button placement, and mobile responsiveness of the timeline and booking cards.
+TBD — Review both flows end-to-end and identify specific friction points: loading states, success/error feedback, form validation messaging, state transition animations, button placement, mobile responsiveness of the timeline and booking cards, admin filter UX, and cancel dialog polish.
