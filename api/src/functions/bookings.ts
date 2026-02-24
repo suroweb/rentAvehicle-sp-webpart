@@ -35,6 +35,7 @@ import {
   getBookingSuggestions,
 } from '../services/bookingService.js';
 import { BookingInputSchema } from '../models/Booking.js';
+import { syncBookingToCalendars } from '../services/calendarService.js';
 
 /**
  * GET /api/vehicles/available
@@ -231,6 +232,11 @@ async function createBookingEndpoint(
       };
     }
 
+    // Fire-and-forget: sync to calendars
+    syncBookingToCalendars(result.id, 'created').catch((error) => {
+      context.error('Calendar sync failed for new booking', result.id, error);
+    });
+
     return { status: 201, jsonBody: { id: result.id } };
   } catch (error) {
     context.error('createBookingEndpoint failed:', error);
@@ -290,6 +296,9 @@ async function cancelBookingEndpoint(
 
     switch (result) {
       case 'cancelled':
+        syncBookingToCalendars(id, 'cancelled').catch((error) => {
+          context.error('Calendar sync failed for cancelled booking', id, error);
+        });
         return { jsonBody: { success: true } };
       case 'not_found':
         return { status: 404, jsonBody: { error: 'Booking not found' } };
@@ -340,6 +349,9 @@ async function checkOutBookingEndpoint(
 
     switch (result) {
       case 'checked_out':
+        syncBookingToCalendars(id, 'checked_out').catch((error) => {
+          context.error('Calendar sync failed for checkout booking', id, error);
+        });
         return { jsonBody: { success: true } };
       case 'not_found':
         return { status: 404, jsonBody: { error: 'Booking not found' } };
@@ -403,6 +415,9 @@ async function checkInBookingEndpoint(
 
     switch (result) {
       case 'checked_in':
+        syncBookingToCalendars(id, 'checked_in').catch((error) => {
+          context.error('Calendar sync failed for checkin booking', id, error);
+        });
         return { jsonBody: { success: true } };
       case 'not_found':
         return { status: 404, jsonBody: { error: 'Booking not found' } };

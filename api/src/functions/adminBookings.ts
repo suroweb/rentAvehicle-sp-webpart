@@ -19,6 +19,7 @@ import {
   adminCancelBooking,
 } from '../services/bookingService.js';
 import { AdminCancelInputSchema } from '../models/Booking.js';
+import { syncBookingToCalendars } from '../services/calendarService.js';
 
 const isAuthorized = requireRole('Admin', 'SuperAdmin');
 
@@ -141,6 +142,9 @@ async function adminCancelBookingEndpoint(
 
     switch (result) {
       case 'cancelled':
+        syncBookingToCalendars(id, 'cancelled', parsed.data.cancelReason).catch((error) => {
+          context.error('Calendar sync failed for admin-cancelled booking', id, error);
+        });
         return { jsonBody: { success: true } };
       case 'not_found':
         return { status: 404, jsonBody: { error: 'Booking not found' } };
