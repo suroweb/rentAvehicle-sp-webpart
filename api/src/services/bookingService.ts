@@ -144,16 +144,19 @@ export async function getVehicleDetail(
  */
 export async function getVehicleAvailability(
   vehicleId: number,
-  days: number = 7
+  days: number = 7,
+  startDate?: string
 ): Promise<IVehicleAvailabilitySlot[]> {
   const pool = await getPool();
   const request = pool.request();
 
-  const now = new Date();
-  const rangeEnd = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+  const rangeStart = startDate
+    ? new Date(startDate + 'T00:00:00.000Z')
+    : new Date();
+  const rangeEnd = new Date(rangeStart.getTime() + days * 24 * 60 * 60 * 1000);
 
   request.input('vehicleId', sql.Int, vehicleId);
-  request.input('rangeStart', sql.DateTime2, now);
+  request.input('rangeStart', sql.DateTime2, rangeStart);
   request.input('rangeEnd', sql.DateTime2, rangeEnd);
 
   const result = await request.query(`

@@ -130,10 +130,16 @@ export class ApiService {
 
   public async getVehicleAvailability(
     vehicleId: number,
-    days?: number
+    days?: number,
+    startDate?: string
   ): Promise<IVehicleAvailabilitySlot[]> {
-    const params = days !== undefined ? `?days=${days}` : '';
-    return this.get<IVehicleAvailabilitySlot[]>(`/api/vehicles/${vehicleId}/availability${params}`);
+    const params = new URLSearchParams();
+    if (days !== undefined) params.append('days', String(days));
+    if (startDate) params.append('startDate', startDate);
+    const qs = params.toString();
+    return this.get<IVehicleAvailabilitySlot[]>(
+      '/api/vehicles/' + String(vehicleId) + '/availability' + (qs ? '?' + qs : '')
+    );
   }
 
   // ── Employee: Bookings ──────────────────────────────────

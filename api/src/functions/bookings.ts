@@ -158,8 +158,9 @@ async function getVehicleAvailabilityEndpoint(
 
     const daysParam = request.query.get('days');
     const days = daysParam ? parseInt(daysParam, 10) : 7;
+    const startDateParam = request.query.get('startDate');
 
-    const slots = await getVehicleAvailability(id, days);
+    const slots = await getVehicleAvailability(id, days, startDateParam || undefined);
     return { jsonBody: slots };
   } catch (error) {
     context.error('getVehicleAvailabilityEndpoint failed:', error);
