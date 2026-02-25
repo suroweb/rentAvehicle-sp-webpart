@@ -3,7 +3,7 @@ import { IUser } from '../models/IUser';
 import { IVehicle, IVehicleInput, IVehicleFilters } from '../models/IVehicle';
 import { ICategory, ICategoryInput } from '../models/ICategory';
 import { ILocation, ILocationSyncResult } from '../models/ILocation';
-import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, ITimelineData, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
+import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
 import { IKpiSummary, IUtilizationData, IUtilizationVehicleData, ITrendData, IRawBookingRecord, ITeamBooking } from '../models/IReport';
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
@@ -170,14 +170,6 @@ export class ApiService {
 
   public async checkInBooking(bookingId: number): Promise<void> {
     await this.patch<void>('/api/bookings/' + String(bookingId) + '/return', {});
-  }
-
-  // ── Vehicle Timeline ──────────────────────────────────
-
-  public async getTimeline(locationId: number, date: string): Promise<ITimelineData> {
-    return this.get<ITimelineData>(
-      '/api/vehicles/timeline?locationId=' + String(locationId) + '&date=' + date
-    );
   }
 
   // ── Admin: Booking Management ─────────────────────────

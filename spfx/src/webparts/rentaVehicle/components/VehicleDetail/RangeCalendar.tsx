@@ -4,7 +4,7 @@ import styles from './RangeCalendar.module.scss';
 
 /**
  * Single source of truth for date range state.
- * Used across VehicleDetail, BookingForm, AvailabilityStrip, and AvailabilityTimeline.
+ * Used across VehicleDetail, BookingForm, and AvailabilityStrip.
  */
 export interface IRangeState {
   startDate: Date;

@@ -83,33 +83,6 @@ export interface IBookingSuggestion {
 }
 
 /**
- * A booking entry for the day-view calendar timeline.
- * Includes own-booking detection for color coding.
- */
-export interface ITimelineBooking {
-  bookingId: number;
-  vehicleId: number;
-  vehicleMake: string;
-  vehicleModel: string;
-  vehicleLicensePlate: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  userId: string;
-  userDisplayName: string | null;
-  isOwnBooking: boolean;
-}
-
-/**
- * Timeline data for a location on a given date.
- * Contains vehicles at the location and their bookings for the day.
- */
-export interface ITimelineData {
-  vehicles: IAvailableVehicle[];
-  bookings: ITimelineBooking[];
-}
-
-/**
  * Structured conflict response from postWithConflict on 409.
  */
 export interface IConflictResponse {
