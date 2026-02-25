@@ -22,6 +22,10 @@ export interface IVehicleDetailProps {
   onBack: () => void;
   onNavigateToMyBookings: () => void;
   onNavigateToVehicle?: (vehicleId: number) => void;
+  initialStartDate?: Date;
+  initialStartHour?: number;
+  initialEndDate?: Date;
+  initialEndHour?: number;
 }
 
 function pad2(n: number): string {
@@ -35,6 +39,10 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   onBack,
   onNavigateToMyBookings,
   onNavigateToVehicle,
+  initialStartDate,
+  initialStartHour,
+  initialEndDate,
+  initialEndHour,
 }) => {
   const [vehicle, setVehicle] = React.useState<IAvailableVehicle | undefined>(undefined);
   const [availabilitySlots, setAvailabilitySlots] = React.useState<IVehicleAvailabilitySlot[]>([]);

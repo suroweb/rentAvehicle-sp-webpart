@@ -10,7 +10,7 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { FleetManagement } from '../FleetManagement/FleetManagement';
 import { CategoryManagement } from '../CategoryManagement/CategoryManagement';
 import { LocationList } from '../LocationList/LocationList';
-import { VehicleBrowse } from '../VehicleBrowse/VehicleBrowse';
+import { VehicleBrowse, IDateContext } from '../VehicleBrowse/VehicleBrowse';
 import { VehicleDetail } from '../VehicleDetail/VehicleDetail';
 import { MyBookings } from '../MyBookings/MyBookings';
 import { AllBookings } from '../AllBookings/AllBookings';
@@ -36,6 +36,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
   const { isMobile } = useResponsive();
   const [activeNavKey, setActiveNavKey] = React.useState<string>('home');
   const [selectedVehicleId, setSelectedVehicleId] = React.useState<number | null>(null);
+  const [selectedDateContext, setSelectedDateContext] = React.useState<IDateContext | undefined>(undefined);
 
   const apiService = React.useMemo(() => {
     return new ApiService(apiClient || null);
@@ -58,6 +59,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
   const handleNavigate = (key: string): void => {
     setActiveNavKey(key);
     setSelectedVehicleId(null);
+    setSelectedDateContext(undefined);
   };
 
   const renderPage = (navKey: string): React.ReactElement => {
@@ -108,19 +110,27 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
                 vehicleId={selectedVehicleId}
                 apiService={apiService}
                 currentUserId={auth.user ? auth.user.userId : ''}
-                onBack={() => setSelectedVehicleId(null)}
+                onBack={() => { setSelectedVehicleId(null); setSelectedDateContext(undefined); }}
                 onNavigateToMyBookings={() => {
                   setSelectedVehicleId(null);
+                  setSelectedDateContext(undefined);
                   setActiveNavKey('myBookings');
                 }}
-                onNavigateToVehicle={(id: number) => setSelectedVehicleId(id)}
+                onNavigateToVehicle={(id: number) => { setSelectedVehicleId(id); setSelectedDateContext(undefined); }}
+                initialStartDate={selectedDateContext?.startDate}
+                initialStartHour={selectedDateContext?.startHour}
+                initialEndDate={selectedDateContext?.endDate}
+                initialEndHour={selectedDateContext?.endHour}
               />
             );
           }
           return (
             <VehicleBrowse
               apiService={apiService}
-              onNavigateToDetail={(id: number) => setSelectedVehicleId(id)}
+              onNavigateToDetail={(id: number, dateContext?: IDateContext) => {
+                setSelectedVehicleId(id);
+                setSelectedDateContext(dateContext);
+              }}
               userOfficeLocation={auth.user ? auth.user.officeLocation : null}
             />
           );

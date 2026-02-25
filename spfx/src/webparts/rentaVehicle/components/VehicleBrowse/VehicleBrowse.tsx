@@ -14,9 +14,16 @@ import { ICategory } from '../../models/ICategory';
 import { localToUtcIso } from '../../hooks/useTimezone';
 import { VehicleCard } from './VehicleCard';
 
+export interface IDateContext {
+  startDate: Date;
+  startHour: number;
+  endDate: Date;
+  endHour: number;
+}
+
 export interface IVehicleBrowseProps {
   apiService: ApiService;
-  onNavigateToDetail: (vehicleId: number) => void;
+  onNavigateToDetail: (vehicleId: number, dateContext?: IDateContext) => void;
   userOfficeLocation?: string | null;
 }
 
@@ -275,9 +282,14 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
 
   const handleCardSelect = React.useCallback(
     (vehicleId: number): void => {
-      onNavigateToDetail(vehicleId);
+      onNavigateToDetail(vehicleId, {
+        startDate: startDate,
+        startHour: startHour,
+        endDate: endDate,
+        endHour: endHour,
+      });
     },
-    [onNavigateToDetail]
+    [onNavigateToDetail, startDate, startHour, endDate, endHour]
   );
 
   // Loading state
