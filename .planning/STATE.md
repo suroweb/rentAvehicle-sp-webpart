@@ -131,9 +131,13 @@ Recent decisions affecting current work:
 - [Phase 07]: TeamBookings follows AllBookings DetailsList pattern for consistent admin/manager table UX
 - [Phase 07]: Status badges in team view limited to Confirmed/Active/Overdue (current + upcoming scope only)
 
+### Roadmap Evolution
+
+- Phase 8 added: UX Polish: Availability Strip Navigation and Booking Process Refinement
+
 ### Pending Todos
 
-3 pending todo(s) in `.planning/todos/pending/`
+4 pending todo(s) in `.planning/todos/pending/`
 
 ### Blockers/Concerns
 
@@ -143,5 +147,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 07-03-PLAN.md -- ALL PHASES COMPLETE
-Resume file: .planning/phases/07-reporting-and-manager-visibility/07-03-SUMMARY.md
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-CONTEXT.md
