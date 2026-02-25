@@ -152,7 +152,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | 4. Booking Lifecycle and Admin Oversight | 3/3 | Complete | 2026-02-24 |
 | 5. M365 Calendar Integration | 2/2 | Complete | 2026-02-25 |
 | 6. Notifications | 2/2 | Complete | 2026-02-25 |
-| 7. Reporting and Manager Visibility | 3/3 | Complete | 2026-02-25 |
+| 7. Reporting and Manager Visibility | 3/3 | Complete    | 2026-02-25 |
 
 ---
 *Roadmap created: 2026-02-22*
