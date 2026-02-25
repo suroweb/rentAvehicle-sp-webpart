@@ -193,3 +193,13 @@ Plans:
 - [x] 08.1-02-PLAN.md -- AvailabilityStrip range overlay band, drag handles, snap-to-boundary, two-click selection
 - [x] 08.1-03-PLAN.md -- AvailabilityTimeline (Day View) range overlay + drag, VehicleBrowse RangeCalendar refactor, StickyBottomBar
 - [x] 08.1-04-PLAN.md -- Human verification checkpoint for all Phase 08.1 features (auto-approved)
+
+### Phase 08.1.1: Remove Day View — strip AvailabilityTimeline range overlay, Day View pivot tab, and related styles; Week View per vehicle is sufficient (INSERTED)
+
+**Goal:** Delete AvailabilityTimeline and its SCSS, remove the Pivot wrapper from VehicleDetail, strip all Day View state/callbacks/imports, and delete related interfaces and API methods — Week View (AvailabilityStrip) is the sole availability view
+**Requirements**: (phase-local cleanup — no external requirement IDs)
+**Depends on:** Phase 08.1
+**Plans:** 1 plan
+
+Plans:
+- [ ] 08.1.1-01-PLAN.md — Delete AvailabilityTimeline files, remove Pivot wrapper, strip all Day View dead code, build verification
