@@ -7,6 +7,7 @@ import styles from './AvailabilityTimeline.module.scss';
 import { ApiService } from '../../services/ApiService';
 import { ITimelineData, ITimelineBooking, IAvailableVehicle } from '../../models/IBooking';
 import { useTimezone } from '../../hooks/useTimezone';
+import { useResponsive } from '../../hooks/useResponsive';
 
 export interface IAvailabilityTimelineProps {
   apiService: ApiService;
@@ -112,11 +113,35 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
   const onSlotClick = props.onSlotClick;
 
   const tz = useTimezone(locationTimezone);
+  const { isMobile } = useResponsive();
 
   const [selectedDate, setSelectedDate] = React.useState(getToday);
   const [timelineData, setTimelineData] = React.useState<ITimelineData | undefined>(undefined);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | undefined>(undefined);
+
+  // Mobile: active vehicle index for single-vehicle vertical view
+  const [activeVehicleIndex, setActiveVehicleIndex] = React.useState<number>(0);
+
+  // Mobile: horizontal swipe detection for vehicle switching
+  const touchStartRef = React.useRef<number>(0);
+
+  const handleMobileTouchStart = React.useCallback(function onTouchStart(e: React.TouchEvent<HTMLDivElement>): void {
+    touchStartRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleMobileTouchEnd = React.useCallback(function onTouchEnd(e: React.TouchEvent<HTMLDivElement>): void {
+    if (!timelineData) return;
+    const vehicleCount = timelineData.vehicles.length;
+    const deltaX = e.changedTouches[0].clientX - touchStartRef.current;
+    if (Math.abs(deltaX) > 50) {
+      if (deltaX < 0 && activeVehicleIndex < vehicleCount - 1) {
+        setActiveVehicleIndex(activeVehicleIndex + 1);
+      } else if (deltaX > 0 && activeVehicleIndex > 0) {
+        setActiveVehicleIndex(activeVehicleIndex - 1);
+      }
+    }
+  }, [activeVehicleIndex, timelineData]);
 
   // Formatter for converting UTC booking times to local timezone
   const localFormatter = React.useMemo(function createFormatter(): Intl.DateTimeFormat {
@@ -436,6 +461,123 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     )
   );
 
+  // Mobile vertical view: single vehicle at a time with swipe navigation
+  if (isMobile) {
+    const safeIndex = activeVehicleIndex < vehicles.length ? activeVehicleIndex : 0;
+    const activeVehicle = vehicles[safeIndex];
+
+    // Get bookings for active vehicle
+    const activeBookings: ITimelineBooking[] = [];
+    for (let ab = 0; ab < bookings.length; ab++) {
+      if (bookings[ab].vehicleId === activeVehicle.id) {
+        activeBookings.push(bookings[ab]);
+      }
+    }
+
+    // Build booked hours map for active vehicle
+    const mobileBookedHours: { [hour: number]: string } = {};
+    for (let mbi = 0; mbi < activeBookings.length; mbi++) {
+      const mbooking = activeBookings[mbi];
+      const mspan = getBookingHourSpan(mbooking, selectedDate, localFormatter);
+      if (mspan === undefined) continue;
+      for (let mh = mspan.startCol - 2; mh < mspan.endCol - 2; mh++) {
+        if (mh >= 0 && mh < TOTAL_HOUR_COLUMNS) {
+          mobileBookedHours[mh + TIMELINE_START_HOUR] = mbooking.userDisplayName || 'Booked';
+        }
+      }
+    }
+
+    // Build mobile hour range
+    const mobileHourRange: number[] = [];
+    for (let mhr = TIMELINE_START_HOUR; mhr < TIMELINE_END_HOUR; mhr++) {
+      mobileHourRange.push(mhr);
+    }
+
+    const mobileVehicleHeader = React.createElement('div', { className: styles.mobileVehicleHeader },
+      React.createElement(IconButton, {
+        iconProps: { iconName: 'ChevronLeft' },
+        onClick: function goToPrevVehicle(): void { if (safeIndex > 0) setActiveVehicleIndex(safeIndex - 1); },
+        disabled: safeIndex === 0,
+        title: 'Previous vehicle',
+        ariaLabel: 'Previous vehicle',
+      }),
+      React.createElement('span', { className: styles.mobileVehicleName },
+        activeVehicle.make + ' ' + activeVehicle.model + ' (' + String(safeIndex + 1) + '/' + String(vehicles.length) + ')'
+      ),
+      React.createElement(IconButton, {
+        iconProps: { iconName: 'ChevronRight' },
+        onClick: function goToNextVehicle(): void { if (safeIndex < vehicles.length - 1) setActiveVehicleIndex(safeIndex + 1); },
+        disabled: safeIndex === vehicles.length - 1,
+        title: 'Next vehicle',
+        ariaLabel: 'Next vehicle',
+      })
+    );
+
+    const mobileSlotRows = mobileHourRange.map(function renderMobileSlot(hour: number): React.ReactElement {
+      const isBookedMobile = mobileBookedHours[hour] !== undefined;
+      const isPastMobile = isSelectedDateToday && hour <= currentHour;
+
+      const slotClassName = isPastMobile
+        ? styles.mobileSlotPast
+        : isBookedMobile
+          ? styles.mobileSlotBooked
+          : styles.mobileSlotFree;
+
+      const statusText = isPastMobile
+        ? 'Past'
+        : isBookedMobile
+          ? mobileBookedHours[hour]
+          : 'Available \u2014 tap to book';
+
+      const slotClickHandler = (!isBookedMobile && !isPastMobile)
+        ? (function makeHandler(vid: number, ds: string, sh: number) {
+            return function onMobileSlotClick(): void { onSlotClick(vid, ds, sh); };
+          })(activeVehicle.id, dateStr, hour)
+        : undefined;
+
+      return React.createElement('div', {
+        key: hour,
+        className: slotClassName,
+        onClick: slotClickHandler,
+      },
+        React.createElement('span', { className: styles.mobileSlotHour }, pad2(hour) + ':00'),
+        React.createElement('span', { className: styles.mobileSlotStatus }, statusText)
+      );
+    });
+
+    return React.createElement('div', { className: styles.timelineContainer },
+      React.createElement('div', { className: styles.timelineHeader },
+        React.createElement('div', { className: styles.timelineNav },
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronLeft' },
+            title: 'Previous day',
+            ariaLabel: 'Previous day',
+            onClick: handlePrevDay,
+            disabled: isPrevDayDisabled,
+          }),
+          React.createElement(DatePicker, datePickerProps),
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronRight' },
+            title: 'Next day',
+            ariaLabel: 'Next day',
+            onClick: handleNextDay,
+          })
+        ),
+        React.createElement('span', { className: styles.dayLabel },
+          tz.formatDateOnly(selectedDate) + ' (' + tz.timezoneAbbr + ')'
+        ),
+        legend
+      ),
+      mobileVehicleHeader,
+      React.createElement('div', {
+        className: styles.mobileSlotList,
+        onTouchStart: handleMobileTouchStart,
+        onTouchEnd: handleMobileTouchEnd,
+      }, mobileSlotRows)
+    );
+  }
+
+  // Desktop: CSS Grid view
   return React.createElement('div', { className: styles.timelineContainer },
     React.createElement('div', { className: styles.timelineHeader },
       React.createElement('div', { className: styles.timelineNav },
@@ -458,9 +600,6 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
         tz.formatDateOnly(selectedDate) + ' (' + tz.timezoneAbbr + ')'
       ),
       legend
-    ),
-    React.createElement('div', { className: styles.mobileHint },
-      'For best experience, use landscape or desktop view.'
     ),
     React.createElement('div', { className: styles.gridWrapper },
       React.createElement('div', {

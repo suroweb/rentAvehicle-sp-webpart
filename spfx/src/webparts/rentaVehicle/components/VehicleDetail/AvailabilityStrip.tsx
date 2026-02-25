@@ -4,6 +4,7 @@ import { TooltipHost } from '@fluentui/react/lib/Tooltip';
 import styles from './VehicleDetail.module.scss';
 import { IVehicleAvailabilitySlot } from '../../models/IBooking';
 import { useTimezone } from '../../hooks/useTimezone';
+import { useResponsive } from '../../hooks/useResponsive';
 
 export interface IAvailabilityStripProps {
   slots: IVehicleAvailabilitySlot[];
@@ -92,6 +93,10 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   onSlotClick,
 }) => {
   const tz = useTimezone(timezone);
+  const { isMobile } = useResponsive();
+
+  // On mobile, limit visible hours to business hours (8-18) for wider touch targets
+  const mobileEndHour = isMobile ? 18 : STRIP_END_HOUR;
 
   // Create a shared formatter for slot times to avoid re-creating per iteration
   const localFormatter = React.useMemo(function createFormatter(): Intl.DateTimeFormat {
@@ -117,6 +122,7 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   const dayColumns = React.useMemo(function buildColumns() {
     const nextDays = getNextDays(days, weekOffset);
     const nowHour = new Date().getHours();
+    const endHourForLoop = mobileEndHour;
 
     return nextDays.map(function buildDayColumn(dayDate: Date) {
       const dayLabel = DAY_LABELS[dayDate.getDay()];
@@ -125,7 +131,7 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
 
       // Build hour blocks for this day
       const hourBlocks: IHourBlock[] = [];
-      for (let h = STRIP_START_HOUR; h < STRIP_END_HOUR; h++) {
+      for (let h = STRIP_START_HOUR; h < endHourForLoop; h++) {
         let isBooked = false;
         const isPast = isToday && h <= nowHour;
         let tooltipText = isPast
@@ -171,7 +177,7 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
         hourBlocks: hourBlocks,
       };
     });
-  }, [slots, days, weekOffset, tz, localFormatter, todayMidnight]);
+  }, [slots, days, weekOffset, tz, localFormatter, todayMidnight, mobileEndHour]);
 
   // Compute week range label for header (e.g., "25 Feb - 3 Mar")
   const weekRangeLabel = React.useMemo(function computeRangeLabel(): string {
@@ -219,7 +225,10 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
         {/* Hour labels column */}
         <div className={styles.stripHourLabels}>
           <div className={styles.stripDayHeader}>&nbsp;</div>
-          {[STRIP_START_HOUR, STRIP_START_HOUR + 4, STRIP_START_HOUR + 8, STRIP_END_HOUR].map(
+          {(isMobile
+            ? [STRIP_START_HOUR, STRIP_START_HOUR + 5, mobileEndHour]
+            : [STRIP_START_HOUR, STRIP_START_HOUR + 4, STRIP_START_HOUR + 8, STRIP_END_HOUR]
+          ).map(
             function renderHourLabel(h: number) {
               return (
                 <div key={h} className={styles.stripHourLabel}>

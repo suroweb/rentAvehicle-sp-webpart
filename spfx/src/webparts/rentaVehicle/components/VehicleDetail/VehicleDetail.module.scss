@@ -417,4 +417,15 @@
   .stripDayColumn {
     min-width: 45px;
   }
+
+  .stripBlockFree,
+  .stripBlockBooked,
+  .stripBlockPast {
+    height: 44px;
+  }
+
+  .stripHourLabel {
+    height: 44px;
+    line-height: 44px;
+  }
 }
