@@ -48,7 +48,7 @@ async function browseAvailableVehicles(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -111,7 +111,7 @@ async function getVehicleDetailEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -146,7 +146,7 @@ async function getVehicleAvailabilityEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -181,7 +181,7 @@ async function createBookingEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -263,7 +263,7 @@ async function getMyBookingsEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -289,7 +289,7 @@ async function cancelBookingEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -342,7 +342,7 @@ async function checkOutBookingEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -408,7 +408,7 @@ async function checkInBookingEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -459,7 +459,7 @@ async function getTimelineEndpoint(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }

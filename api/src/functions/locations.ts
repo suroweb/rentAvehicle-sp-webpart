@@ -36,7 +36,7 @@ async function listLocations(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -72,7 +72,7 @@ async function syncLocationsTrigger(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -112,7 +112,7 @@ async function listLocationsPublic(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }

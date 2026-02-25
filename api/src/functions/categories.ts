@@ -35,7 +35,7 @@ async function listCategories(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -67,7 +67,7 @@ async function addCategory(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -111,7 +111,7 @@ async function editCategory(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -164,7 +164,7 @@ async function removeCategory(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -205,7 +205,7 @@ async function listCategoriesPublic(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }

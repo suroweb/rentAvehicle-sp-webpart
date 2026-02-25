@@ -35,7 +35,7 @@ export async function adminHealth(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  const user = getUserFromRequest(request);
+  const user = await getUserFromRequest(request);
 
   if (!user) {
     return {

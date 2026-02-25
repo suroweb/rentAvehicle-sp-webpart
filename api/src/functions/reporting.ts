@@ -45,7 +45,7 @@ async function getKpiReport(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -78,7 +78,7 @@ async function getUtilizationReport(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -122,7 +122,7 @@ async function getTrendsReport(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -180,7 +180,7 @@ async function getExportReport(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }

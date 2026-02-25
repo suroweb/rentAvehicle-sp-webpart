@@ -1,6 +1,7 @@
 import { HttpRequest } from '@azure/functions';
 import { z } from 'zod';
 import { UserContext, AppRole } from '../models/UserContext.js';
+import { getGraphClient } from '../services/graphService.js';
 
 /**
  * Zod schema for validating the decoded x-ms-client-principal JSON structure.
@@ -105,15 +106,26 @@ export function requireRole(...allowedRoles: AppRole[]): (user: UserContext | nu
 }
 
 /**
- * Returns a mock UserContext for local development when Easy Auth is not available.
+ * Cached Graph user profile for local dev to avoid calling Graph on every request.
+ */
+let cachedLocalDevUser: UserContext | null = null;
+let localDevUserFetched = false;
+
+/**
+ * Returns a UserContext for local development when Easy Auth is not available.
  * Only active when LOCAL_DEV environment variable is 'true'.
  *
+ * When Graph credentials are configured (AZURE_CLIENT_SECRET set), fetches
+ * the real user profile from Entra ID using NOTIFICATION_SENDER_EMAIL.
+ * Falls back to env var overrides if Graph lookup fails.
+ *
  * Uses environment variables:
- * - LOCAL_DEV_NAME: Display name (default: 'Local Dev User')
- * - LOCAL_DEV_EMAIL: Email (default: 'dev@localhost')
+ * - NOTIFICATION_SENDER_EMAIL: Email to look up in Graph (primary)
+ * - LOCAL_DEV_EMAIL: Fallback email if Graph lookup fails
+ * - LOCAL_DEV_NAME: Fallback display name if Graph lookup fails
  * - LOCAL_DEV_ROLE: Role (default: 'Employee')
  */
-export function getLocalDevUser(): UserContext | null {
+export async function getLocalDevUser(): Promise<UserContext | null> {
   if (process.env.LOCAL_DEV !== 'true') {
     return null;
   }
@@ -121,6 +133,36 @@ export function getLocalDevUser(): UserContext | null {
   const role = (process.env.LOCAL_DEV_ROLE || 'Employee') as AppRole;
   const validRoles: AppRole[] = ['SuperAdmin', 'Admin', 'Manager', 'Employee'];
   const effectiveRole = validRoles.includes(role) ? role : 'Employee';
+
+  // Try Graph lookup (cached after first call)
+  if (!localDevUserFetched && process.env.AZURE_CLIENT_SECRET) {
+    localDevUserFetched = true;
+    const email = process.env.NOTIFICATION_SENDER_EMAIL || process.env.LOCAL_DEV_EMAIL;
+    if (email) {
+      try {
+        const client = await getGraphClient();
+        const user = await client.api(`/users/${email}`)
+          .select('id,displayName,mail,userPrincipalName,officeLocation')
+          .get();
+        cachedLocalDevUser = {
+          userId: user.id,
+          displayName: user.displayName || email,
+          email: user.mail || user.userPrincipalName || email,
+          roles: [effectiveRole],
+          effectiveRole,
+          officeLocation: user.officeLocation || null,
+        };
+        console.log(`  Local dev user from Graph: ${cachedLocalDevUser.displayName} (${cachedLocalDevUser.email})`);
+      } catch (err) {
+        console.warn('  Could not fetch user from Graph, using env var fallback:', (err as Error).message);
+      }
+    }
+  }
+
+  if (cachedLocalDevUser) {
+    // Apply current role (may change via --role flag between restarts)
+    return { ...cachedLocalDevUser, roles: [effectiveRole], effectiveRole };
+  }
 
   return {
     userId: 'local-dev-user-id',
@@ -136,18 +178,18 @@ export function getLocalDevUser(): UserContext | null {
  * Extracts user identity from an HTTP request.
  *
  * First checks for the x-ms-client-principal header (set by Easy Auth in production).
- * If the header is missing and LOCAL_DEV is enabled, falls back to a mock user.
+ * If the header is missing and LOCAL_DEV is enabled, falls back to Graph user lookup.
  *
  * @param request - The Azure Functions HttpRequest
  * @returns UserContext if authenticated, null if not
  */
-export function getUserFromRequest(request: HttpRequest): UserContext | null {
+export async function getUserFromRequest(request: HttpRequest): Promise<UserContext | null> {
   const principalHeader = request.headers.get('x-ms-client-principal');
 
   if (principalHeader) {
     return parseClientPrincipal(principalHeader);
   }
 
-  // Fall back to local dev mock when header is missing
+  // Fall back to local dev user (Graph lookup or env var fallback)
   return getLocalDevUser();
 }

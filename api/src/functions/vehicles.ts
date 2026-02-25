@@ -44,7 +44,7 @@ async function listVehicles(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -118,7 +118,7 @@ async function getVehicle(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -159,7 +159,7 @@ async function addVehicle(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -203,7 +203,7 @@ async function editVehicle(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -256,7 +256,7 @@ async function removeVehicle(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -298,7 +298,7 @@ async function changeVehicleStatus(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
@@ -352,7 +352,7 @@ async function setVehicleMailbox(
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
-    const user = getUserFromRequest(request);
+    const user = await getUserFromRequest(request);
     if (!user) {
       return { status: 401, jsonBody: { error: 'Not authenticated' } };
     }
