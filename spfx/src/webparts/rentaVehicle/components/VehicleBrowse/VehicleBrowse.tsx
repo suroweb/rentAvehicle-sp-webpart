@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { PrimaryButton } from '@fluentui/react/lib/Button';
 import { Dropdown, IDropdownOption } from '@fluentui/react/lib/Dropdown';
-import { DatePicker } from '@fluentui/react/lib/DatePicker';
-import { DayOfWeek } from '@fluentui/react/lib/Calendar';
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import { Shimmer } from '@fluentui/react/lib/Shimmer';
@@ -13,6 +11,7 @@ import { ILocation } from '../../models/ILocation';
 import { ICategory } from '../../models/ICategory';
 import { localToUtcIso } from '../../hooks/useTimezone';
 import { VehicleCard } from './VehicleCard';
+import { RangeCalendar, IRangeState } from '../VehicleDetail/RangeCalendar';
 
 export interface IDateContext {
   startDate: Date;
@@ -80,13 +79,24 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   const [categories, setCategories] = React.useState<ICategory[]>([]);
   const [selectedLocationId, setSelectedLocationId] = React.useState<number | undefined>(undefined);
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<number | undefined>(undefined);
-  const [startDate, setStartDate] = React.useState<Date>(getToday);
-  const [endDate, setEndDate] = React.useState<Date>(getToday);
-  const [startHour, setStartHour] = React.useState<number>(getNextFullHour);
-  const [endHour, setEndHour] = React.useState<number>(() => {
-    const next = getNextFullHour();
-    return next >= 23 ? 23 : next + 1;
+
+  // Unified range state replacing separate date/hour state
+  const [range, setRange] = React.useState<IRangeState>(function initRange(): IRangeState {
+    const today = getToday();
+    const nextHour = getNextFullHour();
+    return {
+      startDate: today,
+      startHour: nextHour,
+      endDate: today,
+      endHour: nextHour >= 23 ? 23 : nextHour + 1,
+    };
   });
+
+  const updateRange = React.useCallback(function onUpdateRange(partial: Partial<IRangeState>): void {
+    setRange(function mergeRange(prev: IRangeState): IRangeState {
+      return { ...prev, ...partial };
+    });
+  }, []);
 
   // Results state
   const [vehicles, setVehicles] = React.useState<IAvailableVehicle[]>([]);
@@ -97,12 +107,12 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
 
   // Filtered hour options based on whether today is selected
   const startHourOptions = React.useMemo(function filterStartHours(): IDropdownOption[] {
-    return getFilteredHourOptions(startDate);
-  }, [startDate]);
+    return getFilteredHourOptions(range.startDate);
+  }, [range.startDate]);
 
   const endHourOptions = React.useMemo(function filterEndHours(): IDropdownOption[] {
-    return getFilteredHourOptions(endDate);
-  }, [endDate]);
+    return getFilteredHourOptions(range.endDate);
+  }, [range.endDate]);
 
   // Selected location timezone for time conversion
   const selectedLocationTimezone = React.useMemo(() => {
@@ -201,26 +211,18 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
     []
   );
 
-  const handleStartDateChange = React.useCallback((date: Date | null | undefined): void => {
-    if (date) setStartDate(date);
-  }, []);
-
-  const handleEndDateChange = React.useCallback((date: Date | null | undefined): void => {
-    if (date) setEndDate(date);
-  }, []);
-
   const handleStartHourChange = React.useCallback(
-    (_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
-      if (option) setStartHour(option.key as number);
+    function onStartHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
+      if (option) updateRange({ startHour: option.key as number });
     },
-    []
+    [updateRange]
   );
 
   const handleEndHourChange = React.useCallback(
-    (_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void => {
-      if (option) setEndHour(option.key as number);
+    function onEndHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
+      if (option) updateRange({ endHour: option.key as number });
     },
-    []
+    [updateRange]
   );
 
   const handleSearch = React.useCallback(async (): Promise<void> => {
@@ -231,17 +233,17 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
 
     // Convert selected date+hour to UTC using the location's timezone
     const startTimeUtc = localToUtcIso(
-      startDate.getFullYear(),
-      startDate.getMonth() + 1,
-      startDate.getDate(),
-      startHour,
+      range.startDate.getFullYear(),
+      range.startDate.getMonth() + 1,
+      range.startDate.getDate(),
+      range.startHour,
       selectedLocationTimezone
     );
     const endTimeUtc = localToUtcIso(
-      endDate.getFullYear(),
-      endDate.getMonth() + 1,
-      endDate.getDate(),
-      endHour,
+      range.endDate.getFullYear(),
+      range.endDate.getMonth() + 1,
+      range.endDate.getDate(),
+      range.endHour,
       selectedLocationTimezone
     );
 
@@ -272,10 +274,7 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   }, [
     selectedLocationId,
     selectedCategoryId,
-    startDate,
-    endDate,
-    startHour,
-    endHour,
+    range,
     selectedLocationTimezone,
     apiService,
   ]);
@@ -283,13 +282,13 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   const handleCardSelect = React.useCallback(
     (vehicleId: number): void => {
       onNavigateToDetail(vehicleId, {
-        startDate: startDate,
-        startHour: startHour,
-        endDate: endDate,
-        endHour: endHour,
+        startDate: range.startDate,
+        startHour: range.startHour,
+        endDate: range.endDate,
+        endHour: range.endHour,
       });
     },
-    [onNavigateToDetail, startDate, startHour, endDate, endHour]
+    [onNavigateToDetail, range]
   );
 
   // Loading state
@@ -324,67 +323,49 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
 
       {/* Filter bar */}
       <div className={styles.filterBar}>
-        <div className={styles.filterField}>
-          <Dropdown
-            label="Location"
-            selectedKey={selectedLocationId}
-            options={locationOptions}
-            onChange={handleLocationChange}
-            placeholder="Select a location"
-          />
+        <div className={styles.filterRow}>
+          <div className={styles.filterField}>
+            <Dropdown
+              label="Location"
+              selectedKey={selectedLocationId}
+              options={locationOptions}
+              onChange={handleLocationChange}
+              placeholder="Select a location"
+            />
+          </div>
+          <div className={styles.filterField}>
+            <Dropdown
+              label="Category"
+              selectedKey={selectedCategoryId || 'all'}
+              options={categoryOptions}
+              onChange={handleCategoryChange}
+            />
+          </div>
         </div>
 
-        <div className={styles.filterField}>
-          <DatePicker
-            label="Start date"
-            value={startDate}
-            onSelectDate={handleStartDateChange}
-            firstDayOfWeek={DayOfWeek.Monday}
-            minDate={getToday()}
-            formatDate={(date?: Date) =>
-              date ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
-            }
+        <div className={styles.rangeSection}>
+          <RangeCalendar
+            range={range}
+            onRangeChange={updateRange}
           />
-        </div>
-
-        <div className={styles.filterFieldNarrow}>
-          <Dropdown
-            label="Start time"
-            selectedKey={startHour}
-            options={startHourOptions}
-            onChange={handleStartHourChange}
-          />
-        </div>
-
-        <div className={styles.filterField}>
-          <DatePicker
-            label="End date"
-            value={endDate}
-            onSelectDate={handleEndDateChange}
-            firstDayOfWeek={DayOfWeek.Monday}
-            minDate={startDate}
-            formatDate={(date?: Date) =>
-              date ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
-            }
-          />
-        </div>
-
-        <div className={styles.filterFieldNarrow}>
-          <Dropdown
-            label="End time"
-            selectedKey={endHour}
-            options={endHourOptions}
-            onChange={handleEndHourChange}
-          />
-        </div>
-
-        <div className={styles.filterField}>
-          <Dropdown
-            label="Category"
-            selectedKey={selectedCategoryId || 'all'}
-            options={categoryOptions}
-            onChange={handleCategoryChange}
-          />
+          <div className={styles.hourRow}>
+            <div className={styles.hourField}>
+              <Dropdown
+                label="Start time"
+                selectedKey={range.startHour}
+                options={startHourOptions}
+                onChange={handleStartHourChange}
+              />
+            </div>
+            <div className={styles.hourField}>
+              <Dropdown
+                label="End time"
+                selectedKey={range.endHour}
+                options={endHourOptions}
+                onChange={handleEndHourChange}
+              />
+            </div>
+          </div>
         </div>
 
         <div className={styles.searchButton}>
