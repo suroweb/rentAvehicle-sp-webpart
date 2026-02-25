@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 5: M365 Calendar Integration -- Complete (2 of 2 plans done).
+**Current focus:** Phase 6: Notifications -- Complete (2 of 2 plans done).
 
 ## Current Position
 
-Phase: 5 of 7 (M365 Calendar Integration)
-Plan: 2 of 2 in current phase (05-02 complete)
+Phase: 6 of 7 (Notifications)
+Plan: 2 of 2 in current phase (06-02 complete)
 Status: Phase Complete
-Last activity: 2026-02-25 -- Completed 05-02-PLAN.md (Admin Provisioning, Backfill Migration, and Calendar Verification)
+Last activity: 2026-02-25 -- Completed 06-02-PLAN.md (Timer-triggered scheduled reminders)
 
-Progress: [########..] 82%
+Progress: [#########.] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 5.1min
-- Total execution time: 1.22 hours
+- Total plans completed: 17
+- Average duration: 5.0min
+- Total execution time: 1.44 hours
 
 **By Phase:**
 
@@ -42,9 +42,11 @@ Progress: [########..] 82%
 | Phase 04 P03 | 5min | 2 tasks | 3 files |
 | Phase 05 P01 | 3min | 2 tasks | 6 files |
 | Phase 05 P02 | 4min | 2 tasks | 6 files |
+| Phase 06 P01 | 8min | 2 tasks | 6 files |
+| Phase 06 P02 | 5min | 1 task | 3 files |
 
 **Recent Trend:**
-- Last 5 plans: 4min, 9min, 5min, 3min, 4min
+- Last 5 plans: 5min, 3min, 4min, 8min, 5min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -109,6 +111,13 @@ Recent decisions affecting current work:
 - [Phase 05]: Backfill processes in batches of 10 with 2-second delay for Graph API rate limiting
 - [Phase 05]: SuperAdmin-only access for backfill endpoint (bulk/destructive operation)
 - [Phase 05]: Equipment mailbox BookInPolicy restricts booking to app service account only
+- [Phase 06]: Teams activity feed with deep links instead of bot-based Adaptive Cards (no bot registration needed)
+- [Phase 06]: Fire-and-forget notification dispatch using Promise.allSettled (one failure cannot block others)
+- [Phase 06]: Timer-triggered function every 5 minutes (6-field NCRONTAB '0 */5 * * * *')
+- [Phase 06]: Database-level duplicate prevention via atomic UPDATE...WHERE sentAt IS NULL
+- [Phase 06]: Batch processing with 1-second delay between batches of 10 for Graph API rate limiting
+- [Phase 06]: Overdue notification multi-recipient: employee + manager + admin (OVERDUE_ADMIN_EMAIL env var)
+- [Phase 06]: Admin cancel notification uses IIFE pattern for fire-and-forget async in switch/case
 
 ### Pending Todos
 
@@ -122,5 +131,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 05-02-PLAN.md
-Resume file: .planning/phases/05-m365-calendar-integration/05-02-SUMMARY.md
+Stopped at: Completed 06-02-PLAN.md (Phase 6 complete)
+Resume file: .planning/phases/06-notifications/06-02-SUMMARY.md

@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Core Booking Flow** - Employees can find, book, and view vehicle reservations (completed 2026-02-23)
 - [ ] **Phase 4: Booking Lifecycle and Admin Oversight** - Full reservation lifecycle with calendar views, check-in/out, and admin control
 - [ ] **Phase 5: M365 Calendar Integration** - Vehicle bookings visible in Outlook through resource calendars and employee calendars
-- [ ] **Phase 6: Notifications** - Booking confirmations, return reminders, and manager alerts via email and Teams
+- [x] **Phase 6: Notifications** - Booking confirmations, return reminders, and manager alerts via email and Teams (completed 2026-02-25)
 - [ ] **Phase 7: Reporting and Manager Visibility** - Utilization dashboards, trend analysis, exports, and manager team view
 
 ## Phase Details
@@ -119,8 +119,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- Notification service layer: email confirmation (Graph sendMail), Teams activity feed notifications, manager lookup, wired into booking and admin booking endpoints
-- [ ] 06-02-PLAN.md -- Timer-triggered scheduled reminders: pickup reminder (1h before), return reminder (1h before), overdue alerts (15min grace), human verification
+- [x] 06-01-PLAN.md -- Notification service layer: email confirmation (Graph sendMail), Teams activity feed notifications, manager lookup, wired into booking and admin booking endpoints
+- [x] 06-02-PLAN.md -- Timer-triggered scheduled reminders: pickup reminder (1h before), return reminder (1h before), overdue alerts (15min grace), human verification
 
 ### Phase 7: Reporting and Manager Visibility
 **Goal**: Fleet admins can analyze utilization patterns and export data, and managers can see their team's rental activity
@@ -148,11 +148,11 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | 1. Foundation and Authentication | 3/3 | Complete    | 2026-02-23 |
 | 2. Vehicle Inventory and Locations | 0/4 | Complete    | 2026-02-23 |
 | 3. Core Booking Flow | 3/3 | Complete | 2026-02-23 |
-| 4. Booking Lifecycle and Admin Oversight | 0/TBD | Not started | - |
-| 5. M365 Calendar Integration | 0/TBD | Not started | - |
-| 6. Notifications | 0/TBD | Not started | - |
+| 4. Booking Lifecycle and Admin Oversight | 3/3 | Complete | 2026-02-24 |
+| 5. M365 Calendar Integration | 2/2 | Complete | 2026-02-25 |
+| 6. Notifications | 2/2 | Complete | 2026-02-25 |
 | 7. Reporting and Manager Visibility | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-23 (Phase 3 complete)*
+*Last updated: 2026-02-25 (Phase 6 complete)*
