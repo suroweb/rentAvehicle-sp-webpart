@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 08-ux-polish-availability-strip-navigation-and-booking-process-refinement
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-02-25T12:00:00Z
@@ -103,9 +103,12 @@ skipped: 4
   reason: "User reported: the card 'Book this Vehicle' still displays the loading spinner and the message 'Creating your booking'. The booking is already booked in the strip view with red color no page refresh needed and if i check my bookings the booking was created successfully."
   severity: major
   test: 5
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "BookingForm.tsx handleConfirm success branch (line 247-249) calls onBookingComplete() but never calls setFormState('selection'). The conflict and error branches both reset formState, but the success branch does not."
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleDetail/BookingForm.tsx"
+      issue: "Success branch of handleConfirm missing setFormState('selection') — line 247-249"
+  missing:
+    - "Add setFormState('selection') before onBookingComplete() in the success branch"
   debug_session: ""
 
 - truth: "Past hour filtering applies to all booking form instances, including the browse vehicles page"
@@ -113,27 +116,47 @@ skipped: 4
   reason: "User reported: only in the full details page yes but when i open the form in the browse vehicles page there i can pick past hours."
   severity: major
   test: 9
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "VehicleBrowse.tsx passes raw HOUR_OPTIONS to both hour dropdowns (lines 311, 333) with no past-hour filtering. The getFilteredHourOptions function exists in BookingForm.tsx but was never added to VehicleBrowse.tsx."
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleBrowse/VehicleBrowse.tsx"
+      issue: "Lines 311 and 333 pass raw HOUR_OPTIONS — no getFilteredHourOptions function"
+  missing:
+    - "Add getFilteredHourOptions function to VehicleBrowse.tsx (or extract to shared utility)"
+    - "Add useMemo hooks for startHourOptions/endHourOptions"
+    - "Replace HOUR_OPTIONS with filtered versions in Dropdown components"
+  debug_session: ".planning/debug/browse-past-hours-not-filtered.md"
 
 - truth: "Booking form on VehicleDetail inherits date/time context from browse vehicles page selection"
   status: failed
   reason: "User reported: when opening a vehicle booked today but wanting to book for tomorrow, the form defaults to today causing a false overlap warning. Date context from browse page needs to sync to detail page form."
   severity: major
   test: 11
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Navigation from VehicleBrowse to VehicleDetail only passes vehicleId — no date/time. onNavigateToDetail signature is (vehicleId: number) => void. Date state is trapped in VehicleBrowse local state. BookingForm defaults to getToday()/getNextFullHour()."
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleBrowse/VehicleBrowse.tsx"
+      issue: "onNavigateToDetail only accepts vehicleId, date state is local-only"
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleBrowse/VehicleCard.tsx"
+      issue: "onSelect only passes vehicle.id"
+    - path: "spfx/src/webparts/rentaVehicle/components/AppShell/AppShell.tsx"
+      issue: "No date state; VehicleDetail rendered without date props"
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleDetail/VehicleDetail.tsx"
+      issue: "IVehicleDetailProps has no date props; prefill state starts undefined"
+  missing:
+    - "Widen onNavigateToDetail signature to include date/time params"
+    - "Forward date state from VehicleBrowse when clicking a card"
+    - "Store and forward dates through AppShell to VehicleDetail"
+    - "Wire incoming date props into existing prefillDate/prefillStartHour mechanism"
+  debug_session: ".planning/debug/booking-form-date-not-inherited.md"
 
 - truth: "After successful booking, the form resets to ready state and remains visible for another booking"
   status: failed
   reason: "User reported: it stays with the loading spinner from test 5 — same root cause"
   severity: major
   test: 12
-  root_cause: ""
-  artifacts: []
-  missing: []
+  root_cause: "Same as test 5 — BookingForm.tsx handleConfirm success branch missing setFormState('selection')"
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/VehicleDetail/BookingForm.tsx"
+      issue: "Same as test 5"
+  missing:
+    - "Same fix as test 5 resolves this"
   debug_session: ""
