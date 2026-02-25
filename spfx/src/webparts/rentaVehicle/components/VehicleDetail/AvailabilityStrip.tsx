@@ -15,8 +15,8 @@ export interface IAvailabilityStripProps {
   onPrevWeek: () => void;
   onNextWeek: () => void;
   onSlotClick: (dayDate: Date, hour: number) => void;
-  range?: IRangeState;
-  onRangeChange?: (partial: Partial<IRangeState>) => void;
+  range: IRangeState;
+  onRangeChange: (partial: Partial<IRangeState>) => void;
 }
 
 // Display hours range for the strip (8:00 - 20:00)
@@ -86,6 +86,49 @@ function toComparableMinutes(year: number, month: number, day: number, hour: num
  * Free slots are clickable to pre-fill the booking form.
  * Left/right arrows navigate between weeks.
  */
+/**
+ * Compute per-day overlay data for the range within the visible week.
+ * Returns null if the range does not overlap the given day.
+ */
+function computeDayOverlay(
+  range: IRangeState,
+  dayDate: Date,
+  stripStartHour: number,
+  stripEndHour: number
+): { topPercent: number; heightPercent: number } | null {
+  const rangeStartMs = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), range.startDate.getDate()).getTime();
+  const rangeEndMs = new Date(range.endDate.getFullYear(), range.endDate.getMonth(), range.endDate.getDate()).getTime();
+  const dayMs = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate()).getTime();
+
+  // Day is outside range
+  if (dayMs < rangeStartMs || dayMs > rangeEndMs) return null;
+
+  const totalBlocks = stripEndHour - stripStartHour;
+  if (totalBlocks <= 0) return null;
+
+  const isStartDay = dayMs === rangeStartMs;
+  const isEndDay = dayMs === rangeEndMs;
+
+  // Determine start hour index within this column
+  let startHourInCol = 0;
+  if (isStartDay) {
+    startHourInCol = Math.max(0, range.startHour - stripStartHour);
+  }
+
+  // Determine end hour index within this column
+  let endHourInCol = totalBlocks;
+  if (isEndDay) {
+    endHourInCol = Math.max(0, Math.min(totalBlocks, range.endHour - stripStartHour));
+  }
+
+  if (endHourInCol <= startHourInCol) return null;
+
+  const topPercent = (startHourInCol / totalBlocks) * 100;
+  const heightPercent = ((endHourInCol - startHourInCol) / totalBlocks) * 100;
+
+  return { topPercent: topPercent, heightPercent: heightPercent };
+}
+
 export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   slots,
   timezone,
@@ -94,9 +137,14 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   onPrevWeek,
   onNextWeek,
   onSlotClick,
+  range,
+  onRangeChange,
 }) => {
   const tz = useTimezone(timezone);
   const { isMobile } = useResponsive();
+
+  // Track whether next strip click sets start or end of range
+  const stripSelectingEnd = React.useRef<boolean>(false);
 
   // On mobile, limit visible hours to business hours (8-18) for wider touch targets
   const mobileEndHour = isMobile ? 18 : STRIP_END_HOUR;
@@ -274,12 +322,45 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
                     );
                   }
 
-                  // Free future slots: green, clickable
+                  // Free future slots: green, clickable with two-click range selection
                   return (
                     <TooltipHost key={block.hour} content={block.tooltip}>
                       <div
                         className={styles.stripBlockFree}
                         onClick={function onFreeSlotClick(): void {
+                          // Two-click range selection on the strip
+                          if (!stripSelectingEnd.current) {
+                            // First click: set start, collapse end to same slot
+                            onRangeChange({
+                              startDate: col.dayDate,
+                              startHour: block.hour,
+                              endDate: col.dayDate,
+                              endHour: block.hour >= 23 ? 23 : block.hour + 1,
+                            });
+                            stripSelectingEnd.current = true;
+                          } else {
+                            // Second click: set end, swap if clicked before start
+                            const clickedMs = new Date(col.dayDate.getFullYear(), col.dayDate.getMonth(), col.dayDate.getDate()).getTime();
+                            const startMs = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), range.startDate.getDate()).getTime();
+                            const endHourVal = block.hour >= 23 ? 23 : block.hour + 1;
+
+                            if (clickedMs < startMs || (clickedMs === startMs && block.hour < range.startHour)) {
+                              // Clicked before current start -- swap
+                              onRangeChange({
+                                startDate: col.dayDate,
+                                startHour: block.hour,
+                                endDate: range.startDate,
+                                endHour: range.startHour >= 23 ? 23 : range.startHour + 1,
+                              });
+                            } else {
+                              onRangeChange({
+                                endDate: col.dayDate,
+                                endHour: endHourVal,
+                              });
+                            }
+                            stripSelectingEnd.current = false;
+                          }
+                          // Also call original onSlotClick for backward compat
                           onSlotClick(col.dayDate, block.hour);
                         }}
                         role="button"
@@ -293,6 +374,21 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
                     </TooltipHost>
                   );
                 })}
+
+                {/* Range overlay for this day column */}
+                {(function renderDayOverlay(): React.ReactNode {
+                  const overlay = computeDayOverlay(range, col.dayDate, STRIP_START_HOUR, mobileEndHour);
+                  if (!overlay) return null;
+                  return (
+                    <div
+                      className={styles.rangeOverlay}
+                      style={{
+                        top: overlay.topPercent + '%',
+                        height: overlay.heightPercent + '%',
+                      }}
+                    />
+                  );
+                })()}
               </div>
             </div>
           );
