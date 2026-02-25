@@ -1,0 +1,6 @@
+{
+  "role": "Employee",
+  "name": "Test User",
+  "email": "test@contoso.com",
+  "officeLocation": "Bucharest"
+}

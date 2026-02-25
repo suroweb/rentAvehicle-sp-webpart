@@ -37,12 +37,12 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
 
     const fetchUser = async (): Promise<void> => {
       if (!apiClient) {
-        // No API client available (local workbench) -- use Admin role for local dev
+        // No API client available (local workbench) -- use Employee role for local dev
         const fallbackUser: IUser = {
           userId: 'local-dev',
           displayName: userDisplayName,
           email: userEmail,
-          role: 'Admin' as AppRole,
+          role: 'Employee' as AppRole,
         };
         if (!cancelled) {
           setAuthState({
@@ -65,12 +65,12 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
           });
         }
       } catch (err) {
-        // API call failed -- use Admin for local dev fallback
+        // API call failed -- use Employee for local dev fallback
         const fallbackUser: IUser = {
           userId: 'local-dev',
           displayName: userDisplayName,
           email: userEmail,
-          role: 'Admin' as AppRole,
+          role: 'Employee' as AppRole,
         };
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to fetch user identity';
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<IAuthProviderProps> = ({
             userId: 'local-dev',
             displayName: userDisplayName,
             email: userEmail,
-            role: 'Admin' as AppRole,
+            role: 'Employee' as AppRole,
           },
           loading: false,
           error: null,
