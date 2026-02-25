@@ -4,7 +4,7 @@ import { IVehicle, IVehicleInput, IVehicleFilters } from '../models/IVehicle';
 import { ICategory, ICategoryInput } from '../models/ICategory';
 import { ILocation, ILocationSyncResult } from '../models/ILocation';
 import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, ITimelineData, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
-import { IKpiSummary, IUtilizationData, IUtilizationVehicleData, ITrendData, IRawBookingRecord } from '../models/IReport';
+import { IKpiSummary, IUtilizationData, IUtilizationVehicleData, ITrendData, IRawBookingRecord, ITeamBooking } from '../models/IReport';
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
@@ -262,6 +262,12 @@ export class ApiService {
     params.append('dateTo', dateTo);
     params.append('type', 'raw');
     return this.get<IRawBookingRecord[]>('/api/backoffice/reports/export?' + params.toString());
+  }
+
+  // ── Team Bookings ─────────────────────────────────────────
+
+  public async getTeamBookings(): Promise<ITeamBooking[]> {
+    return this.get<ITeamBooking[]>('/api/backoffice/team-bookings');
   }
 
   // ── HTTP helpers ──────────────────────────────────────────

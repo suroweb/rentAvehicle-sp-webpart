@@ -1,0 +1,65 @@
+@import '../../styles/variables.module.scss';
+
+.teamBookings {
+  padding: 0;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: $color-text-secondary;
+  margin: 0;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.tableContainer {
+  margin-top: 8px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+// Status badges
+.statusBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusConfirmed {
+  background-color: #deecf9;
+  color: #0078d4;
+}
+
+.statusActive {
+  background-color: #dff6dd;
+  color: #107c10;
+}
+
+.statusOverdue {
+  background-color: #fde7e9;
+  color: #d13438;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .pageTitle {
+    font-size: 20px;
+  }
+}

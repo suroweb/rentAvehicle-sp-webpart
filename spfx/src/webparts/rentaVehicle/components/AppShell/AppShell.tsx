@@ -15,6 +15,7 @@ import { VehicleDetail } from '../VehicleDetail/VehicleDetail';
 import { MyBookings } from '../MyBookings/MyBookings';
 import { AllBookings } from '../AllBookings/AllBookings';
 import { Reports } from '../Reports/Reports';
+import { TeamBookings } from '../TeamBookings/TeamBookings';
 import { ApiService } from '../../services/ApiService';
 import { ILocation } from '../../models/ILocation';
 import { ICategory } from '../../models/ICategory';
@@ -172,6 +173,11 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
             API connection not available.
           </p>
         );
+      case 'teamBookings':
+        if (apiService) {
+          return <TeamBookings apiService={apiService} />;
+        }
+        return <p className={styles.welcomeText}>API connection not available.</p>;
       default:
         return (
           <>
