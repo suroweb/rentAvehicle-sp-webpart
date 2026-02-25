@@ -44,6 +44,7 @@ function getNextDays(count: number, weekOffset: number): Date[] {
 interface IHourBlock {
   hour: number;
   isBooked: boolean;
+  isPast: boolean;
   tooltip: string;
 }
 
@@ -115,6 +116,7 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   // Build the days and their hour blocks
   const dayColumns = React.useMemo(function buildColumns() {
     const nextDays = getNextDays(days, weekOffset);
+    const nowHour = new Date().getHours();
 
     return nextDays.map(function buildDayColumn(dayDate: Date) {
       const dayLabel = DAY_LABELS[dayDate.getDay()];
@@ -125,7 +127,10 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
       const hourBlocks: IHourBlock[] = [];
       for (let h = STRIP_START_HOUR; h < STRIP_END_HOUR; h++) {
         let isBooked = false;
-        let tooltipText = pad2(h) + ':00 - ' + pad2(h + 1) + ':00 ' + tz.timezoneAbbr + ': Free';
+        const isPast = isToday && h <= nowHour;
+        let tooltipText = isPast
+          ? pad2(h) + ':00 - ' + pad2(h + 1) + ':00 ' + tz.timezoneAbbr + ': Past'
+          : pad2(h) + ':00 - ' + pad2(h + 1) + ':00 ' + tz.timezoneAbbr + ': Free';
 
         // Compute block time range in comparable minutes (local frame)
         const blockDay = dayDate.getDate();
@@ -155,7 +160,7 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
           }
         }
 
-        hourBlocks.push({ hour: h, isBooked: isBooked, tooltip: tooltipText });
+        hourBlocks.push({ hour: h, isBooked: isBooked, isPast: isPast, tooltip: tooltipText });
       }
 
       return {
@@ -239,31 +244,39 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
               </div>
               <div className={styles.stripBlocks}>
                 {col.hourBlocks.map(function renderBlock(block) {
-                  const handleBlockClick = !block.isBooked
-                    ? function onFreeSlotClick(): void {
-                        onSlotClick(col.dayDate, block.hour);
-                      }
-                    : undefined;
+                  // Past slots: grayed out, non-clickable
+                  if (block.isPast) {
+                    return (
+                      <TooltipHost key={block.hour} content={block.tooltip}>
+                        <div className={styles.stripBlockPast} />
+                      </TooltipHost>
+                    );
+                  }
 
+                  // Booked slots: red, non-clickable
+                  if (block.isBooked) {
+                    return (
+                      <TooltipHost key={block.hour} content={block.tooltip}>
+                        <div className={styles.stripBlockBooked} />
+                      </TooltipHost>
+                    );
+                  }
+
+                  // Free future slots: green, clickable
                   return (
-                    <TooltipHost
-                      key={block.hour}
-                      content={block.tooltip}
-                    >
+                    <TooltipHost key={block.hour} content={block.tooltip}>
                       <div
-                        className={
-                          block.isBooked
-                            ? styles.stripBlockBooked
-                            : styles.stripBlockFree
-                        }
-                        onClick={handleBlockClick}
-                        role={!block.isBooked ? 'button' : undefined}
-                        tabIndex={!block.isBooked ? 0 : undefined}
-                        onKeyDown={!block.isBooked ? function onKey(e: React.KeyboardEvent): void {
+                        className={styles.stripBlockFree}
+                        onClick={function onFreeSlotClick(): void {
+                          onSlotClick(col.dayDate, block.hour);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={function onKey(e: React.KeyboardEvent): void {
                           if (e.key === 'Enter' || e.key === ' ') {
                             onSlotClick(col.dayDate, block.hour);
                           }
-                        } : undefined}
+                        }}
                       />
                     </TooltipHost>
                   );

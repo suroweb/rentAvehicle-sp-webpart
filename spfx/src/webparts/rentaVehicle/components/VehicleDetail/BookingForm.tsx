@@ -49,6 +49,28 @@ function getNextFullHour(): number {
   return nextHour >= 24 ? 0 : nextHour;
 }
 
+/**
+ * Filter hour options to exclude past hours when selectedDate is today.
+ * Returns only hours strictly greater than the current hour when today is selected.
+ */
+function getFilteredHourOptions(selectedDate: Date): IDropdownOption[] {
+  const now = new Date();
+  const isToday = selectedDate.getFullYear() === now.getFullYear()
+    && selectedDate.getMonth() === now.getMonth()
+    && selectedDate.getDate() === now.getDate();
+
+  if (!isToday) return HOUR_OPTIONS;
+
+  const currentHour = now.getHours();
+  const filtered: IDropdownOption[] = [];
+  for (let i = 0; i < HOUR_OPTIONS.length; i++) {
+    if ((HOUR_OPTIONS[i].key as number) > currentHour) {
+      filtered.push(HOUR_OPTIONS[i]);
+    }
+  }
+  return filtered;
+}
+
 export const BookingForm: React.FC<IBookingFormProps> = ({
   vehicleId,
   vehicleName,
@@ -61,6 +83,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   prefillDate,
   prefillStartHour,
   onFormDateChange,
+  availabilitySlots,
 }) => {
   const tz = useTimezone(locationTimezone);
 
@@ -112,6 +135,29 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
       locationTimezone
     );
   }, [endDate, endHour, locationTimezone]);
+
+  // Overlap warning: check if form selection conflicts with a booked slot
+  const overlapWarning = React.useMemo(function checkOverlap(): boolean {
+    if (!availabilitySlots || availabilitySlots.length === 0) return false;
+    const formStartMs = new Date(startTimeUtc).getTime();
+    const formEndMs = new Date(endTimeUtc).getTime();
+    if (isNaN(formStartMs) || isNaN(formEndMs) || formEndMs <= formStartMs) return false;
+    for (let i = 0; i < availabilitySlots.length; i++) {
+      const slotStartMs = new Date(availabilitySlots[i].startTime).getTime();
+      const slotEndMs = new Date(availabilitySlots[i].endTime).getTime();
+      if (formStartMs < slotEndMs && formEndMs > slotStartMs) return true;
+    }
+    return false;
+  }, [availabilitySlots, startTimeUtc, endTimeUtc]);
+
+  // Filtered hour options based on whether today is selected
+  const startHourOptions = React.useMemo(function filterStartHours(): IDropdownOption[] {
+    return getFilteredHourOptions(startDate);
+  }, [startDate]);
+
+  const endHourOptions = React.useMemo(function filterEndHours(): IDropdownOption[] {
+    return getFilteredHourOptions(endDate);
+  }, [endDate]);
 
   // Handlers
   const handleStartDateChange = React.useCallback(function onStartDateChange(date: Date | null | undefined): void {
@@ -348,7 +394,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
             <Dropdown
               label={'Start time (' + tz.timezoneAbbr + ')'}
               selectedKey={startHour}
-              options={HOUR_OPTIONS}
+              options={startHourOptions}
               onChange={handleStartHourChange}
             />
           </div>
@@ -373,7 +419,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
             <Dropdown
               label={'End time (' + tz.timezoneAbbr + ')'}
               selectedKey={endHour}
-              options={HOUR_OPTIONS}
+              options={endHourOptions}
               onChange={handleEndHourChange}
             />
           </div>
@@ -383,6 +429,15 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
           All times are in {locationTimezone} ({tz.timezoneAbbr})
         </div>
       </div>
+
+      {/* Overlap warning when form selection conflicts with a booked slot */}
+      {overlapWarning && (
+        <div className={styles.overlapWarning}>
+          <MessageBar messageBarType={MessageBarType.warning} isMultiline={false}>
+            This slot appears booked. You can still submit — the server will verify availability.
+          </MessageBar>
+        </div>
+      )}
 
       <div className={styles.formActions}>
         <PrimaryButton
