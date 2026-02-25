@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 8: UX Polish -- human testing in progress. All 3 plans executed, verification found 12 items needing visual/functional checks.
+**Current focus:** Phase 8: UX Polish -- gap closure plans executing. Plans 1-4 complete, plan 5 remaining.
 
 ## Current Position
 
 Phase: 8 of 8 (UX Polish: Availability Strip Navigation and Booking Process Refinement)
-Plan: 3 of 3 in current phase (08-03 complete -- PHASE COMPLETE)
-Status: TESTING
-Last activity: 2026-02-25 -- Human testing Phase 8. Fixed: layout wraps on narrow containers, dev role centralized.
+Plan: 4 of 5 in current phase (08-04 complete)
+Status: EXECUTING
+Last activity: 2026-02-25 -- Executed 08-04: BookingForm spinner reset + VehicleBrowse past-hour filtering.
 
 ### Testing Progress (12 items from VERIFICATION.md)
 1. [x] Desktop side-by-side layout — FIXED (flex-wrap for narrow containers)
@@ -21,21 +21,21 @@ Last activity: 2026-02-25 -- Human testing Phase 8. Fixed: layout wraps on narro
 4. [ ] Form date change shifting the strip week
 5. [ ] Today column blue accent highlight
 6. [ ] Overlap warning MessageBar
-7. [ ] Post-booking strip refresh and form reset
+7. [x] Post-booking strip refresh and form reset -- FIXED (setFormState('selection') in success branch)
 8. [ ] Mobile bottom sheet open/close with swipe-to-dismiss
 9. [ ] Mobile strip 44px touch targets
 10. [ ] Mobile Day View vertical slot list with vehicle swipe
 11. [ ] Day View prev/next day arrows
-12. [ ] Past hour filtering in dropdowns
+12. [x] Past hour filtering in dropdowns -- FIXED (getFilteredHourOptions added to VehicleBrowse)
 
 Progress: [##########] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
-- Average duration: 5.0min
-- Total execution time: 1.92 hours
+- Total plans completed: 24
+- Average duration: 4.8min
+- Total execution time: 1.93 hours
 
 **By Phase:**
 
@@ -64,9 +64,10 @@ Progress: [##########] 100%
 | Phase 08 P01 | 3min | 2 tasks | 7 files |
 | Phase 08 P02 | 5min | 2 tasks | 6 files |
 | Phase 08 P03 | 5min | 3 tasks | 10 files |
+| Phase 08 P04 | 1min | 2 tasks | 2 files |
 
 **Recent Trend:**
-- Last 5 plans: 10min, 3min, 3min, 5min, 5min
+- Last 5 plans: 3min, 3min, 5min, 5min, 1min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -163,6 +164,7 @@ Recent decisions affecting current work:
 - [Phase 08]: Mobile Day View uses completely separate vertical render path (not responsive grid)
 - [Phase 08]: Horizontal swipe on mobile Day View switches vehicles (threshold 50px)
 - [Phase 08]: Swipe-to-dismiss on bottom sheet restricted to drag handle only
+- [Phase 08]: getFilteredHourOptions reused across BookingForm and VehicleBrowse for consistent past-hour filtering
 
 ### Roadmap Evolution
 
@@ -180,6 +182,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Human testing Phase 8 — item 1/12 fixed (layout wrap), items 2-12 remain
-Resume with: `/gsd:verify-work 8` to continue step-by-step testing
-Also fixed: dev.config.json centralized dev role config (was Admin, now Employee)
+Stopped at: Completed 08-04-PLAN.md (gap closure: spinner reset + past-hour filtering)
+Resume with: `/gsd:execute-phase 08` to run plan 08-05
