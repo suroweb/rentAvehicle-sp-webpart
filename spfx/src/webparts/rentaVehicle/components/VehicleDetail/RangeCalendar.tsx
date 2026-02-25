@@ -57,6 +57,9 @@ export const RangeCalendar: React.FC<IRangeCalendarProps> = ({
   const customDayCellRef = React.useCallback(function styleDayCell(
     element: HTMLElement, date: Date
   ): void {
+    // Guard against null — Fluent UI calls ref callbacks with null during unmount
+    if (!element || !date) return;
+
     const dayMs = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
     const startMs = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), range.startDate.getDate()).getTime();
     const endMs = new Date(range.endDate.getFullYear(), range.endDate.getMonth(), range.endDate.getDate()).getTime();
