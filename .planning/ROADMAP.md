@@ -167,8 +167,8 @@ Plans:
 - [x] 08-01-PLAN.md — Backend startDate API, strip week navigation, clickable slots, bidirectional form sync, today highlight, post-booking refresh
 - [x] 08-02-PLAN.md — Desktop side-by-side layout, compact vehicle header, Day View arrow navigation, past-time prevention, overlap warning
 - [x] 08-03-PLAN.md — Mobile bottom sheet, sticky bottom bar, touch-optimized strip, mobile Day View with vehicle swipe, human verification
-- [ ] 08-04-PLAN.md — Gap closure: fix booking form spinner reset, add browse page past-hour filtering
-- [ ] 08-05-PLAN.md — Gap closure: wire date context from browse page to detail page booking form
+- [x] 08-04-PLAN.md — Gap closure: fix booking form spinner reset, add browse page past-hour filtering
+- [x] 08-05-PLAN.md — Gap closure: wire date context from browse page to detail page booking form
 
 ---
 *Roadmap created: 2026-02-22*

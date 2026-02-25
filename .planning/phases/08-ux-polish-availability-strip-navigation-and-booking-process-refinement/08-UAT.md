@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 08-ux-polish-availability-strip-navigation-and-booking-process-refinement
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-02-25T12:00:00Z
-updated: 2026-02-25T12:30:00Z
+updated: 2026-02-25T14:00:00Z
 ---
 
 ## Current Test
@@ -99,7 +99,7 @@ skipped: 4
 ## Gaps
 
 - truth: "After booking, the booking form resets to ready state showing the successful booking and allowing a new one"
-  status: failed
+  status: resolved
   reason: "User reported: the card 'Book this Vehicle' still displays the loading spinner and the message 'Creating your booking'. The booking is already booked in the strip view with red color no page refresh needed and if i check my bookings the booking was created successfully."
   severity: major
   test: 5
@@ -112,7 +112,7 @@ skipped: 4
   debug_session: ""
 
 - truth: "Past hour filtering applies to all booking form instances, including the browse vehicles page"
-  status: failed
+  status: resolved
   reason: "User reported: only in the full details page yes but when i open the form in the browse vehicles page there i can pick past hours."
   severity: major
   test: 9
@@ -127,7 +127,7 @@ skipped: 4
   debug_session: ".planning/debug/browse-past-hours-not-filtered.md"
 
 - truth: "Booking form on VehicleDetail inherits date/time context from browse vehicles page selection"
-  status: failed
+  status: resolved
   reason: "User reported: when opening a vehicle booked today but wanting to book for tomorrow, the form defaults to today causing a false overlap warning. Date context from browse page needs to sync to detail page form."
   severity: major
   test: 11
@@ -149,7 +149,7 @@ skipped: 4
   debug_session: ".planning/debug/booking-form-date-not-inherited.md"
 
 - truth: "After successful booking, the form resets to ready state and remains visible for another booking"
-  status: failed
+  status: resolved
   reason: "User reported: it stays with the loading spinner from test 5 — same root cause"
   severity: major
   test: 12
