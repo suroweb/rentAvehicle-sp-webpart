@@ -246,6 +246,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
         onConflict();
       } else {
         const successResult = result as { id: number };
+        setFormState('selection');
         onBookingComplete(successResult.id);
       }
     } catch (err) {
