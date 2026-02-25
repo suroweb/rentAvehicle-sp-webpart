@@ -21,6 +21,10 @@ export interface IVehicleDetailProps {
   onNavigateToVehicle?: (vehicleId: number) => void;
 }
 
+function pad2(n: number): string {
+  return n < 10 ? '0' + String(n) : String(n);
+}
+
 export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   vehicleId,
   apiService,
@@ -36,27 +40,33 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   const [bookingSuccess, setBookingSuccess] = React.useState<boolean>(false);
   const [availabilityView, setAvailabilityView] = React.useState<string>('week');
 
-  // State for pre-filling BookingForm from timeline slot click
+  // State for pre-filling BookingForm from timeline or strip slot click
   const [prefillDate, setPrefillDate] = React.useState<Date | undefined>(undefined);
   const [prefillStartHour, setPrefillStartHour] = React.useState<number | undefined>(undefined);
 
-  // Fetch vehicle detail and availability in parallel
-  React.useEffect(function loadVehicleData(): () => void {
+  // Week navigation state for AvailabilityStrip
+  const [weekOffset, setWeekOffset] = React.useState<number>(0);
+
+  // Compute weekStartDate string for API calls
+  const weekStartDate = React.useMemo(function computeWeekStart(): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today.getTime() + weekOffset * 7 * 86400000);
+    return start.getFullYear() + '-' + pad2(start.getMonth() + 1) + '-' + pad2(start.getDate());
+  }, [weekOffset]);
+
+  // Fetch vehicle detail (runs on vehicleId change only)
+  React.useEffect(function loadVehicleDetail(): () => void {
     let cancelled = false;
 
-    const fetchData = async (): Promise<void> => {
+    const fetchDetail = async (): Promise<void> => {
       setLoading(true);
       setError(undefined);
 
       try {
-        const [detail, slots] = await Promise.all([
-          apiService.getVehicleDetail(vehicleId),
-          apiService.getVehicleAvailability(vehicleId, 7),
-        ]);
-
+        const detail = await apiService.getVehicleDetail(vehicleId);
         if (!cancelled) {
           setVehicle(detail);
-          setAvailabilitySlots(slots);
         }
       } catch (err) {
         if (!cancelled) {
@@ -70,7 +80,7 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
       }
     };
 
-    fetchData().catch(function onUnexpected(): void {
+    fetchDetail().catch(function onUnexpected(): void {
       if (!cancelled) {
         setLoading(false);
         setError('Unexpected error loading vehicle');
@@ -82,22 +92,74 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
     };
   }, [vehicleId, apiService]);
 
+  // Fetch availability (runs on vehicleId + weekStartDate change)
+  React.useEffect(function loadAvailability(): () => void {
+    let cancelled = false;
+
+    apiService.getVehicleAvailability(vehicleId, 7, weekStartDate)
+      .then(function updateSlots(slots: IVehicleAvailabilitySlot[]): void {
+        if (!cancelled) {
+          setAvailabilitySlots(slots);
+        }
+      })
+      .catch(function onError(): void {
+        // Silently fail -- vehicle detail still shows, availability strip shows empty
+      });
+
+    return function cleanup(): void {
+      cancelled = true;
+    };
+  }, [vehicleId, weekStartDate, apiService]);
+
+  // Arrow navigation handlers
+  const handlePrevWeek = React.useCallback(function onPrevWeek(): void {
+    if (weekOffset > 0) setWeekOffset(weekOffset - 1);
+  }, [weekOffset]);
+
+  const handleNextWeek = React.useCallback(function onNextWeek(): void {
+    if (weekOffset < 7) setWeekOffset(weekOffset + 1);
+  }, [weekOffset]);
+
+  // Strip slot click handler -- pre-fill booking form with date and hour
+  const handleStripSlotClick = React.useCallback(function onStripSlotClick(
+    dayDate: Date, hour: number
+  ): void {
+    setPrefillDate(dayDate);
+    setPrefillStartHour(hour);
+    setBookingSuccess(false);
+  }, []);
+
+  // Form date change handler (bidirectional sync -- form changes shift the strip)
+  const handleFormDateChange = React.useCallback(function onFormDateChange(date: Date): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((date.getTime() - today.getTime()) / 86400000);
+    const targetWeek = Math.floor(diffDays / 7);
+    setWeekOffset(Math.max(0, targetWeek));
+  }, []);
+
   // Handlers
   const handleBookingComplete = React.useCallback(function onBookingComplete(_bookingId: number): void {
     setBookingSuccess(true);
-  }, []);
+    // Re-fetch availability to show new booking as booked
+    apiService.getVehicleAvailability(vehicleId, 7, weekStartDate)
+      .then(function updateSlots(slots: IVehicleAvailabilitySlot[]): void {
+        setAvailabilitySlots(slots);
+      })
+      .catch(function onError(): void { /* silently fail */ });
+  }, [vehicleId, weekStartDate, apiService]);
 
   const handleConflict = React.useCallback(function onConflict(): void {
     // Re-fetch availability to refresh the strip
     apiService
-      .getVehicleAvailability(vehicleId, 7)
+      .getVehicleAvailability(vehicleId, 7, weekStartDate)
       .then(function updateSlots(slots: IVehicleAvailabilitySlot[]): void {
         setAvailabilitySlots(slots);
       })
       .catch(function onError(): void {
         // Silently fail - user will see stale availability
       });
-  }, [vehicleId, apiService]);
+  }, [vehicleId, weekStartDate, apiService]);
 
   const handleAvailabilityViewChange = React.useCallback(function onViewChange(item?: PivotItem): void {
     if (item && item.props.itemKey) {
@@ -252,6 +314,10 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
             slots={availabilitySlots}
             timezone={vehicleTimezone}
             days={7}
+            weekOffset={weekOffset}
+            onPrevWeek={handlePrevWeek}
+            onNextWeek={handleNextWeek}
+            onSlotClick={handleStripSlotClick}
           />
         </PivotItem>
         <PivotItem headerText="Day View" itemKey="day">
@@ -278,6 +344,7 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
           onNavigateToVehicle={onNavigateToVehicle}
           prefillDate={prefillDate}
           prefillStartHour={prefillStartHour}
+          onFormDateChange={handleFormDateChange}
         />
       )}
     </div>

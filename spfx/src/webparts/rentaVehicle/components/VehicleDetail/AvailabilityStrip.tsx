@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { IconButton } from '@fluentui/react/lib/Button';
 import { TooltipHost } from '@fluentui/react/lib/Tooltip';
 import styles from './VehicleDetail.module.scss';
 import { IVehicleAvailabilitySlot } from '../../models/IBooking';
@@ -8,6 +9,10 @@ export interface IAvailabilityStripProps {
   slots: IVehicleAvailabilitySlot[];
   timezone: string;
   days?: number;
+  weekOffset: number;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
+  onSlotClick: (dayDate: Date, hour: number) => void;
 }
 
 // Display hours range for the strip (8:00 - 20:00)
@@ -15,20 +20,22 @@ const STRIP_START_HOUR = 8;
 const STRIP_END_HOUR = 20;
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function pad2(n: number): string {
   return n < 10 ? '0' + String(n) : String(n);
 }
 
 /**
- * Get the next N days starting from today.
+ * Get N days starting from today offset by weekOffset weeks.
  * Returns an array of Date objects representing each day at midnight local time.
  */
-function getNextDays(count: number): Date[] {
+function getNextDays(count: number, weekOffset: number): Date[] {
   const result: Date[] = [];
   const now = new Date();
+  const startDay = weekOffset * 7;
   for (let i = 0; i < count; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + startDay + i);
     result.push(d);
   }
   return result;
@@ -68,14 +75,20 @@ function toComparableMinutes(year: number, month: number, day: number, hour: num
 }
 
 /**
- * AvailabilityStrip - compact 7-day availability visualization.
+ * AvailabilityStrip - compact 7-day availability visualization with week navigation.
  * Shows a horizontal strip with one column per day. Each column displays
  * colored blocks for 8:00-20:00 indicating booked (red) vs free (green) hours.
+ * Free slots are clickable to pre-fill the booking form.
+ * Left/right arrows navigate between weeks.
  */
 export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
   slots,
   timezone,
   days = 7,
+  weekOffset,
+  onPrevWeek,
+  onNextWeek,
+  onSlotClick,
 }) => {
   const tz = useTimezone(timezone);
 
@@ -92,13 +105,21 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
     });
   }, [timezone]);
 
+  // Get today at midnight for today-column highlight
+  const todayMidnight = React.useMemo(function getTodayMidnight(): number {
+    const now = new Date();
+    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return t.getTime();
+  }, []);
+
   // Build the days and their hour blocks
   const dayColumns = React.useMemo(function buildColumns() {
-    const nextDays = getNextDays(days);
+    const nextDays = getNextDays(days, weekOffset);
 
     return nextDays.map(function buildDayColumn(dayDate: Date) {
       const dayLabel = DAY_LABELS[dayDate.getDay()];
       const dateLabel = pad2(dayDate.getDate()) + '/' + pad2(dayDate.getMonth() + 1);
+      const isToday = dayDate.getTime() === todayMidnight;
 
       // Build hour blocks for this day
       const hourBlocks: IHourBlock[] = [];
@@ -138,17 +159,47 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
       }
 
       return {
+        dayDate: dayDate,
         dayLabel: dayLabel,
         dateLabel: dateLabel,
+        isToday: isToday,
         hourBlocks: hourBlocks,
       };
     });
-  }, [slots, days, tz, localFormatter]);
+  }, [slots, days, weekOffset, tz, localFormatter, todayMidnight]);
+
+  // Compute week range label for header (e.g., "25 Feb - 3 Mar")
+  const weekRangeLabel = React.useMemo(function computeRangeLabel(): string {
+    if (dayColumns.length === 0) return '';
+    const first = dayColumns[0].dayDate;
+    const last = dayColumns[dayColumns.length - 1].dayDate;
+    const startLabel = String(first.getDate()) + ' ' + MONTH_LABELS[first.getMonth()];
+    const endLabel = String(last.getDate()) + ' ' + MONTH_LABELS[last.getMonth()];
+    return startLabel + ' - ' + endLabel;
+  }, [dayColumns]);
 
   return (
     <div className={styles.availabilityStrip}>
       <div className={styles.stripHeader}>
-        <span className={styles.stripTitle}>Availability (next {days} days)</span>
+        <div className={styles.stripNav}>
+          <IconButton
+            iconProps={{ iconName: 'ChevronLeft' }}
+            title="Previous week"
+            ariaLabel="Previous week"
+            disabled={weekOffset === 0}
+            onClick={onPrevWeek}
+            className={styles.stripNavButton}
+          />
+          <span className={styles.stripTitle}>{'Availability: ' + weekRangeLabel}</span>
+          <IconButton
+            iconProps={{ iconName: 'ChevronRight' }}
+            title="Next week"
+            ariaLabel="Next week"
+            disabled={weekOffset >= 7}
+            onClick={onNextWeek}
+            className={styles.stripNavButton}
+          />
+        </div>
         <span className={styles.stripTimezone}>{tz.timezoneAbbr}</span>
         <div className={styles.stripLegend}>
           <span className={styles.legendItem}>
@@ -176,14 +227,24 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
 
         {/* Day columns */}
         {dayColumns.map(function renderDayColumn(col, idx) {
+          const columnClass = col.isToday
+            ? styles.stripDayColumn + ' ' + styles.stripDayColumnToday
+            : styles.stripDayColumn;
+
           return (
-            <div key={idx} className={styles.stripDayColumn}>
+            <div key={idx} className={columnClass}>
               <div className={styles.stripDayHeader}>
                 <div className={styles.stripDayName}>{col.dayLabel}</div>
                 <div className={styles.stripDate}>{col.dateLabel}</div>
               </div>
               <div className={styles.stripBlocks}>
                 {col.hourBlocks.map(function renderBlock(block) {
+                  const handleBlockClick = !block.isBooked
+                    ? function onFreeSlotClick(): void {
+                        onSlotClick(col.dayDate, block.hour);
+                      }
+                    : undefined;
+
                   return (
                     <TooltipHost
                       key={block.hour}
@@ -195,6 +256,14 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
                             ? styles.stripBlockBooked
                             : styles.stripBlockFree
                         }
+                        onClick={handleBlockClick}
+                        role={!block.isBooked ? 'button' : undefined}
+                        tabIndex={!block.isBooked ? 0 : undefined}
+                        onKeyDown={!block.isBooked ? function onKey(e: React.KeyboardEvent): void {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            onSlotClick(col.dayDate, block.hour);
+                          }
+                        } : undefined}
                       />
                     </TooltipHost>
                   );

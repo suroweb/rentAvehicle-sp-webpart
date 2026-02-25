@@ -290,6 +290,25 @@
   }
 }
 
+/* ── Strip navigation ──────────────────────────────── */
+
+.stripNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stripNavButton {
+  width: 32px;
+  height: 32px;
+}
+
+.stripDayColumnToday {
+  background: rgba(0, 120, 212, 0.04);
+  border: 1px solid rgba(0, 120, 212, 0.2);
+  border-radius: 4px;
+}
+
 /* ── Booking form ───────────────────────────────────── */
 
 .bookingForm {

@@ -22,6 +22,7 @@ export interface IBookingFormProps {
   onNavigateToVehicle?: (vehicleId: number) => void;
   prefillDate?: Date;
   prefillStartHour?: number;
+  onFormDateChange?: (date: Date) => void;
 }
 
 type FormState = 'selection' | 'review' | 'submitting';
@@ -58,6 +59,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   onNavigateToVehicle,
   prefillDate,
   prefillStartHour,
+  onFormDateChange,
 }) => {
   const tz = useTimezone(locationTimezone);
 
@@ -115,8 +117,11 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
     if (date) {
       setStartDate(date);
       setSuggestions([]);
+      if (onFormDateChange) {
+        onFormDateChange(date);
+      }
     }
-  }, []);
+  }, [onFormDateChange]);
 
   const handleEndDateChange = React.useCallback(function onEndDateChange(date: Date | null | undefined): void {
     if (date) {
