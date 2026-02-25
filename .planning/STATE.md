@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 08.1 of 08.1 (Unified Date Range Picker)
-Plan: 2 of 4 in current phase (08.1-02 complete)
+Plan: 3 of 4 in current phase (08.1-03 complete)
 Status: IN PROGRESS
-Last activity: 2026-02-25 -- Executed 08.1-02: AvailabilityStrip range overlay band, drag handles, snap-to-boundary logic.
+Last activity: 2026-02-25 -- Executed 08.1-03: Day View range overlay with drag handles, VehicleBrowse RangeCalendar refactor, StickyBottomBar update.
 
 ### Testing Progress (12 items from VERIFICATION.md)
 1. [x] Desktop side-by-side layout — FIXED (flex-wrap for narrow containers)
@@ -28,14 +28,14 @@ Last activity: 2026-02-25 -- Executed 08.1-02: AvailabilityStrip range overlay b
 11. [ ] Day View prev/next day arrows
 12. [x] Past hour filtering in dropdowns -- FIXED (getFilteredHourOptions added to VehicleBrowse)
 
-Progress: [#####-----] 50% (2/4 plans)
+Progress: [########--] 75% (3/4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
+- Total plans completed: 28
 - Average duration: 4.7min
-- Total execution time: 2.05 hours
+- Total execution time: 2.15 hours
 
 **By Phase:**
 
@@ -68,9 +68,10 @@ Progress: [#####-----] 50% (2/4 plans)
 | Phase 08 P05 | 3min | 2 tasks | 3 files |
 | Phase 08.1 P01 | 4min | 2 tasks | 6 files |
 | Phase 08.1 P02 | 4min | 2 tasks | 2 files |
+| Phase 08.1 P03 | 6min | 2 tasks | 5 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 1min, 3min, 4min, 4min
+- Last 5 plans: 1min, 3min, 4min, 4min, 6min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -178,6 +179,11 @@ Recent decisions affecting current work:
 - [Phase 08.1]: snapToBoundary walks backward for end-edge, forward for start-edge to nearest free slot
 - [Phase 08.1]: Range overlay rendered per-day-column inside .stripBlocks with absolute positioning
 - [Phase 08.1]: AvailabilityStrip range/onRangeChange changed to required props (VehicleDetail always provides them)
+- [Phase 08.1]: Day View range overlay uses CSS Grid positioning spanning all vehicle rows at correct hour columns
+- [Phase 08.1]: Pointer capture (setPointerCapture) for Day View drag handles ensures reliable cross-element dragging
+- [Phase 08.1]: Conservative snap-to-boundary uses booked hours from ALL vehicles on timeline
+- [Phase 08.1]: VehicleBrowse filter bar restructured: Location+Category row, RangeCalendar section, Search button
+- [Phase 08.1]: AvailabilityTimeline range/onRangeChange changed from optional to required props
 
 ### Roadmap Evolution
 
@@ -196,5 +202,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 08.1-02-PLAN.md (AvailabilityStrip range overlay band, drag handles, snap-to-boundary logic)
-Resume with: Execute 08.1-03-PLAN.md -- Day View range editing and VehicleBrowse refactor.
+Stopped at: Completed 08.1-03-PLAN.md (Day View range overlay with drag handles, VehicleBrowse RangeCalendar refactor, StickyBottomBar update)
+Resume with: Execute 08.1-04-PLAN.md -- Final verification and integration testing.
