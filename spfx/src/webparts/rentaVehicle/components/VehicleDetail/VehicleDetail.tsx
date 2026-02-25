@@ -141,6 +141,9 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   // Handlers
   const handleBookingComplete = React.useCallback(function onBookingComplete(_bookingId: number): void {
     setBookingSuccess(true);
+    // Reset prefill to trigger form reset via smart defaults
+    setPrefillDate(undefined);
+    setPrefillStartHour(undefined);
     // Re-fetch availability to show new booking as booked
     apiService.getVehicleAvailability(vehicleId, 7, weekStartDate)
       .then(function updateSlots(slots: IVehicleAvailabilitySlot[]): void {
@@ -219,134 +222,102 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
 
   return (
     <div className={styles.vehicleDetail}>
-      {/* Back navigation */}
-      <div className={styles.backNav}>
-        <IconButton
-          iconProps={{ iconName: 'ChevronLeft' }}
-          title="Back to results"
-          ariaLabel="Back to results"
-          onClick={onBack}
-        />
-        <Link onClick={onBack} className={styles.backLink}>
-          Back to results
-        </Link>
-      </div>
+      <div className={styles.vehicleDetailLayout}>
+        {/* Left column: navigation, header, availability */}
+        <div className={styles.leftColumn}>
+          {/* Back navigation */}
+          <div className={styles.backNav}>
+            <IconButton
+              iconProps={{ iconName: 'ChevronLeft' }}
+              title="Back to results"
+              ariaLabel="Back to results"
+              onClick={onBack}
+            />
+            <Link onClick={onBack} className={styles.backLink}>
+              Back to results
+            </Link>
+          </div>
 
-      {/* Hero image */}
-      <div className={styles.heroImage}>
-        {vehicle.photoUrl ? (
-          <img
-            src={vehicle.photoUrl}
-            alt={vehicleName}
-            className={styles.heroImg}
+          {/* Compact vehicle header */}
+          <div className={styles.compactHeader}>
+            {vehicle.photoUrl ? (
+              <img src={vehicle.photoUrl} alt={vehicleName} className={styles.compactThumbnail} />
+            ) : (
+              <div className={styles.compactThumbnailPlaceholder}>
+                <Icon iconName="Car" className={styles.compactPlaceholderIcon} />
+              </div>
+            )}
+            <div className={styles.compactInfo}>
+              <h2 className={styles.compactTitle}>{vehicleName}</h2>
+              <div className={styles.compactSpecs}>
+                <span>{vehicle.licensePlate}</span>
+                <span>{vehicle.categoryName}</span>
+                <span><Icon iconName="People" /> {vehicle.capacity} seats</span>
+                <span>{vehicle.locationName}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking success message */}
+          {bookingSuccess && (
+            <MessageBar
+              messageBarType={MessageBarType.success}
+              isMultiline={false}
+              className={styles.successBar}
+            >
+              Booking confirmed!{' '}
+              <Link onClick={onNavigateToMyBookings}>View My Bookings</Link>
+            </MessageBar>
+          )}
+
+          {/* Availability views toggle */}
+          <Pivot
+            selectedKey={availabilityView}
+            onLinkClick={handleAvailabilityViewChange}
+            headersOnly={false}
+            className={styles.availabilityPivot}
+          >
+            <PivotItem headerText="Week View" itemKey="week">
+              <AvailabilityStrip
+                slots={availabilitySlots}
+                timezone={vehicleTimezone}
+                days={7}
+                weekOffset={weekOffset}
+                onPrevWeek={handlePrevWeek}
+                onNextWeek={handleNextWeek}
+                onSlotClick={handleStripSlotClick}
+              />
+            </PivotItem>
+            <PivotItem headerText="Day View" itemKey="day">
+              <AvailabilityTimeline
+                apiService={apiService}
+                locationId={vehicle.locationId}
+                locationTimezone={vehicleTimezone}
+                currentUserId={currentUserId}
+                onSlotClick={handleTimelineSlotClick}
+              />
+            </PivotItem>
+          </Pivot>
+        </div>
+
+        {/* Right column: sticky booking form -- always visible */}
+        <div className={styles.rightColumn}>
+          <BookingForm
+            vehicleId={vehicle.id}
+            vehicleName={vehicleName}
+            locationName={vehicle.locationName}
+            locationTimezone={vehicleTimezone}
+            apiService={apiService}
+            onBookingComplete={handleBookingComplete}
+            onConflict={handleConflict}
+            onNavigateToVehicle={onNavigateToVehicle}
+            prefillDate={prefillDate}
+            prefillStartHour={prefillStartHour}
+            onFormDateChange={handleFormDateChange}
+            availabilitySlots={availabilitySlots}
           />
-        ) : (
-          <div className={styles.heroPlaceholder}>
-            <Icon iconName="Car" className={styles.heroPlaceholderIcon} />
-          </div>
-        )}
-      </div>
-
-      {/* Vehicle title */}
-      <h2 className={styles.vehicleTitle}>{vehicleName}</h2>
-
-      {/* Booking success message */}
-      {bookingSuccess && (
-        <MessageBar
-          messageBarType={MessageBarType.success}
-          isMultiline={false}
-          className={styles.successBar}
-        >
-          Booking confirmed!{' '}
-          <Link onClick={onNavigateToMyBookings}>View My Bookings</Link>
-        </MessageBar>
-      )}
-
-      {/* Specs section */}
-      <div className={styles.specsSection}>
-        <div className={styles.specsGrid}>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Make</span>
-            <span className={styles.specValue}>{vehicle.make}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Model</span>
-            <span className={styles.specValue}>{vehicle.model}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Year</span>
-            <span className={styles.specValue}>{vehicle.year}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>License Plate</span>
-            <span className={styles.specValue + ' ' + styles.specMono}>{vehicle.licensePlate}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Category</span>
-            <span className={styles.specBadge}>{vehicle.categoryName}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Capacity</span>
-            <span className={styles.specValue}>
-              <Icon iconName="People" className={styles.specIcon} /> {vehicle.capacity} seats
-            </span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Location</span>
-            <span className={styles.specValue}>{vehicle.locationName}</span>
-          </div>
-          <div className={styles.specItem}>
-            <span className={styles.specLabel}>Status</span>
-            <span className={styles.specValue}>{vehicle.status}</span>
-          </div>
         </div>
       </div>
-
-      {/* Availability views toggle */}
-      <Pivot
-        selectedKey={availabilityView}
-        onLinkClick={handleAvailabilityViewChange}
-        headersOnly={false}
-        className={styles.availabilityPivot}
-      >
-        <PivotItem headerText="Week View" itemKey="week">
-          <AvailabilityStrip
-            slots={availabilitySlots}
-            timezone={vehicleTimezone}
-            days={7}
-            weekOffset={weekOffset}
-            onPrevWeek={handlePrevWeek}
-            onNextWeek={handleNextWeek}
-            onSlotClick={handleStripSlotClick}
-          />
-        </PivotItem>
-        <PivotItem headerText="Day View" itemKey="day">
-          <AvailabilityTimeline
-            apiService={apiService}
-            locationId={vehicle.locationId}
-            locationTimezone={vehicleTimezone}
-            currentUserId={currentUserId}
-            onSlotClick={handleTimelineSlotClick}
-          />
-        </PivotItem>
-      </Pivot>
-
-      {/* Booking form */}
-      {!bookingSuccess && (
-        <BookingForm
-          vehicleId={vehicle.id}
-          vehicleName={vehicleName}
-          locationName={vehicle.locationName}
-          locationTimezone={vehicleTimezone}
-          apiService={apiService}
-          onBookingComplete={handleBookingComplete}
-          onConflict={handleConflict}
-          onNavigateToVehicle={onNavigateToVehicle}
-          prefillDate={prefillDate}
-          prefillStartHour={prefillStartHour}
-          onFormDateChange={handleFormDateChange}
-        />
-      )}
     </div>
   );
 };

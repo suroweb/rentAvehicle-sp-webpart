@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { DatePicker } from '@fluentui/react/lib/DatePicker';
+import { IconButton } from '@fluentui/react/lib/Button';
 import { DayOfWeek } from '@fluentui/react/lib/Calendar';
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import styles from './AvailabilityTimeline.module.scss';
@@ -164,6 +165,19 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     }
   }, []);
 
+  // Day-by-day arrow navigation handlers
+  const handlePrevDay = React.useCallback(function onPrevDay(): void {
+    const prev = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 1);
+    const today = getToday();
+    if (prev >= today) {
+      setSelectedDate(prev);
+    }
+  }, [selectedDate]);
+
+  const handleNextDay = React.useCallback(function onNextDay(): void {
+    setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1));
+  }, [selectedDate]);
+
   // Build hour labels
   const hourLabels: React.ReactElement[] = [];
   for (let h = TIMELINE_START_HOUR; h < TIMELINE_END_HOUR; h++) {
@@ -177,6 +191,16 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
   }
 
   const dateStr = formatDateString(selectedDate);
+
+  // Check if selected date is today for past-slot graying
+  const isSelectedDateToday = React.useMemo(function checkIsToday(): boolean {
+    const today = getToday();
+    return selectedDate.getTime() === today.getTime();
+  }, [selectedDate]);
+
+  const currentHour = React.useMemo(function getCurrentHour(): number {
+    return new Date().getHours();
+  }, []);
 
   // Shared DatePicker props builder
   const datePickerProps = {
@@ -192,11 +216,29 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     },
   };
 
+  // Check if previous day button should be disabled (cannot go before today)
+  const isPrevDayDisabled = selectedDate.getTime() <= getToday().getTime();
+
   // Loading
   if (loading) {
     return React.createElement('div', { className: styles.timelineContainer },
       React.createElement('div', { className: styles.timelineHeader },
-        React.createElement(DatePicker, datePickerProps),
+        React.createElement('div', { className: styles.timelineNav },
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronLeft' },
+            title: 'Previous day',
+            ariaLabel: 'Previous day',
+            onClick: handlePrevDay,
+            disabled: isPrevDayDisabled,
+          }),
+          React.createElement(DatePicker, datePickerProps),
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronRight' },
+            title: 'Next day',
+            ariaLabel: 'Next day',
+            onClick: handleNextDay,
+          })
+        ),
         React.createElement('span', { className: styles.dayLabel },
           tz.formatDateOnly(selectedDate) + ' (' + tz.timezoneAbbr + ')'
         )
@@ -211,7 +253,22 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
   if (error) {
     return React.createElement('div', { className: styles.timelineContainer },
       React.createElement('div', { className: styles.timelineHeader },
-        React.createElement(DatePicker, datePickerProps)
+        React.createElement('div', { className: styles.timelineNav },
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronLeft' },
+            title: 'Previous day',
+            ariaLabel: 'Previous day',
+            onClick: handlePrevDay,
+            disabled: isPrevDayDisabled,
+          }),
+          React.createElement(DatePicker, datePickerProps),
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronRight' },
+            title: 'Next day',
+            ariaLabel: 'Next day',
+            onClick: handleNextDay,
+          })
+        )
       ),
       React.createElement('div', { className: styles.errorText }, error)
     );
@@ -221,7 +278,22 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
   if (!timelineData || timelineData.vehicles.length === 0) {
     return React.createElement('div', { className: styles.timelineContainer },
       React.createElement('div', { className: styles.timelineHeader },
-        React.createElement(DatePicker, datePickerProps)
+        React.createElement('div', { className: styles.timelineNav },
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronLeft' },
+            title: 'Previous day',
+            ariaLabel: 'Previous day',
+            onClick: handlePrevDay,
+            disabled: isPrevDayDisabled,
+          }),
+          React.createElement(DatePicker, datePickerProps),
+          React.createElement(IconButton, {
+            iconProps: { iconName: 'ChevronRight' },
+            title: 'Next day',
+            ariaLabel: 'Next day',
+            onClick: handleNextDay,
+          })
+        )
       ),
       React.createElement('div', { className: styles.emptyState }, 'No vehicles at this location')
     );
@@ -301,26 +373,44 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
       )
     );
 
-    // Free slot cells
+    // Free slot cells (with past-slot graying)
     for (let fh = 0; fh < TOTAL_HOUR_COLUMNS; fh++) {
       if (!bookedHours[fh]) {
         const slotHour = fh + TIMELINE_START_HOUR;
-        vehicleRows.push(
-          React.createElement('div', {
-            key: 'free-' + String(vehicle.id) + '-' + String(slotHour),
-            className: styles.freeSlot,
-            style: {
-              gridColumn: String(fh + 2),
-              gridRow: String(v + 2),
-            },
-            onClick: (function makeClickHandler(vid: number, ds: string, sh: number) {
-              return function handleSlotClick(): void {
-                onSlotClick(vid, ds, sh);
-              };
-            })(vehicle.id, dateStr, slotHour),
-            title: pad2(slotHour) + ':00 - Free',
-          })
-        );
+        const isPast = isSelectedDateToday && slotHour <= currentHour;
+
+        if (isPast) {
+          // Past slot -- grayed out, non-clickable
+          vehicleRows.push(
+            React.createElement('div', {
+              key: 'past-' + String(vehicle.id) + '-' + String(slotHour),
+              className: styles.pastSlot,
+              style: {
+                gridColumn: String(fh + 2),
+                gridRow: String(v + 2),
+              },
+              title: pad2(slotHour) + ':00 - Past',
+            })
+          );
+        } else {
+          // Future free slot -- clickable
+          vehicleRows.push(
+            React.createElement('div', {
+              key: 'free-' + String(vehicle.id) + '-' + String(slotHour),
+              className: styles.freeSlot,
+              style: {
+                gridColumn: String(fh + 2),
+                gridRow: String(v + 2),
+              },
+              onClick: (function makeClickHandler(vid: number, ds: string, sh: number) {
+                return function handleSlotClick(): void {
+                  onSlotClick(vid, ds, sh);
+                };
+              })(vehicle.id, dateStr, slotHour),
+              title: pad2(slotHour) + ':00 - Free',
+            })
+          );
+        }
       }
     }
 
@@ -348,7 +438,22 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
 
   return React.createElement('div', { className: styles.timelineContainer },
     React.createElement('div', { className: styles.timelineHeader },
-      React.createElement(DatePicker, datePickerProps),
+      React.createElement('div', { className: styles.timelineNav },
+        React.createElement(IconButton, {
+          iconProps: { iconName: 'ChevronLeft' },
+          title: 'Previous day',
+          ariaLabel: 'Previous day',
+          onClick: handlePrevDay,
+          disabled: isPrevDayDisabled,
+        }),
+        React.createElement(DatePicker, datePickerProps),
+        React.createElement(IconButton, {
+          iconProps: { iconName: 'ChevronRight' },
+          title: 'Next day',
+          ariaLabel: 'Next day',
+          onClick: handleNextDay,
+        })
+      ),
       React.createElement('span', { className: styles.dayLabel },
         tz.formatDateOnly(selectedDate) + ' (' + tz.timezoneAbbr + ')'
       ),

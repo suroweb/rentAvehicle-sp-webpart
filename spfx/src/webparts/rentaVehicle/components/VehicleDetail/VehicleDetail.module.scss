@@ -1,10 +1,9 @@
 @import '../../styles/variables.module.scss';
 
-/* ── Detail page layout ─────────────────────────────── */
+/* -- Detail page layout ---------------------------------------- */
 
 .vehicleDetail {
   padding: 0;
-  max-width: 900px;
 }
 
 .loadingContainer {
@@ -13,7 +12,29 @@
   padding: 48px 0;
 }
 
-/* ── Back navigation ────────────────────────────────── */
+/* -- Two-column desktop layout --------------------------------- */
+
+.vehicleDetailLayout {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.leftColumn {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.rightColumn {
+  flex: 0 0 360px;
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+/* -- Back navigation ------------------------------------------- */
 
 .backNav {
   display: flex;
@@ -33,119 +54,77 @@
   }
 }
 
-/* ── Hero image ─────────────────────────────────────── */
+/* -- Compact vehicle header ------------------------------------ */
 
-.heroImage {
-  width: 100%;
-  max-height: 300px;
-  overflow: hidden;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background: #f3f2f1;
+.compactHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.heroImg {
-  width: 100%;
-  height: 300px;
+.compactThumbnail {
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
   object-fit: cover;
+  flex: 0 0 80px;
 }
 
-.heroPlaceholder {
-  width: 100%;
-  height: 300px;
+.compactThumbnailPlaceholder {
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  background: #f3f2f1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f3f2f1;
+  flex: 0 0 80px;
 }
 
-.heroPlaceholderIcon {
-  font-size: 72px;
+.compactPlaceholderIcon {
+  font-size: 28px;
   color: #a19f9d;
 }
 
-/* ── Vehicle title ──────────────────────────────────── */
-
-.vehicleTitle {
-  font-size: 28px;
-  font-weight: 600;
-  color: $color-text-primary;
-  margin: 0 0 16px 0;
+.compactInfo {
+  flex: 1 1 auto;
 }
 
-/* ── Success bar ────────────────────────────────────── */
+.compactTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: $color-text-primary;
+  margin: 0 0 4px 0;
+}
+
+.compactSpecs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: $color-text-secondary;
+}
+
+/* -- Success bar ----------------------------------------------- */
 
 .successBar {
   margin-bottom: 20px;
 }
 
-/* ── Specs section ──────────────────────────────────── */
+/* -- Overlap warning ------------------------------------------- */
 
-.specsSection {
-  margin-bottom: 24px;
-  padding: 20px;
-  background: #faf9f8;
-  border-radius: 8px;
-  border: 1px solid #edebe9;
+.overlapWarning {
+  margin-bottom: 12px;
 }
 
-.specsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.specItem {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.specLabel {
-  font-size: 12px;
-  font-weight: 600;
-  color: $color-text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.specValue {
-  font-size: 14px;
-  color: $color-text-primary;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.specMono {
-  font-family: monospace;
-  background: #f3f2f1;
-  padding: 2px 6px;
-  border-radius: 3px;
-  display: inline-block;
-}
-
-.specBadge {
-  display: inline-block;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  color: $color-primary;
-  background: rgba(0, 120, 212, 0.1);
-  border-radius: 12px;
-}
-
-.specIcon {
-  font-size: 14px;
-}
-
-/* ── Availability view toggle ──────────────────────── */
+/* -- Availability view toggle ---------------------------------- */
 
 .availabilityPivot {
   margin-bottom: 24px;
 }
 
-/* ── Availability strip ─────────────────────────────── */
+/* -- Availability strip ---------------------------------------- */
 
 .availabilityStrip {
   margin-bottom: 24px;
@@ -290,7 +269,15 @@
   }
 }
 
-/* ── Strip navigation ──────────────────────────────── */
+.stripBlockPast {
+  height: 16px;
+  background: #f3f2f1;
+  border-radius: 2px;
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* -- Strip navigation ------------------------------------------ */
 
 .stripNav {
   display: flex;
@@ -309,7 +296,7 @@
   border-radius: 4px;
 }
 
-/* ── Booking form ───────────────────────────────────── */
+/* -- Booking form ---------------------------------------------- */
 
 .bookingForm {
   max-width: 500px;
@@ -365,7 +352,7 @@
   text-align: center;
 }
 
-/* ── Review panel ───────────────────────────────────── */
+/* -- Review panel ---------------------------------------------- */
 
 .reviewPanel {
   background: #faf9f8;
@@ -397,20 +384,15 @@
   text-align: right;
 }
 
-/* ── Mobile responsive ──────────────────────────────── */
+/* -- Mobile responsive ----------------------------------------- */
 
 @media (max-width: $mobile-breakpoint) {
-  .specsGrid {
-    grid-template-columns: 1fr;
+  .vehicleDetailLayout {
+    flex-direction: column;
   }
 
-  .vehicleTitle {
-    font-size: 22px;
-  }
-
-  .heroImg,
-  .heroPlaceholder {
-    height: 200px;
+  .rightColumn {
+    display: none; /* Hidden on mobile -- form will be in bottom sheet (Plan 03) */
   }
 
   .formRow {

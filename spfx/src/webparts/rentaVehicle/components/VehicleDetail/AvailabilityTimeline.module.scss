@@ -229,6 +229,24 @@
   margin-bottom: 8px;
 }
 
+/* -- Past slot (grayed out) ----------------------------- */
+
+.pastSlot {
+  border-right: 1px solid #f3f2f1;
+  border-bottom: 1px solid #f3f2f1;
+  cursor: default;
+  background: #f3f2f1;
+  opacity: 0.5;
+}
+
+/* -- Timeline navigation -------------------------------- */
+
+.timelineNav {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
 /* -- Responsive ----------------------------------------- */
 
 @media (max-width: 768px) {

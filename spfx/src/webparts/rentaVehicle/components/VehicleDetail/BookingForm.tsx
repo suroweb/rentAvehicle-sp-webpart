@@ -8,7 +8,7 @@ import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import styles from './VehicleDetail.module.scss';
 import suggestionStyles from '../MyBookings/MyBookings.module.scss';
 import { ApiService } from '../../services/ApiService';
-import { IConflictResponse, IBookingSuggestion } from '../../models/IBooking';
+import { IConflictResponse, IBookingSuggestion, IVehicleAvailabilitySlot } from '../../models/IBooking';
 import { useTimezone, localToUtcIso } from '../../hooks/useTimezone';
 
 export interface IBookingFormProps {
@@ -23,6 +23,7 @@ export interface IBookingFormProps {
   prefillDate?: Date;
   prefillStartHour?: number;
   onFormDateChange?: (date: Date) => void;
+  availabilitySlots?: IVehicleAvailabilitySlot[];
 }
 
 type FormState = 'selection' | 'review' | 'submitting';
