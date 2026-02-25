@@ -199,7 +199,7 @@ Plans:
 **Goal:** Delete AvailabilityTimeline and its SCSS, remove the Pivot wrapper from VehicleDetail, strip all Day View state/callbacks/imports, and delete related interfaces and API methods — Week View (AvailabilityStrip) is the sole availability view
 **Requirements**: (phase-local cleanup — no external requirement IDs)
 **Depends on:** Phase 08.1
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 08.1.1-01-PLAN.md — Delete AvailabilityTimeline files, remove Pivot wrapper, strip all Day View dead code, build verification
