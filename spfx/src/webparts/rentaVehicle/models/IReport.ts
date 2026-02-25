@@ -97,25 +97,25 @@ export interface IDateRange {
  * All dates are computed in UTC to avoid timezone drift.
  */
 export function getDateRange(preset: DatePreset): IDateRange {
-  var now = new Date();
-  var to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59));
+  const now = new Date();
+  const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59));
 
   switch (preset) {
     case 'last7': {
-      var from7 = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const from7 = new Date(to.getTime() - 7 * 24 * 60 * 60 * 1000);
       return { from: from7, to: to, granularity: 'daily' };
     }
     case 'last30': {
-      var from30 = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const from30 = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
       return { from: from30, to: to, granularity: 'daily' };
     }
     case 'thisMonth': {
-      var fromMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      const fromMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
       return { from: fromMonth, to: to, granularity: 'daily' };
     }
     case 'thisQuarter': {
-      var quarterMonth = Math.floor(now.getUTCMonth() / 3) * 3;
-      var fromQuarter = new Date(Date.UTC(now.getUTCFullYear(), quarterMonth, 1));
+      const quarterMonth = Math.floor(now.getUTCMonth() / 3) * 3;
+      const fromQuarter = new Date(Date.UTC(now.getUTCFullYear(), quarterMonth, 1));
       return { from: fromQuarter, to: to, granularity: 'weekly' };
     }
   }
