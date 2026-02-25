@@ -179,7 +179,7 @@ Plans:
 **Goal:** Replace separate start/end dropdowns with a unified date range picker across BookingForm (browse + detail), synced with availability strip week view and day view -- users can define and adjust their booking range from any surface (calendar, strip, day view) with instant bidirectional sync
 **Requirements**: UX-RANGE-01, UX-RANGE-02, UX-RANGE-03, UX-RANGE-04, UX-RANGE-05
 **Depends on:** Phase 8
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Phase-local requirement definitions:
 - UX-RANGE-01: Inline range calendar replaces separate DatePickers in BookingForm with two-click selection and visual range highlighting

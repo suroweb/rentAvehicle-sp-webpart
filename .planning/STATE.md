@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 08.1 of 08.1 (Unified Date Range Picker)
-Plan: 1 of 4 in current phase (08.1-01 complete)
+Plan: 2 of 4 in current phase (08.1-02 complete)
 Status: IN PROGRESS
-Last activity: 2026-02-25 -- Executed 08.1-01: RangeCalendar component, IRangeState interface, BookingForm refactor, VehicleDetail state lift.
+Last activity: 2026-02-25 -- Executed 08.1-02: AvailabilityStrip range overlay band, drag handles, snap-to-boundary logic.
 
 ### Testing Progress (12 items from VERIFICATION.md)
 1. [x] Desktop side-by-side layout — FIXED (flex-wrap for narrow containers)
@@ -28,12 +28,12 @@ Last activity: 2026-02-25 -- Executed 08.1-01: RangeCalendar component, IRangeSt
 11. [ ] Day View prev/next day arrows
 12. [x] Past hour filtering in dropdowns -- FIXED (getFilteredHourOptions added to VehicleBrowse)
 
-Progress: [###-------] 25% (1/4 plans)
+Progress: [#####-----] 50% (2/4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: 4.7min
 - Total execution time: 2.05 hours
 
@@ -67,9 +67,10 @@ Progress: [###-------] 25% (1/4 plans)
 | Phase 08 P04 | 1min | 2 tasks | 2 files |
 | Phase 08 P05 | 3min | 2 tasks | 3 files |
 | Phase 08.1 P01 | 4min | 2 tasks | 6 files |
+| Phase 08.1 P02 | 4min | 2 tasks | 2 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 5min, 1min, 3min, 4min
+- Last 5 plans: 5min, 1min, 3min, 4min, 4min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -173,6 +174,10 @@ Recent decisions affecting current work:
 - [Phase 08.1]: useEffect on range.startDate replaces handleFormDateChange callback for strip sync (reactive over imperative)
 - [Phase 08.1]: AvailabilityStrip/AvailabilityTimeline get optional range props now, required in Plans 02/03
 - [Phase 08.1]: IRangeState partial update pattern: updateRange({startHour: 9}) merges into existing range state
+- [Phase 08.1]: Pointer capture drag with requestAnimationFrame throttle for smooth strip drag handles
+- [Phase 08.1]: snapToBoundary walks backward for end-edge, forward for start-edge to nearest free slot
+- [Phase 08.1]: Range overlay rendered per-day-column inside .stripBlocks with absolute positioning
+- [Phase 08.1]: AvailabilityStrip range/onRangeChange changed to required props (VehicleDetail always provides them)
 
 ### Roadmap Evolution
 
@@ -191,5 +196,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 08.1-01-PLAN.md (RangeCalendar component, IRangeState interface, BookingForm refactor, VehicleDetail state lift)
-Resume with: Execute 08.1-02-PLAN.md -- AvailabilityStrip range overlay band, drag handles, snap-to-boundary.
+Stopped at: Completed 08.1-02-PLAN.md (AvailabilityStrip range overlay band, drag handles, snap-to-boundary logic)
+Resume with: Execute 08.1-03-PLAN.md -- Day View range editing and VehicleBrowse refactor.
