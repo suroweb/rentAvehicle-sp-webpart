@@ -1,8 +1,8 @@
 # Phase 9: Live Tenant Verification Checklist
 
 **Date started:** 2026-02-25
-**Status:** In Progress
-**Tester:** ___
+**Status:** In Progress (Section 4 complete)
+**Tester:** Automated + Danco Milosevici
 
 ---
 
@@ -56,20 +56,38 @@
 
 ## Section 4: Calendar Integration (VRFY-01 + VRFY-02)
 
-*To be filled during Plan 02 execution.*
+*Verified 2026-02-26 via automated API tests against live tenant (contoso.onmicrosoft.com).*
 
 ### VRFY-01: Resource Calendar Events
 
-- [ ] VRFY-01a: Create booking -> resource calendar event visible in Outlook for vehicle's resource mailbox
-- [ ] VRFY-01b: Cancel booking -> resource calendar event updated with [CANCELLED] prefix
-- [ ] VRFY-01c: Check out booking -> resource calendar event updated with [IN USE] prefix
-- [ ] VRFY-01d: Check in booking -> resource calendar event updated with [RETURNED] prefix
+- [x] VRFY-01a: Create booking -> resource calendar event visible in Outlook for vehicle's resource mailbox
+  - Booking 1012: Vehicle 1 (Toyota Corolla), resource mailbox car-toyota-camry-test001@contoso.onmicrosoft.com
+  - Subject: "Danco Milosevici - Toyota Corolla (B-123-ABC)", times 2026-02-27 09:00-17:00 UTC, location "Bucharest"
+  - Body contains HTML table with employee, booking ID, vehicle, category, location details
+- [x] VRFY-01b: Cancel booking -> resource calendar event updated with [CANCELLED] prefix
+  - Booking 1013: Cancelled via DELETE /api/bookings/1013
+  - Resource event subject updated to "[CANCELLED] Danco Milosevici - Toyota Corolla (B-123-ABC)"
+  - Body contains [CANCELLED] status banner
+- [x] VRFY-01c: Check out booking -> resource calendar event updated with [IN USE] prefix
+  - Booking 1015: Checked out via PATCH /api/bookings/1015/checkout
+  - Resource event subject updated to "[IN USE] Danco Milosevici - Toyota Corolla (B-123-ABC)"
+  - Body contains [IN USE] status banner
+- [x] VRFY-01d: Check in booking -> resource calendar event updated with [RETURNED] prefix
+  - Booking 1015: Returned via PATCH /api/bookings/1015/return
+  - Resource event subject updated to "[RETURNED] Danco Milosevici - Toyota Corolla (B-123-ABC)"
+  - Body contains [RETURNED] status banner
 
 ### VRFY-02: Personal Calendar Events
 
-- [ ] VRFY-02a: Create booking -> personal calendar event visible in employee's Outlook calendar
-- [ ] VRFY-02b: Cancel booking -> personal calendar event updated with [CANCELLED] prefix
-- [ ] VRFY-02c: Personal calendar event has correct vehicle name, date/time, location in body
+- [x] VRFY-02a: Create booking -> personal calendar event visible in employee's Outlook calendar
+  - Booking 1012: Employee admin@contoso.onmicrosoft.com
+  - Subject: "Vehicle Rental: Toyota Corolla (B-123-ABC)", times 2026-02-27 09:00-17:00 UTC, location "Bucharest"
+  - Body contains Vehicle Rental HTML table
+- [x] VRFY-02b: Cancel booking -> personal calendar event updated with [CANCELLED] prefix
+  - Booking 1013: Employee event subject updated to "[CANCELLED] Vehicle Rental: Toyota Corolla (B-123-ABC)"
+  - Body contains [CANCELLED] status banner
+- [x] VRFY-02c: Personal calendar event has correct vehicle name, date/time, location in body
+  - Booking 1012: Body contains "Toyota Corolla (B-123-ABC)", start/end ISO times, "Bucharest" pickup location, deep link
 
 ---
 
