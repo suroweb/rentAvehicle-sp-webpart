@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 7: Reporting and Manager Visibility -- In Progress (1 of 3 plans done).
+**Current focus:** Phase 7: Reporting and Manager Visibility -- In Progress (2 of 3 plans done).
 
 ## Current Position
 
 Phase: 7 of 7 (Reporting and Manager Visibility)
-Plan: 1 of 3 in current phase (07-01 complete)
+Plan: 2 of 3 in current phase (07-02 complete)
 Status: In Progress
-Last activity: 2026-02-25 -- Completed 07-01-PLAN.md (Reporting backend service and API endpoints)
+Last activity: 2026-02-25 -- Completed 07-02-PLAN.md (Reporting dashboard frontend)
 
-Progress: [#########.] 93%
+Progress: [#########.] 95%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: 4.9min
-- Total execution time: 1.49 hours
+- Total plans completed: 19
+- Average duration: 5.2min
+- Total execution time: 1.66 hours
 
 **By Phase:**
 
@@ -45,9 +45,10 @@ Progress: [#########.] 93%
 | Phase 06 P01 | 8min | 2 tasks | 6 files |
 | Phase 06 P02 | 5min | 1 task | 3 files |
 | Phase 07 P01 | 3min | 2 tasks | 6 files |
+| Phase 07 P02 | 10min | 2 tasks | 10 files |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 4min, 8min, 5min, 3min
+- Last 5 plans: 4min, 8min, 5min, 3min, 10min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -123,6 +124,9 @@ Recent decisions affecting current work:
 - [Phase 07]: Raw booking export includes all statuses including Cancelled for complete fleet picture
 - [Phase 07]: Team bookings scope: current + upcoming only (privacy-first, no historical tracking)
 - [Phase 07]: Reporting endpoints under /api/backoffice/reports/* with mandatory date range params
+- [Phase 07]: Data point onClick for chart drill-down (HorizontalBarChartWithAxis has no onBarClick prop)
+- [Phase 07]: Stacked VerticalBarChart + LineChart for trends (combined overlay not supported)
+- [Phase 07]: AdminCategories loaded at AppShell level alongside adminLocations for shared admin state
 
 ### Pending Todos
 
@@ -136,5 +140,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 07-01-PLAN.md
-Resume file: .planning/phases/07-reporting-and-manager-visibility/07-01-SUMMARY.md
+Stopped at: Completed 07-02-PLAN.md
+Resume file: .planning/phases/07-reporting-and-manager-visibility/07-02-SUMMARY.md

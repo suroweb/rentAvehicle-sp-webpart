@@ -134,8 +134,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Backend: reporting service with SQL aggregation queries, 5 API endpoints (utilization, trends, KPI, export, team bookings), frontend report interfaces
-- [ ] 07-02-PLAN.md -- Frontend: Admin Reports dashboard with KPI cards, utilization horizontal bar chart, dual-axis trend chart, CSV export, @fluentui/react-charting integration
+- [x] 07-01-PLAN.md -- Backend: reporting service with SQL aggregation queries, 5 API endpoints (utilization, trends, KPI, export, team bookings), frontend report interfaces
+- [x] 07-02-PLAN.md -- Frontend: Admin Reports dashboard with KPI cards, utilization horizontal bar chart, dual-axis trend chart, CSV export, @fluentui/react-charting integration
 - [ ] 07-03-PLAN.md -- Frontend: Manager "My Team" page with direct reports' bookings, AppShell wiring, human verification
 
 ## Progress
