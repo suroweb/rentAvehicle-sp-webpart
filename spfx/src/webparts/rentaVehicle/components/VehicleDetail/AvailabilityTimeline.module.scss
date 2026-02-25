@@ -315,6 +315,70 @@
   font-size: 13px;
 }
 
+/* -- Day View range overlay ----------------------------- */
+
+.dayViewRangeOverlay {
+  background-color: rgba(0, 120, 212, 0.12);
+  pointer-events: none;
+  z-index: 1;
+  border-top: 2px solid rgba(0, 120, 212, 0.3);
+  border-bottom: 2px solid rgba(0, 120, 212, 0.3);
+}
+
+.dayViewDragHandle {
+  width: 8px;
+  background-color: rgba(0, 120, 212, 0.5);
+  cursor: ew-resize;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: none;
+  border-radius: 4px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    left: -18px;
+    right: -18px;
+  }
+}
+
+.dayViewDragHandleStart {
+  justify-self: start;
+}
+
+.dayViewDragHandleEnd {
+  justify-self: end;
+}
+
+/* -- Mobile range highlight styles ---------------------- */
+
+.mobileSlotInRange {
+  background-color: rgba(0, 120, 212, 0.08) !important;
+}
+
+.mobileSlotRangeStart {
+  border-top: 2px solid #0078d4;
+}
+
+.mobileSlotRangeEnd {
+  border-bottom: 2px solid #0078d4;
+}
+
+/* -- Compact range header ------------------------------- */
+
+.rangeHeaderCompact {
+  font-size: 12px;
+  color: #0078d4;
+  padding: 4px 8px;
+  background-color: rgba(0, 120, 212, 0.05);
+  border-radius: 4px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
 /* -- Responsive ----------------------------------------- */
 
 @media (max-width: 768px) {

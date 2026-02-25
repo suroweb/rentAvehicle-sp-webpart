@@ -16,14 +16,16 @@ export interface IAvailabilityTimelineProps {
   locationTimezone: string;
   currentUserId: string;
   onSlotClick: (vehicleId: number, date: string, startHour: number) => void;
-  range?: IRangeState;
-  onRangeChange?: (partial: Partial<IRangeState>) => void;
+  range: IRangeState;
+  onRangeChange: (partial: Partial<IRangeState>) => void;
 }
 
 // Display hours range (8:00 - 20:00 = 12 columns)
 const TIMELINE_START_HOUR = 8;
 const TIMELINE_END_HOUR = 20;
 const TOTAL_HOUR_COLUMNS = TIMELINE_END_HOUR - TIMELINE_START_HOUR;
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function pad2(n: number): string {
   return n < 10 ? '0' + String(n) : String(n);
@@ -108,12 +110,19 @@ function getBookingHourSpan(
   return { startCol: startCol, endCol: endCol };
 }
 
+/** Normalize a Date to midnight for day-level comparison */
+function toDayMs(d: Date): number {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+}
+
 export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = function AvailabilityTimeline(props) {
   const apiService = props.apiService;
   const locationId = props.locationId;
   const locationTimezone = props.locationTimezone;
   const currentUserId = props.currentUserId;
   const onSlotClick = props.onSlotClick;
+  const range = props.range;
+  const onRangeChange = props.onRangeChange;
 
   const tz = useTimezone(locationTimezone);
   const { isMobile } = useResponsive();
@@ -128,6 +137,12 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
 
   // Mobile: horizontal swipe detection for vehicle switching
   const touchStartRef = React.useRef<number>(0);
+
+  // Drag state for Day View range overlay handles
+  const draggingEdge = React.useRef<'start' | 'end' | null>(null);
+
+  // Two-click selection state for Day View
+  const dayViewSelectingEnd = React.useRef<boolean>(false);
 
   const handleMobileTouchStart = React.useCallback(function onTouchStart(e: React.TouchEvent<HTMLDivElement>): void {
     touchStartRef.current = e.touches[0].clientX;
@@ -206,6 +221,129 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 1));
   }, [selectedDate]);
 
+  // Compute range overlay boundaries for the current day
+  const selectedDayMs = toDayMs(selectedDate);
+  const rangeStartDayMs = toDayMs(range.startDate);
+  const rangeEndDayMs = toDayMs(range.endDate);
+  const isDayInRange = selectedDayMs >= rangeStartDayMs && selectedDayMs <= rangeEndDayMs;
+
+  let overlayStartHour = TIMELINE_START_HOUR;
+  let overlayEndHour = TIMELINE_END_HOUR;
+
+  if (isDayInRange) {
+    if (selectedDayMs === rangeStartDayMs) {
+      overlayStartHour = Math.max(range.startHour, TIMELINE_START_HOUR);
+    }
+    if (selectedDayMs === rangeEndDayMs) {
+      overlayEndHour = Math.min(range.endHour, TIMELINE_END_HOUR);
+    }
+  }
+
+  // Build a global booked hours set from ALL bookings on selectedDate (conservative snap boundary)
+  const allBookedHoursSet = React.useMemo(function buildBookedHoursSet(): Set<number> {
+    const set = new Set<number>();
+    if (!timelineData) return set;
+    for (let b = 0; b < timelineData.bookings.length; b++) {
+      const booking = timelineData.bookings[b];
+      const span = getBookingHourSpan(booking, selectedDate, localFormatter);
+      if (span === undefined) continue;
+      for (let h = span.startCol - 2; h < span.endCol - 2; h++) {
+        if (h >= 0 && h < TOTAL_HOUR_COLUMNS) {
+          set.add(h + TIMELINE_START_HOUR);
+        }
+      }
+    }
+    return set;
+  }, [timelineData, selectedDate, localFormatter]);
+
+  /** Snap a target hour to the nearest free hour in the appropriate direction */
+  function snapToFreeHour(targetHour: number, edge: 'start' | 'end'): number {
+    if (!allBookedHoursSet.has(targetHour)) return targetHour;
+    if (edge === 'end') {
+      for (let h = targetHour - 1; h >= TIMELINE_START_HOUR; h--) {
+        if (!allBookedHoursSet.has(h)) return h;
+      }
+      return TIMELINE_START_HOUR;
+    } else {
+      for (let h = targetHour + 1; h < TIMELINE_END_HOUR; h++) {
+        if (!allBookedHoursSet.has(h)) return h;
+      }
+      return TIMELINE_END_HOUR - 1;
+    }
+  }
+
+  /** Map pointer X to an hour column for Day View drag */
+  const handleDayViewDragMove = React.useCallback(function onDragMove(
+    e: React.PointerEvent<HTMLDivElement>
+  ): void {
+    if (!draggingEdge.current) return;
+
+    const grid = (e.currentTarget as HTMLElement).closest('.' + styles.timelineGrid) as HTMLElement | null;
+    if (!grid) return;
+
+    const gridRect = grid.getBoundingClientRect();
+    // First column (180px) is vehicle labels
+    const labelWidth = 180;
+    const hourAreaWidth = gridRect.width - labelWidth;
+    const relativeX = e.clientX - gridRect.left - labelWidth;
+    const hourIndex = Math.floor(relativeX / (hourAreaWidth / TOTAL_HOUR_COLUMNS));
+    const targetHour = Math.max(TIMELINE_START_HOUR, Math.min(TIMELINE_END_HOUR - 1, hourIndex + TIMELINE_START_HOUR));
+    const snappedHour = snapToFreeHour(targetHour, draggingEdge.current);
+
+    if (draggingEdge.current === 'start') {
+      if (snappedHour < range.endHour) {
+        onRangeChange({ startHour: snappedHour });
+      }
+    } else {
+      const endVal = snappedHour >= 23 ? 23 : snappedHour + 1;
+      if (endVal > range.startHour) {
+        onRangeChange({ endHour: endVal });
+      }
+    }
+  }, [range.startHour, range.endHour, onRangeChange, allBookedHoursSet]);
+
+  const handleDayViewDragUp = React.useCallback(function onDragUp(
+    e: React.PointerEvent<HTMLDivElement>
+  ): void {
+    if (draggingEdge.current) {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      draggingEdge.current = null;
+    }
+  }, []);
+
+  /** Two-click selection on Day View free slots */
+  const handleDayViewSlotClick = React.useCallback(function onDayViewSlotClick(
+    vehicleId: number,
+    dateStr: string,
+    hour: number
+  ): void {
+    if (!dayViewSelectingEnd.current) {
+      // First click: set start
+      onRangeChange({
+        startDate: selectedDate,
+        startHour: hour,
+        endDate: selectedDate,
+        endHour: hour >= 23 ? 23 : hour + 1,
+      });
+      dayViewSelectingEnd.current = true;
+    } else {
+      // Second click: set end hour
+      const endVal = hour >= 23 ? 23 : hour + 1;
+      if (endVal > range.startHour) {
+        onRangeChange({ endHour: endVal });
+      } else {
+        // Clicked before start -- swap
+        onRangeChange({
+          startHour: hour,
+          endHour: range.startHour >= 23 ? 23 : range.startHour + 1,
+        });
+      }
+      dayViewSelectingEnd.current = false;
+    }
+    // Also call existing onSlotClick for backward compatibility
+    onSlotClick(vehicleId, dateStr, hour);
+  }, [selectedDate, range.startHour, onRangeChange, onSlotClick]);
+
   // Build hour labels
   const hourLabels: React.ReactElement[] = [];
   for (let h = TIMELINE_START_HOUR; h < TIMELINE_END_HOUR; h++) {
@@ -246,6 +384,14 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
 
   // Check if previous day button should be disabled (cannot go before today)
   const isPrevDayDisabled = selectedDate.getTime() <= getToday().getTime();
+
+  // Multi-day range header text for compact display
+  const rangeHeaderText = React.useMemo(function buildRangeHeader(): string | null {
+    if (toDayMs(range.startDate) === toDayMs(range.endDate)) return null;
+    return MONTH_LABELS[range.startDate.getMonth()] + ' ' + range.startDate.getDate() + ' ' + pad2(range.startHour) + ':00'
+      + ' \u2013 '
+      + MONTH_LABELS[range.endDate.getMonth()] + ' ' + range.endDate.getDate() + ' ' + pad2(range.endHour) + ':00';
+  }, [range]);
 
   // Loading
   if (loading) {
@@ -421,7 +567,7 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
             })
           );
         } else {
-          // Future free slot -- clickable
+          // Future free slot -- clickable (use two-click handler)
           vehicleRows.push(
             React.createElement('div', {
               key: 'free-' + String(vehicle.id) + '-' + String(slotHour),
@@ -432,7 +578,7 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
               },
               onClick: (function makeClickHandler(vid: number, ds: string, sh: number) {
                 return function handleSlotClick(): void {
-                  onSlotClick(vid, ds, sh);
+                  handleDayViewSlotClick(vid, ds, sh);
                 };
               })(vehicle.id, dateStr, slotHour),
               title: pad2(slotHour) + ':00 - Free',
@@ -445,6 +591,62 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     // Add booking blocks for this vehicle
     for (let bbi = 0; bbi < bookingBlocks.length; bbi++) {
       vehicleRows.push(bookingBlocks[bbi]);
+    }
+  }
+
+  // Build range overlay and drag handles for desktop grid
+  const rangeOverlayElements: React.ReactElement[] = [];
+  if (isDayInRange && overlayEndHour > overlayStartHour) {
+    // Range overlay band spanning all vehicle rows
+    rangeOverlayElements.push(
+      React.createElement('div', {
+        key: 'range-overlay',
+        className: styles.dayViewRangeOverlay,
+        style: {
+          gridColumn: (overlayStartHour - TIMELINE_START_HOUR + 2) + ' / ' + (overlayEndHour - TIMELINE_START_HOUR + 2),
+          gridRow: '2 / ' + String(vehicles.length + 2),
+        },
+      })
+    );
+
+    // Start drag handle -- only when selectedDate is the range start day
+    if (selectedDayMs === rangeStartDayMs) {
+      rangeOverlayElements.push(
+        React.createElement('div', {
+          key: 'drag-start',
+          className: styles.dayViewDragHandle + ' ' + styles.dayViewDragHandleStart,
+          style: {
+            gridColumn: String(overlayStartHour - TIMELINE_START_HOUR + 2),
+            gridRow: '2 / ' + String(vehicles.length + 2),
+          },
+          onPointerDown: function onStartDrag(e: React.PointerEvent<HTMLDivElement>): void {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            draggingEdge.current = 'start';
+          },
+          onPointerMove: handleDayViewDragMove,
+          onPointerUp: handleDayViewDragUp,
+        })
+      );
+    }
+
+    // End drag handle -- only when selectedDate is the range end day
+    if (selectedDayMs === rangeEndDayMs) {
+      rangeOverlayElements.push(
+        React.createElement('div', {
+          key: 'drag-end',
+          className: styles.dayViewDragHandle + ' ' + styles.dayViewDragHandleEnd,
+          style: {
+            gridColumn: String(overlayEndHour - TIMELINE_START_HOUR + 1),
+            gridRow: '2 / ' + String(vehicles.length + 2),
+          },
+          onPointerDown: function onEndDrag(e: React.PointerEvent<HTMLDivElement>): void {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            draggingEdge.current = 'end';
+          },
+          onPointerMove: handleDayViewDragMove,
+          onPointerUp: handleDayViewDragUp,
+        })
+      );
     }
   }
 
@@ -520,11 +722,27 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
       const isBookedMobile = mobileBookedHours[hour] !== undefined;
       const isPastMobile = isSelectedDateToday && hour <= currentHour;
 
-      const slotClassName = isPastMobile
+      // Determine if this slot is within the range for mobile highlighting
+      const isSlotInRange = isDayInRange && hour >= overlayStartHour && hour < overlayEndHour;
+      const isSlotRangeStart = isSlotInRange && hour === overlayStartHour;
+      const isSlotRangeEnd = isSlotInRange && hour === (overlayEndHour - 1);
+
+      let slotClassName = isPastMobile
         ? styles.mobileSlotPast
         : isBookedMobile
           ? styles.mobileSlotBooked
           : styles.mobileSlotFree;
+
+      // Add range highlight classes for mobile
+      if (isSlotInRange && !isPastMobile) {
+        slotClassName = slotClassName + ' ' + styles.mobileSlotInRange;
+      }
+      if (isSlotRangeStart && !isPastMobile) {
+        slotClassName = slotClassName + ' ' + styles.mobileSlotRangeStart;
+      }
+      if (isSlotRangeEnd && !isPastMobile) {
+        slotClassName = slotClassName + ' ' + styles.mobileSlotRangeEnd;
+      }
 
       const statusText = isPastMobile
         ? 'Past'
@@ -534,7 +752,9 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
 
       const slotClickHandler = (!isBookedMobile && !isPastMobile)
         ? (function makeHandler(vid: number, ds: string, sh: number) {
-            return function onMobileSlotClick(): void { onSlotClick(vid, ds, sh); };
+            return function onMobileSlotClick(): void {
+              handleDayViewSlotClick(vid, ds, sh);
+            };
           })(activeVehicle.id, dateStr, hour)
         : undefined;
 
@@ -549,6 +769,10 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
     });
 
     return React.createElement('div', { className: styles.timelineContainer },
+      // Compact full-range header when multi-day
+      rangeHeaderText
+        ? React.createElement('div', { className: styles.rangeHeaderCompact }, rangeHeaderText)
+        : null,
       React.createElement('div', { className: styles.timelineHeader },
         React.createElement('div', { className: styles.timelineNav },
           React.createElement(IconButton, {
@@ -582,6 +806,10 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
 
   // Desktop: CSS Grid view
   return React.createElement('div', { className: styles.timelineContainer },
+    // Compact full-range header when multi-day
+    rangeHeaderText
+      ? React.createElement('div', { className: styles.rangeHeaderCompact }, rangeHeaderText)
+      : null,
     React.createElement('div', { className: styles.timelineHeader },
       React.createElement('div', { className: styles.timelineNav },
         React.createElement(IconButton, {
@@ -618,7 +846,9 @@ export const AvailabilityTimeline: React.FC<IAvailabilityTimelineProps> = functi
         }, 'Vehicle'),
         hourLabels.map(function renderLabel(label) { return label; }),
         // Vehicle rows with free slots and booking blocks
-        vehicleRows.map(function renderRow(row) { return row; })
+        vehicleRows.map(function renderRow(row) { return row; }),
+        // Range overlay and drag handles
+        rangeOverlayElements.map(function renderOverlay(el) { return el; })
       )
     )
   );
