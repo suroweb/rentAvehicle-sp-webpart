@@ -90,6 +90,11 @@ async function setup() {
     `CREATE INDEX IX_Bookings_VehicleId_Status ON Bookings(vehicleId, status) INCLUDE (startTime, endTime)`,
     `CREATE INDEX IX_Bookings_UserId ON Bookings(userId) INCLUDE (status, startTime, endTime)`,
     `CREATE INDEX IX_Bookings_StartTime ON Bookings(startTime) WHERE status IN ('Confirmed', 'Active')`,
+
+    // Phase 5: calendar integration columns
+    `ALTER TABLE Vehicles ADD resourceMailboxEmail NVARCHAR(255) NULL`,
+    `ALTER TABLE Bookings ADD vehicleCalendarEventId NVARCHAR(255) NULL`,
+    `ALTER TABLE Bookings ADD employeeCalendarEventId NVARCHAR(255) NULL`,
   ];
 
   for (const stmt of statements) {
