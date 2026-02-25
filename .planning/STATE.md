@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 8: UX Polish -- Availability Strip Navigation and Booking Process Refinement (1 of 3 plans done).
+**Current focus:** Phase 8: UX Polish -- Availability Strip Navigation and Booking Process Refinement (2 of 3 plans done).
 
 ## Current Position
 
 Phase: 8 of 8 (UX Polish: Availability Strip Navigation and Booking Process Refinement)
-Plan: 1 of 3 in current phase (08-01 complete)
+Plan: 2 of 3 in current phase (08-02 complete)
 Status: IN PROGRESS
-Last activity: 2026-02-25 -- Completed 08-01-PLAN.md (Strip navigation, clickable slots, bidirectional sync)
+Last activity: 2026-02-25 -- Completed 08-02-PLAN.md (Desktop layout, past-time prevention, overlap warning)
 
-Progress: [#######---] 70%
+Progress: [########--] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: 5.0min
-- Total execution time: 1.76 hours
+- Total execution time: 1.84 hours
 
 **By Phase:**
 
@@ -48,9 +48,10 @@ Progress: [#######---] 70%
 | Phase 07 P02 | 10min | 2 tasks | 10 files |
 | Phase 07 P03 | 3min | 2 tasks | 4 files |
 | Phase 08 P01 | 3min | 2 tasks | 7 files |
+| Phase 08 P02 | 5min | 2 tasks | 6 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 3min, 10min, 3min, 3min
+- Last 5 plans: 3min, 10min, 3min, 3min, 5min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -135,6 +136,11 @@ Recent decisions affecting current work:
 - [Phase 08]: Separate useEffect for availability fetch (vehicleId + weekStartDate) from vehicle detail fetch (vehicleId only)
 - [Phase 08]: 8-week lookahead soft limit (weekOffset <= 7) per research recommendation
 - [Phase 08]: Today column highlight uses rgba(0, 120, 212, 0.04) background with subtle border
+- [Phase 08]: Two-column flexbox layout: left column flex:1, right column fixed 360px with sticky positioning
+- [Phase 08]: Compact 80px thumbnail replaces 300px hero image for space efficiency
+- [Phase 08]: BookingForm always visible on desktop -- not hidden after bookingSuccess
+- [Phase 08]: Overlap warning computed inside BookingForm via availabilitySlots prop
+- [Phase 08]: Past-hour filtering uses strict greater-than (>) current hour comparison
 
 ### Roadmap Evolution
 
@@ -152,5 +158,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 08-01-PLAN.md
-Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-01-SUMMARY.md
+Stopped at: Completed 08-02-PLAN.md
+Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-02-SUMMARY.md
