@@ -154,6 +154,18 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | 6. Notifications | 2/2 | Complete | 2026-02-25 |
 | 7. Reporting and Manager Visibility | 3/3 | Complete    | 2026-02-25 |
 
+### Phase 8: UX Polish: Availability Strip Navigation and Booking Process Refinement
+
+**Goal:** The vehicle detail page provides a polished, interactive booking experience — the availability strip has week navigation with bidirectional form sync, the desktop layout is side-by-side with a sticky booking form, past times are comprehensively prevented, and mobile users get a native-feeling bottom sheet booking form with touch-optimized strip and Day View
+**Depends on:** Phase 7
+**Requirements:** (post-milestone UX polish — binding requirements from CONTEXT.md decisions)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Backend startDate API, strip week navigation, clickable slots, bidirectional form sync, today highlight, post-booking refresh
+- [ ] 08-02-PLAN.md — Desktop side-by-side layout, compact vehicle header, Day View arrow navigation, past-time prevention, overlap warning
+- [ ] 08-03-PLAN.md — Mobile bottom sheet, sticky bottom bar, touch-optimized strip, mobile Day View with vehicle swipe, human verification
+
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-25 (Phase 7 complete -- ALL PHASES DONE)*
+*Last updated: 2026-02-25 (Phase 8 planned — 3 plans in 3 waves)*
