@@ -1,9 +1,9 @@
 ---
-status: resolved
+status: complete
 phase: 08-ux-polish-availability-strip-navigation-and-booking-process-refinement
 source: 08-01-SUMMARY.md, 08-02-SUMMARY.md, 08-03-SUMMARY.md
 started: 2026-02-25T12:00:00Z
-updated: 2026-02-25T14:00:00Z
+updated: 2026-02-25T15:00:00Z
 ---
 
 ## Current Test
@@ -30,9 +30,8 @@ result: pass
 
 ### 5. Post-Booking Availability Refresh
 expected: After successfully creating a booking, the availability strip updates immediately to show the new booking as a booked slot — no manual page refresh needed.
-result: issue
-reported: "yes. but the card 'Book this Vehicle' still displays the loading spinner and the message 'Creating your booking'. The booking is already booked in the strip view with red color no page refresh needed and if i check my bookings the booking was created successfully."
-severity: major
+result: pass
+retest: true (gap closure 08-04)
 
 ### 6. Two-Column Desktop Layout
 expected: On desktop, the VehicleDetail page shows a side-by-side layout: availability content on the left, and a sticky booking form on the right that stays visible as you scroll.
@@ -49,9 +48,8 @@ result: pass
 
 ### 9. Past Hour Filtering
 expected: When today's date is selected in the booking form, the hour dropdowns only show future hours — past hours are filtered out.
-result: issue
-reported: "only in the full details page yes but when i open the form in the browse vehicles page there i can pick past hours."
-severity: major
+result: pass
+retest: true (gap closure 08-04)
 
 ### 10. Past Slots Grayed Out
 expected: Past time slots on the availability strip and Day View timeline appear grayed out (faded) and are not clickable.
@@ -59,15 +57,13 @@ result: pass
 
 ### 11. Overlap Warning
 expected: If you select start/end times in the booking form that overlap with an existing booked slot, a warning message bar appears indicating the conflict.
-result: issue
-reported: "Overlap warning works on detail page but booking form doesn't inherit date/time selection from browse vehicles page. When opening a vehicle booked today but wanting to book for tomorrow, the form defaults to today causing a false overlap warning. Date context from browse page needs to sync to detail page form."
-severity: major
+result: pass
+retest: true (gap closure 08-05)
 
 ### 12. Form Always Visible After Booking
 expected: On desktop, the booking form remains visible even after a successful booking — it is not hidden or replaced by a success-only view.
-result: issue
-reported: "it stays with the loading spinner from test 5"
-severity: major
+result: pass
+retest: true (gap closure 08-04)
 
 ### 13. Mobile Bottom Sheet
 expected: On mobile, tapping the Book button on the sticky bar opens a bottom sheet that slides up from the bottom of the screen containing the booking form. The sheet can be dismissed by tapping the overlay or swiping down on the drag handle.
@@ -91,8 +87,8 @@ reason: Needs production env for proper mobile testing.
 ## Summary
 
 total: 16
-passed: 8
-issues: 4
+passed: 12
+issues: 0
 pending: 0
 skipped: 4
 
