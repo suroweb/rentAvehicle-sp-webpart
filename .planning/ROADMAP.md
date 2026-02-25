@@ -131,11 +131,12 @@ Plans:
   2. Admin dashboard shows booking trends over time (daily, weekly, monthly)
   3. Admin can export report data to CSV or Excel
   4. Manager can view their direct reports' current and upcoming bookings in a team view
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md -- Backend: reporting service with SQL aggregation queries, 5 API endpoints (utilization, trends, KPI, export, team bookings), frontend report interfaces
+- [ ] 07-02-PLAN.md -- Frontend: Admin Reports dashboard with KPI cards, utilization horizontal bar chart, dual-axis trend chart, CSV export, @fluentui/react-charting integration
+- [ ] 07-03-PLAN.md -- Frontend: Manager "My Team" page with direct reports' bookings, AppShell wiring, human verification
 
 ## Progress
 
