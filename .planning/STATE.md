@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 7: Reporting and Manager Visibility -- COMPLETE (3 of 3 plans done). ALL PHASES COMPLETE.
+**Current focus:** Phase 8: UX Polish -- Availability Strip Navigation and Booking Process Refinement (1 of 3 plans done).
 
 ## Current Position
 
-Phase: 7 of 7 (Reporting and Manager Visibility)
-Plan: 3 of 3 in current phase (07-03 complete)
-Status: COMPLETE
-Last activity: 2026-02-25 -- Completed 07-03-PLAN.md (Manager team bookings page)
+Phase: 8 of 8 (UX Polish: Availability Strip Navigation and Booking Process Refinement)
+Plan: 1 of 3 in current phase (08-01 complete)
+Status: IN PROGRESS
+Last activity: 2026-02-25 -- Completed 08-01-PLAN.md (Strip navigation, clickable slots, bidirectional sync)
 
-Progress: [##########] 100%
+Progress: [#######---] 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
-- Average duration: 5.1min
-- Total execution time: 1.71 hours
+- Total plans completed: 21
+- Average duration: 5.0min
+- Total execution time: 1.76 hours
 
 **By Phase:**
 
@@ -47,9 +47,10 @@ Progress: [##########] 100%
 | Phase 07 P01 | 3min | 2 tasks | 6 files |
 | Phase 07 P02 | 10min | 2 tasks | 10 files |
 | Phase 07 P03 | 3min | 2 tasks | 4 files |
+| Phase 08 P01 | 3min | 2 tasks | 7 files |
 
 **Recent Trend:**
-- Last 5 plans: 8min, 5min, 3min, 10min, 3min
+- Last 5 plans: 5min, 3min, 10min, 3min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -130,6 +131,10 @@ Recent decisions affecting current work:
 - [Phase 07]: AdminCategories loaded at AppShell level alongside adminLocations for shared admin state
 - [Phase 07]: TeamBookings follows AllBookings DetailsList pattern for consistent admin/manager table UX
 - [Phase 07]: Status badges in team view limited to Confirmed/Active/Overdue (current + upcoming scope only)
+- [Phase 08]: weekOffset state in VehicleDetail drives both strip display and API startDate parameter
+- [Phase 08]: Separate useEffect for availability fetch (vehicleId + weekStartDate) from vehicle detail fetch (vehicleId only)
+- [Phase 08]: 8-week lookahead soft limit (weekOffset <= 7) per research recommendation
+- [Phase 08]: Today column highlight uses rgba(0, 120, 212, 0.04) background with subtle border
 
 ### Roadmap Evolution
 
@@ -147,5 +152,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-CONTEXT.md
+Stopped at: Completed 08-01-PLAN.md
+Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-01-SUMMARY.md
