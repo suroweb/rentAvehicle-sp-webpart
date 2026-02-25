@@ -19,7 +19,10 @@ import {
   adminCancelBooking,
 } from '../services/bookingService.js';
 import { AdminCancelInputSchema } from '../models/Booking.js';
+import sql from 'mssql';
 import { syncBookingToCalendars } from '../services/calendarService.js';
+import { sendTeamsActivityNotification } from '../services/notificationService.js';
+import { getPool } from '../services/database.js';
 
 const isAuthorized = requireRole('Admin', 'SuperAdmin');
 
@@ -145,6 +148,28 @@ async function adminCancelBookingEndpoint(
         syncBookingToCalendars(id, 'cancelled', parsed.data.cancelReason).catch((error) => {
           context.error('Calendar sync failed for admin-cancelled booking', id, error);
         });
+
+        // Fire-and-forget: notify affected employee of admin cancellation
+        (async () => {
+          try {
+            const pool = await getPool();
+            const bookingResult = await pool.request()
+              .input('bookingId', sql.Int, id)
+              .query('SELECT userId, userEmail, userDisplayName FROM Bookings WHERE id = @bookingId');
+            if (bookingResult.recordset.length > 0) {
+              const affected = bookingResult.recordset[0];
+              await sendTeamsActivityNotification(
+                affected.userId,
+                'bookingCancelled',
+                `Your booking has been cancelled by an administrator. Reason: ${parsed.data.cancelReason}`,
+                id
+              );
+            }
+          } catch (error) {
+            context.error('Admin cancel notification failed for booking', id, error);
+          }
+        })();
+
         return { jsonBody: { success: true } };
       case 'not_found':
         return { status: 404, jsonBody: { error: 'Booking not found' } };

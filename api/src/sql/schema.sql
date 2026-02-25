@@ -104,3 +104,9 @@ ALTER TABLE Vehicles ADD resourceMailboxEmail NVARCHAR(255) NULL;
 -- Add calendar event IDs to Bookings table (for later PATCH updates)
 ALTER TABLE Bookings ADD vehicleCalendarEventId NVARCHAR(255) NULL;
 ALTER TABLE Bookings ADD employeeCalendarEventId NVARCHAR(255) NULL;
+
+-- Phase 6: Notifications
+-- Tracks which scheduled reminders have been sent (prevents duplicate notifications)
+ALTER TABLE Bookings ADD pickupReminderSentAt DATETIME2 NULL;
+ALTER TABLE Bookings ADD returnReminderSentAt DATETIME2 NULL;
+ALTER TABLE Bookings ADD overdueNotificationSentAt DATETIME2 NULL;

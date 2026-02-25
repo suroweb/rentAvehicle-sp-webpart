@@ -36,6 +36,7 @@ import {
 } from '../services/bookingService.js';
 import { BookingInputSchema } from '../models/Booking.js';
 import { syncBookingToCalendars } from '../services/calendarService.js';
+import { sendBookingNotifications } from '../services/notificationService.js';
 
 /**
  * GET /api/vehicles/available
@@ -235,6 +236,11 @@ async function createBookingEndpoint(
     // Fire-and-forget: sync to calendars
     syncBookingToCalendars(result.id, 'created').catch((error) => {
       context.error('Calendar sync failed for new booking', result.id, error);
+    });
+
+    // Fire-and-forget: send booking notifications (email + Teams + manager)
+    sendBookingNotifications(result.id).catch((error) => {
+      context.error('Notification dispatch failed for new booking', result.id, error);
     });
 
     return { status: 201, jsonBody: { id: result.id } };
