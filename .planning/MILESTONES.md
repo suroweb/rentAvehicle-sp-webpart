@@ -21,3 +21,16 @@
 
 ---
 
+## v1.1 Production & Documentation (In Progress)
+
+**Phases:** 4 phases (9-12), 14 requirements
+**Started:** 2026-02-25
+**Goal:** Make v1.0 deployable, verifiable, and presentable — verify live tenant integrations, create deployment and developer documentation, set up CI/CD and IaC, and add admin timezone configuration.
+
+**Phase plan:**
+1. Phase 9: Live Tenant Verification — verify calendar + notifications on real tenant (5 requirements)
+2. Phase 10: Documentation — app registration guide, deployment guide, developer README (3 requirements)
+3. Phase 11: CI/CD and Infrastructure — GitHub Actions + Bicep templates (4 requirements)
+4. Phase 12: Admin Timezone Configuration — UI + API for timezone per location (2 requirements)
+
+---
