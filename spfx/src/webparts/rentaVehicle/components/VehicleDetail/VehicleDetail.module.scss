@@ -260,6 +260,52 @@
   border-radius: 2px;
 }
 
+.dragHandle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-color: rgba(0, 120, 212, 0.6);
+  cursor: ns-resize;
+  z-index: 2;
+  border-radius: 4px;
+  pointer-events: auto;
+  touch-action: none;
+
+  // Larger touch target via pseudo-element (44px total)
+  &::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    top: -18px;
+    bottom: -18px;
+  }
+
+  // Visual grab indicator
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 1px;
+  }
+}
+
+.dragHandleStart {
+  top: 0;
+  transform: translateY(-50%);
+}
+
+.dragHandleEnd {
+  bottom: 0;
+  transform: translateY(50%);
+}
+
 .stripBlockFree {
   height: 16px;
   background: #e6f5e6;

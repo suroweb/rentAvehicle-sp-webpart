@@ -87,6 +87,41 @@ function toComparableMinutes(year: number, month: number, day: number, hour: num
  * Left/right arrows navigate between weeks.
  */
 /**
+ * Snap a target hour to the nearest free boundary when it lands on a booked/past slot.
+ * For 'end' edge, walks backward; for 'start' edge, walks forward.
+ */
+function snapToBoundary(
+  targetHour: number,
+  hourBlocks: IHourBlock[],
+  edge: 'start' | 'end'
+): number {
+  const blockIndex = targetHour - STRIP_START_HOUR;
+  if (blockIndex < 0 || blockIndex >= hourBlocks.length) return targetHour;
+
+  const block = hourBlocks[blockIndex];
+  if (!block.isBooked && !block.isPast) return targetHour;
+
+  // Target is booked/past -- find nearest free boundary
+  if (edge === 'end') {
+    // Walk backward to find last free hour before the booked block
+    for (let i = blockIndex - 1; i >= 0; i--) {
+      if (!hourBlocks[i].isBooked && !hourBlocks[i].isPast) {
+        return hourBlocks[i].hour;
+      }
+    }
+    return STRIP_START_HOUR;
+  } else {
+    // Walk forward to find first free hour after the booked block
+    for (let i = blockIndex + 1; i < hourBlocks.length; i++) {
+      if (!hourBlocks[i].isBooked && !hourBlocks[i].isPast) {
+        return hourBlocks[i].hour;
+      }
+    }
+    return hourBlocks[hourBlocks.length - 1].hour;
+  }
+}
+
+/**
  * Compute per-day overlay data for the range within the visible week.
  * Returns null if the range does not overlap the given day.
  */
@@ -145,6 +180,11 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
 
   // Track whether next strip click sets start or end of range
   const stripSelectingEnd = React.useRef<boolean>(false);
+
+  // Drag state refs (refs not state to avoid re-renders during drag)
+  const draggingEdge = React.useRef<'start' | 'end' | null>(null);
+  const dragRafId = React.useRef<number>(0);
+  const dragDayIdx = React.useRef<number>(-1);
 
   // On mobile, limit visible hours to business hours (8-18) for wider touch targets
   const mobileEndHour = isMobile ? 18 : STRIP_END_HOUR;
@@ -239,6 +279,73 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
     const endLabel = String(last.getDate()) + ' ' + MONTH_LABELS[last.getMonth()];
     return startLabel + ' - ' + endLabel;
   }, [dayColumns]);
+
+  // Drag handle pointer move -- throttled with requestAnimationFrame
+  const handleDragPointerMove = React.useCallback(function onDragMove(
+    e: React.PointerEvent<HTMLDivElement>
+  ): void {
+    if (!draggingEdge.current) return;
+
+    // Cancel previous frame for throttle
+    if (dragRafId.current) {
+      cancelAnimationFrame(dragRafId.current);
+    }
+
+    const clientY = e.clientY;
+    const target = e.currentTarget as HTMLElement;
+
+    dragRafId.current = requestAnimationFrame(function processDrag(): void {
+      // Find the closest .stripBlocks container
+      const blocksContainer = target.closest('.' + styles.stripBlocks) as HTMLElement | null;
+      if (!blocksContainer) return;
+
+      const rect = blocksContainer.getBoundingClientRect();
+      const relativeY = clientY - rect.top;
+      const endHour = mobileEndHour;
+      const totalBlocks = endHour - STRIP_START_HOUR;
+      const blockHeight = rect.height / totalBlocks;
+      const hourIndex = Math.floor(relativeY / blockHeight);
+      const rawHour = Math.max(STRIP_START_HOUR, Math.min(endHour - 1, hourIndex + STRIP_START_HOUR));
+
+      // Determine which day column this handle belongs to
+      const dayIdx = dragDayIdx.current;
+      if (dayIdx < 0 || dayIdx >= dayColumns.length) return;
+      const col = dayColumns[dayIdx];
+
+      // Snap to boundary if target is booked/past
+      const adjustedHour = snapToBoundary(rawHour, col.hourBlocks, draggingEdge.current!);
+
+      if (draggingEdge.current === 'start') {
+        // Ensure start doesn't go past end on same day
+        const rangeEndMs = new Date(range.endDate.getFullYear(), range.endDate.getMonth(), range.endDate.getDate()).getTime();
+        const colDayMs = new Date(col.dayDate.getFullYear(), col.dayDate.getMonth(), col.dayDate.getDate()).getTime();
+        if (colDayMs < rangeEndMs || (colDayMs === rangeEndMs && adjustedHour < range.endHour)) {
+          onRangeChange({ startDate: col.dayDate, startHour: adjustedHour });
+        }
+      } else {
+        // End handle
+        const rangeStartMs = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), range.startDate.getDate()).getTime();
+        const colDayMs = new Date(col.dayDate.getFullYear(), col.dayDate.getMonth(), col.dayDate.getDate()).getTime();
+        const endHourValue = adjustedHour >= 23 ? 23 : adjustedHour + 1;
+        if (colDayMs > rangeStartMs || (colDayMs === rangeStartMs && endHourValue > range.startHour)) {
+          onRangeChange({ endDate: col.dayDate, endHour: endHourValue });
+        }
+      }
+    });
+  }, [dayColumns, range, onRangeChange, mobileEndHour]);
+
+  // Drag handle pointer up -- release capture and reset state
+  const handleDragPointerUp = React.useCallback(function onDragUp(
+    e: React.PointerEvent<HTMLDivElement>
+  ): void {
+    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    draggingEdge.current = null;
+    dragDayIdx.current = -1;
+    if (dragRafId.current) {
+      cancelAnimationFrame(dragRafId.current);
+      dragRafId.current = 0;
+    }
+  }, []);
 
   return (
     <div className={styles.availabilityStrip}>
@@ -375,10 +482,18 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
                   );
                 })}
 
-                {/* Range overlay for this day column */}
+                {/* Range overlay for this day column with drag handles */}
                 {(function renderDayOverlay(): React.ReactNode {
                   const overlay = computeDayOverlay(range, col.dayDate, STRIP_START_HOUR, mobileEndHour);
                   if (!overlay) return null;
+
+                  // Determine if this is the first/last day in the range for handle placement
+                  const dayMs = new Date(col.dayDate.getFullYear(), col.dayDate.getMonth(), col.dayDate.getDate()).getTime();
+                  const rangeStartMs = new Date(range.startDate.getFullYear(), range.startDate.getMonth(), range.startDate.getDate()).getTime();
+                  const rangeEndMs = new Date(range.endDate.getFullYear(), range.endDate.getMonth(), range.endDate.getDate()).getTime();
+                  const isFirstOverlayDay = dayMs === rangeStartMs;
+                  const isLastOverlayDay = dayMs === rangeEndMs;
+
                   return (
                     <div
                       className={styles.rangeOverlay}
@@ -386,7 +501,34 @@ export const AvailabilityStrip: React.FC<IAvailabilityStripProps> = ({
                         top: overlay.topPercent + '%',
                         height: overlay.heightPercent + '%',
                       }}
-                    />
+                    >
+                      {/* Start drag handle */}
+                      {isFirstOverlayDay && (
+                        <div
+                          className={styles.dragHandle + ' ' + styles.dragHandleStart}
+                          onPointerDown={function onStartDragDown(e: React.PointerEvent<HTMLDivElement>): void {
+                            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                            draggingEdge.current = 'start';
+                            dragDayIdx.current = idx;
+                          }}
+                          onPointerMove={handleDragPointerMove}
+                          onPointerUp={handleDragPointerUp}
+                        />
+                      )}
+                      {/* End drag handle */}
+                      {isLastOverlayDay && (
+                        <div
+                          className={styles.dragHandle + ' ' + styles.dragHandleEnd}
+                          onPointerDown={function onEndDragDown(e: React.PointerEvent<HTMLDivElement>): void {
+                            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                            draggingEdge.current = 'end';
+                            dragDayIdx.current = idx;
+                          }}
+                          onPointerMove={handleDragPointerMove}
+                          onPointerUp={handleDragPointerUp}
+                        />
+                      )}
+                    </div>
                   );
                 })()}
               </div>
