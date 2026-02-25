@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Booking Lifecycle and Admin Oversight** - Full reservation lifecycle with calendar views, check-in/out, and admin control
 - [ ] **Phase 5: M365 Calendar Integration** - Vehicle bookings visible in Outlook through resource calendars and employee calendars
 - [x] **Phase 6: Notifications** - Booking confirmations, return reminders, and manager alerts via email and Teams (completed 2026-02-25)
-- [ ] **Phase 7: Reporting and Manager Visibility** - Utilization dashboards, trend analysis, exports, and manager team view
+- [x] **Phase 7: Reporting and Manager Visibility** - Utilization dashboards, trend analysis, exports, and manager team view
 
 ## Phase Details
 
@@ -136,7 +136,7 @@ Plans:
 Plans:
 - [x] 07-01-PLAN.md -- Backend: reporting service with SQL aggregation queries, 5 API endpoints (utilization, trends, KPI, export, team bookings), frontend report interfaces
 - [x] 07-02-PLAN.md -- Frontend: Admin Reports dashboard with KPI cards, utilization horizontal bar chart, dual-axis trend chart, CSV export, @fluentui/react-charting integration
-- [ ] 07-03-PLAN.md -- Frontend: Manager "My Team" page with direct reports' bookings, AppShell wiring, human verification
+- [x] 07-03-PLAN.md -- Frontend: Manager "My Team" page with direct reports' bookings, AppShell wiring, human verification
 
 ## Progress
 
@@ -152,8 +152,8 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | 4. Booking Lifecycle and Admin Oversight | 3/3 | Complete | 2026-02-24 |
 | 5. M365 Calendar Integration | 2/2 | Complete | 2026-02-25 |
 | 6. Notifications | 2/2 | Complete | 2026-02-25 |
-| 7. Reporting and Manager Visibility | 0/TBD | Not started | - |
+| 7. Reporting and Manager Visibility | 3/3 | Complete | 2026-02-25 |
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-25 (Phase 6 complete)*
+*Last updated: 2026-02-25 (Phase 7 complete -- ALL PHASES DONE)*
