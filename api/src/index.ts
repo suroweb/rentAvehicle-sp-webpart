@@ -9,3 +9,5 @@ import './functions/bookings.js';
 import './functions/adminBookings.js';
 import './functions/calendarAdmin.js';
 import './functions/notifications.js';
+import './functions/reporting.js';
+import './functions/teamBookings.js';
