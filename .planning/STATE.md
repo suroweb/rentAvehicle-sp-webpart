@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 8: UX Polish -- all 5 gap closure plans complete. Phase 8 execution finished.
+**Current focus:** Phase 08.1: Unified Date Range Picker -- replacing separate DatePickers with inline range calendar.
 
 ## Current Position
 
-Phase: 8 of 8 (UX Polish: Availability Strip Navigation and Booking Process Refinement)
-Plan: 5 of 5 in current phase (08-05 complete -- all plans done)
-Status: PHASE COMPLETE
-Last activity: 2026-02-25 -- Executed 08-05: Date context wiring from Browse to Detail page.
+Phase: 08.1 of 08.1 (Unified Date Range Picker)
+Plan: 1 of 4 in current phase (08.1-01 complete)
+Status: IN PROGRESS
+Last activity: 2026-02-25 -- Executed 08.1-01: RangeCalendar component, IRangeState interface, BookingForm refactor, VehicleDetail state lift.
 
 ### Testing Progress (12 items from VERIFICATION.md)
 1. [x] Desktop side-by-side layout — FIXED (flex-wrap for narrow containers)
@@ -28,14 +28,14 @@ Last activity: 2026-02-25 -- Executed 08-05: Date context wiring from Browse to 
 11. [ ] Day View prev/next day arrows
 12. [x] Past hour filtering in dropdowns -- FIXED (getFilteredHourOptions added to VehicleBrowse)
 
-Progress: [##########] 100%
+Progress: [###-------] 25% (1/4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: 4.7min
-- Total execution time: 1.98 hours
+- Total execution time: 2.05 hours
 
 **By Phase:**
 
@@ -66,9 +66,10 @@ Progress: [##########] 100%
 | Phase 08 P03 | 5min | 3 tasks | 10 files |
 | Phase 08 P04 | 1min | 2 tasks | 2 files |
 | Phase 08 P05 | 3min | 2 tasks | 3 files |
+| Phase 08.1 P01 | 4min | 2 tasks | 6 files |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 5min, 5min, 1min, 3min
+- Last 5 plans: 5min, 5min, 1min, 3min, 4min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -168,6 +169,10 @@ Recent decisions affecting current work:
 - [Phase 08]: getFilteredHourOptions reused across BookingForm and VehicleBrowse for consistent past-hour filtering
 - [Phase 08]: IDateContext interface exported from VehicleBrowse for cross-component date/time navigation context
 - [Phase 08]: prefillDate/prefillStartHour use useState initializers (not useEffect) for immediate availability from browse-page props
+- [Phase 08.1]: Calendar key={startDate+'-'+endDate} forces re-mount on range change for reliable customDayCellRef styling
+- [Phase 08.1]: useEffect on range.startDate replaces handleFormDateChange callback for strip sync (reactive over imperative)
+- [Phase 08.1]: AvailabilityStrip/AvailabilityTimeline get optional range props now, required in Plans 02/03
+- [Phase 08.1]: IRangeState partial update pattern: updateRange({startHour: 9}) merges into existing range state
 
 ### Roadmap Evolution
 
@@ -186,5 +191,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 08-05-PLAN.md (gap closure: date context wiring from browse to detail)
-Resume with: Phase 8 complete. All 5 plans executed. Project at final state.
+Stopped at: Completed 08.1-01-PLAN.md (RangeCalendar component, IRangeState interface, BookingForm refactor, VehicleDetail state lift)
+Resume with: Execute 08.1-02-PLAN.md -- AvailabilityStrip range overlay band, drag handles, snap-to-boundary.

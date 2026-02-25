@@ -173,3 +173,23 @@ Plans:
 ---
 *Roadmap created: 2026-02-22*
 *Last updated: 2026-02-25 (Phase 8 gap closure — 2 plans added for UAT fixes)*
+
+### Phase 08.1: Unified Date Range Picker (INSERTED)
+
+**Goal:** Replace separate start/end dropdowns with a unified date range picker across BookingForm (browse + detail), synced with availability strip week view and day view -- users can define and adjust their booking range from any surface (calendar, strip, day view) with instant bidirectional sync
+**Requirements**: UX-RANGE-01, UX-RANGE-02, UX-RANGE-03, UX-RANGE-04, UX-RANGE-05
+**Depends on:** Phase 8
+**Plans:** 4 plans
+
+Phase-local requirement definitions:
+- UX-RANGE-01: Inline range calendar replaces separate DatePickers in BookingForm with two-click selection and visual range highlighting
+- UX-RANGE-02: Range state lifted to parent (VehicleDetail/VehicleBrowse) as single source of truth with bidirectional sync
+- UX-RANGE-03: Availability strip displays range overlay band with drag handles and snap-to-boundary logic
+- UX-RANGE-04: Day View displays range overlay with drag handles, scoped to single-day hour editing
+- UX-RANGE-05: Browse page uses shared RangeCalendar component, range preserved when navigating to Detail page
+
+Plans:
+- [x] 08.1-01-PLAN.md -- RangeCalendar component, IRangeState interface, BookingForm refactor, VehicleDetail state lift
+- [ ] 08.1-02-PLAN.md -- AvailabilityStrip range overlay band, drag handles, snap-to-boundary, two-click selection
+- [ ] 08.1-03-PLAN.md -- AvailabilityTimeline (Day View) range overlay + drag, VehicleBrowse RangeCalendar refactor, StickyBottomBar
+- [ ] 08.1-04-PLAN.md -- Human verification checkpoint for all Phase 08.1 features
