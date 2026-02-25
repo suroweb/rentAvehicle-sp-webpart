@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 5: M365 Calendar Integration** - Vehicle bookings visible in Outlook through resource calendars and employee calendars
 - [x] **Phase 6: Notifications** - Booking confirmations, return reminders, and manager alerts via email and Teams (completed 2026-02-25)
 - [x] **Phase 7: Reporting and Manager Visibility** - Utilization dashboards, trend analysis, exports, and manager team view
-- [ ] **Phase 8: UX Polish: Availability Strip Navigation and Booking Process Refinement** - Side-by-side layout, navigable strip, smart form defaults, mobile bottom sheet
+- [x] **Phase 8: UX Polish: Availability Strip Navigation and Booking Process Refinement** - Side-by-side layout, navigable strip, smart form defaults, mobile bottom sheet
 
 ## Phase Details
 
@@ -154,7 +154,7 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 | 5. M365 Calendar Integration | 2/2 | Complete | 2026-02-25 |
 | 6. Notifications | 2/2 | Complete | 2026-02-25 |
 | 7. Reporting and Manager Visibility | 3/3 | Complete    | 2026-02-25 |
-| 8. UX Polish: Availability Strip Navigation | 0/3 | Planned | — |
+| 8. UX Polish: Availability Strip Navigation | 3/3 | Complete | 2026-02-25 |
 
 ### Phase 8: UX Polish: Availability Strip Navigation and Booking Process Refinement
 
@@ -164,10 +164,10 @@ Note: Phases 5 and 6 depend on Phase 3 (not Phase 4) and can run in parallel wit
 **Plans:** 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Backend startDate API, strip week navigation, clickable slots, bidirectional form sync, today highlight, post-booking refresh
-- [ ] 08-02-PLAN.md — Desktop side-by-side layout, compact vehicle header, Day View arrow navigation, past-time prevention, overlap warning
-- [ ] 08-03-PLAN.md — Mobile bottom sheet, sticky bottom bar, touch-optimized strip, mobile Day View with vehicle swipe, human verification
+- [x] 08-01-PLAN.md — Backend startDate API, strip week navigation, clickable slots, bidirectional form sync, today highlight, post-booking refresh
+- [x] 08-02-PLAN.md — Desktop side-by-side layout, compact vehicle header, Day View arrow navigation, past-time prevention, overlap warning
+- [x] 08-03-PLAN.md — Mobile bottom sheet, sticky bottom bar, touch-optimized strip, mobile Day View with vehicle swipe, human verification
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-25 (Phase 8 planned — 3 plans in 3 waves)*
+*Last updated: 2026-02-25 (Phase 8 complete — all 3 plans delivered)*
