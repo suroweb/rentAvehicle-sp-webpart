@@ -17,17 +17,18 @@
 .vehicleDetailLayout {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 24px;
   align-items: flex-start;
 }
 
 .leftColumn {
-  flex: 1 1 0;
+  flex: 1 1 480px;
   min-width: 0;
 }
 
 .rightColumn {
-  flex: 0 0 360px;
+  flex: 0 1 340px;
   position: sticky;
   top: 24px;
   max-height: calc(100vh - 48px);
@@ -299,7 +300,7 @@
 /* -- Booking form ---------------------------------------------- */
 
 .bookingForm {
-  max-width: 500px;
+  max-width: none;
   padding: 20px;
   background: #ffffff;
   border-radius: 8px;
