@@ -17,7 +17,10 @@ import { buildConfirmationEmailHtml } from '../templates/emailConfirmation.js';
 import {
   buildBookingConfirmationPreview,
   buildManagerAlertPreview,
+  buildReminderPreview,
+  buildOverduePreview,
 } from '../templates/adaptiveCards.js';
+import type { InvocationContext } from '@azure/functions';
 
 /**
  * Look up a user's manager via Microsoft Graph API.
@@ -324,5 +327,310 @@ export async function sendBookingNotifications(
       `sendBookingNotifications failed for booking ${bookingId}:`,
       error
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Scheduled reminder processing (called from timer-triggered Azure Function)
+// ---------------------------------------------------------------------------
+
+/**
+ * Process items in batches with a delay between batches to avoid Graph API rate limiting.
+ * Same pattern as Phase 5 calendar backfill.
+ */
+async function processBatch<T>(
+  items: T[],
+  batchSize: number,
+  delayMs: number,
+  processor: (item: T) => Promise<void>
+): Promise<void> {
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    await Promise.allSettled(batch.map(processor));
+    if (i + batchSize < items.length) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
+/**
+ * Process pickup reminders for bookings starting within the next hour.
+ *
+ * Queries confirmed bookings where startTime is between NOW and NOW + 1 hour
+ * and pickupReminderSentAt is NULL. Sends Teams activity feed notification
+ * to each employee, then atomically marks the reminder as sent.
+ *
+ * @returns Count of reminders sent
+ */
+export async function processPickupReminders(
+  context?: InvocationContext
+): Promise<number> {
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT
+        b.id, b.userId, b.userEmail, b.userDisplayName,
+        b.startTime, b.endTime,
+        v.make, v.model, v.licensePlate,
+        l.name AS locationName
+      FROM Bookings b
+      INNER JOIN Vehicles v ON b.vehicleId = v.id
+      LEFT JOIN Locations l ON v.locationId = l.id
+      WHERE b.status = 'Confirmed'
+        AND b.startTime > GETUTCDATE()
+        AND b.startTime <= DATEADD(HOUR, 1, GETUTCDATE())
+        AND b.pickupReminderSentAt IS NULL
+    `);
+
+    if (result.recordset.length === 0) {
+      return 0;
+    }
+
+    let sentCount = 0;
+
+    await processBatch(result.recordset, 10, 1000, async (row) => {
+      try {
+        const vehicleName = `${row.make} ${row.model}`;
+        const previewText = buildReminderPreview(
+          'pickup',
+          vehicleName,
+          new Date(row.startTime).toISOString()
+        );
+
+        await sendTeamsActivityNotification(
+          row.userId,
+          'pickupReminder',
+          previewText,
+          row.id
+        );
+
+        // Atomic update -- WHERE sentAt IS NULL prevents duplicates across instances
+        await pool
+          .request()
+          .input('bookingId', sql.Int, row.id)
+          .query(`
+            UPDATE Bookings
+            SET pickupReminderSentAt = GETUTCDATE()
+            WHERE id = @bookingId AND pickupReminderSentAt IS NULL
+          `);
+
+        sentCount++;
+      } catch (error) {
+        (context || console).error(
+          `Pickup reminder failed for booking ${row.id}:`,
+          error
+        );
+      }
+    });
+
+    return sentCount;
+  } catch (error) {
+    (context || console).error('processPickupReminders failed:', error);
+    return 0;
+  }
+}
+
+/**
+ * Process return reminders for bookings with return time within the next hour.
+ *
+ * Queries active or confirmed bookings where endTime is between NOW and NOW + 1 hour
+ * and returnReminderSentAt is NULL. Sends Teams activity feed notification
+ * to each employee, then atomically marks the reminder as sent.
+ *
+ * @returns Count of reminders sent
+ */
+export async function processReturnReminders(
+  context?: InvocationContext
+): Promise<number> {
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT
+        b.id, b.userId, b.userEmail, b.userDisplayName,
+        b.startTime, b.endTime,
+        v.make, v.model, v.licensePlate,
+        l.name AS locationName
+      FROM Bookings b
+      INNER JOIN Vehicles v ON b.vehicleId = v.id
+      LEFT JOIN Locations l ON v.locationId = l.id
+      WHERE b.status IN ('Active', 'Confirmed')
+        AND b.endTime > GETUTCDATE()
+        AND b.endTime <= DATEADD(HOUR, 1, GETUTCDATE())
+        AND b.returnReminderSentAt IS NULL
+    `);
+
+    if (result.recordset.length === 0) {
+      return 0;
+    }
+
+    let sentCount = 0;
+
+    await processBatch(result.recordset, 10, 1000, async (row) => {
+      try {
+        const vehicleName = `${row.make} ${row.model}`;
+        const previewText = buildReminderPreview(
+          'return',
+          vehicleName,
+          new Date(row.endTime).toISOString()
+        );
+
+        await sendTeamsActivityNotification(
+          row.userId,
+          'returnReminder',
+          previewText,
+          row.id
+        );
+
+        // Atomic update -- WHERE sentAt IS NULL prevents duplicates across instances
+        await pool
+          .request()
+          .input('bookingId', sql.Int, row.id)
+          .query(`
+            UPDATE Bookings
+            SET returnReminderSentAt = GETUTCDATE()
+            WHERE id = @bookingId AND returnReminderSentAt IS NULL
+          `);
+
+        sentCount++;
+      } catch (error) {
+        (context || console).error(
+          `Return reminder failed for booking ${row.id}:`,
+          error
+        );
+      }
+    });
+
+    return sentCount;
+  } catch (error) {
+    (context || console).error('processReturnReminders failed:', error);
+    return 0;
+  }
+}
+
+/**
+ * Process overdue notifications for bookings past their return time + 15 min grace period.
+ *
+ * Queries bookings where status is 'Overdue' or status is 'Active' with endTime + 15 min
+ * past current time, and overdueNotificationSentAt is NULL. For Active bookings that meet
+ * the overdue condition, first transitions them to Overdue status. Then sends Teams
+ * activity feed notifications to the employee, their manager, and optionally the admin.
+ *
+ * @returns Count of overdue notifications sent
+ */
+export async function processOverdueNotifications(
+  context?: InvocationContext
+): Promise<number> {
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT
+        b.id, b.userId, b.userEmail, b.userDisplayName,
+        b.startTime, b.endTime, b.status,
+        v.make, v.model, v.licensePlate,
+        l.name AS locationName
+      FROM Bookings b
+      INNER JOIN Vehicles v ON b.vehicleId = v.id
+      LEFT JOIN Locations l ON v.locationId = l.id
+      WHERE b.overdueNotificationSentAt IS NULL
+        AND (
+          b.status = 'Overdue'
+          OR (b.status = 'Active' AND b.endTime < DATEADD(MINUTE, -15, GETUTCDATE()))
+        )
+    `);
+
+    if (result.recordset.length === 0) {
+      return 0;
+    }
+
+    let sentCount = 0;
+
+    await processBatch(result.recordset, 10, 1000, async (row) => {
+      try {
+        // If status is Active and past grace period, transition to Overdue
+        if (row.status === 'Active') {
+          await pool
+            .request()
+            .input('bookingId', sql.Int, row.id)
+            .query(`
+              UPDATE Bookings
+              SET status = 'Overdue', updatedAt = GETUTCDATE()
+              WHERE id = @bookingId AND status = 'Active'
+                AND endTime < DATEADD(MINUTE, -15, GETUTCDATE())
+            `);
+        }
+
+        const vehicleName = `${row.make} ${row.model}`;
+        const previewText = buildOverduePreview(
+          vehicleName,
+          new Date(row.endTime).toISOString()
+        );
+
+        // 1. Notify employee
+        await sendTeamsActivityNotification(
+          row.userId,
+          'bookingOverdue',
+          previewText,
+          row.id
+        );
+
+        // 2. Notify manager (if exists)
+        const manager = await getManagerInfo(row.userId);
+        if (manager) {
+          await sendTeamsActivityNotification(
+            manager.id,
+            'bookingOverdue',
+            previewText,
+            row.id
+          );
+        }
+
+        // 3. Notify admin (if OVERDUE_ADMIN_EMAIL configured)
+        const adminEmail = process.env.OVERDUE_ADMIN_EMAIL;
+        if (adminEmail) {
+          try {
+            const client = await getGraphClient();
+            const adminUser = await client
+              .api(`/users/${adminEmail}`)
+              .select('id')
+              .get();
+            if (adminUser && adminUser.id) {
+              await sendTeamsActivityNotification(
+                adminUser.id,
+                'bookingOverdue',
+                previewText,
+                row.id
+              );
+            }
+          } catch (adminError) {
+            (context || console).error(
+              `Failed to notify admin for overdue booking ${row.id}:`,
+              adminError
+            );
+          }
+        }
+
+        // Atomic update -- WHERE sentAt IS NULL prevents duplicates across instances
+        await pool
+          .request()
+          .input('bookingId', sql.Int, row.id)
+          .query(`
+            UPDATE Bookings
+            SET overdueNotificationSentAt = GETUTCDATE()
+            WHERE id = @bookingId AND overdueNotificationSentAt IS NULL
+          `);
+
+        sentCount++;
+      } catch (error) {
+        (context || console).error(
+          `Overdue notification failed for booking ${row.id}:`,
+          error
+        );
+      }
+    });
+
+    return sentCount;
+  } catch (error) {
+    (context || console).error('processOverdueNotifications failed:', error);
+    return 0;
   }
 }
