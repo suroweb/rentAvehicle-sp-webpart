@@ -1,0 +1,39 @@
+# OS
+.DS_Store
+
+# Dependencies
+node_modules/
+
+# Build
+dist/
+lib/
+lib-dts/
+lib-commonjs/
+lib-esm/
+temp/
+jest-output/
+release/
+solution/
+*.sppkg
+.heft/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Secrets
+api/local.settings.json
+
+# Coverage
+coverage/
+
+# Visual Studio
+.ntvs_analysis.dat
+.vs/
+bin/
+obj/
+
+# SPFx generated
+*.resx.ts
+*.scss.ts

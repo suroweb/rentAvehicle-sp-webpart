@@ -8,10 +8,10 @@
     "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "LOCAL_DEV": "true",
-    "LOCAL_DEV_NAME": "Test User",
-    "LOCAL_DEV_EMAIL": "test@contoso.com",
+    "LOCAL_DEV_NAME": "",
+    "LOCAL_DEV_EMAIL": "",
     "LOCAL_DEV_ROLE": "Employee",
-    "LOCAL_DEV_OFFICE_LOCATION": "Bucharest",
+    "LOCAL_DEV_OFFICE_LOCATION": "",
     "AZURE_SQL_SERVER": "localhost",
     "AZURE_SQL_DATABASE": "RentAVehicle",
     "AZURE_SQL_PORT": "1433",
@@ -19,6 +19,8 @@
     "AZURE_SQL_PASSWORD": "YourStrong!Pass123",
     "AZURE_TENANT_ID": "",
     "AZURE_CLIENT_ID": "",
-    "AZURE_CLIENT_SECRET": ""
+    "AZURE_CLIENT_SECRET": "",
+    "NOTIFICATION_SENDER_EMAIL": "",
+    "APP_BASE_URL": ""
   }
 }
