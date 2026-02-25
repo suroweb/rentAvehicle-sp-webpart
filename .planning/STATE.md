@@ -190,6 +190,7 @@ Recent decisions affecting current work:
 
 - Phase 8 added: UX Polish: Availability Strip Navigation and Booking Process Refinement
 - Phase 08.1 inserted after Phase 8: Unified Date Range Picker — Replace separate start/end dropdowns with a single range picker across BookingForm (browse + detail), synced with availability strip week view and day view (URGENT)
+- Phase 08.1.1 inserted after Phase 08.1: Remove Day View — strip AvailabilityTimeline range overlay, Day View pivot tab, and related styles; Week View per vehicle is sufficient (URGENT)
 
 ### Pending Todos
 
