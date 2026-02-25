@@ -41,6 +41,28 @@ function getToday(): Date {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
+/**
+ * Filter hour options to exclude past hours when selectedDate is today.
+ * Returns only hours strictly greater than the current hour when today is selected.
+ */
+function getFilteredHourOptions(selectedDate: Date): IDropdownOption[] {
+  const now = new Date();
+  const isToday = selectedDate.getFullYear() === now.getFullYear()
+    && selectedDate.getMonth() === now.getMonth()
+    && selectedDate.getDate() === now.getDate();
+
+  if (!isToday) return HOUR_OPTIONS;
+
+  const currentHour = now.getHours();
+  const filtered: IDropdownOption[] = [];
+  for (let i = 0; i < HOUR_OPTIONS.length; i++) {
+    if ((HOUR_OPTIONS[i].key as number) > currentHour) {
+      filtered.push(HOUR_OPTIONS[i]);
+    }
+  }
+  return filtered;
+}
+
 export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   apiService,
   onNavigateToDetail,
@@ -65,6 +87,15 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   const [searching, setSearching] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [hasSearched, setHasSearched] = React.useState<boolean>(false);
+
+  // Filtered hour options based on whether today is selected
+  const startHourOptions = React.useMemo(function filterStartHours(): IDropdownOption[] {
+    return getFilteredHourOptions(startDate);
+  }, [startDate]);
+
+  const endHourOptions = React.useMemo(function filterEndHours(): IDropdownOption[] {
+    return getFilteredHourOptions(endDate);
+  }, [endDate]);
 
   // Selected location timezone for time conversion
   const selectedLocationTimezone = React.useMemo(() => {
@@ -308,7 +339,7 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
           <Dropdown
             label="Start time"
             selectedKey={startHour}
-            options={HOUR_OPTIONS}
+            options={startHourOptions}
             onChange={handleStartHourChange}
           />
         </div>
@@ -330,7 +361,7 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
           <Dropdown
             label="End time"
             selectedKey={endHour}
-            options={HOUR_OPTIONS}
+            options={endHourOptions}
             onChange={handleEndHourChange}
           />
         </div>
