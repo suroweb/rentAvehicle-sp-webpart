@@ -55,10 +55,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Reporting
 
-- [ ] **RPRT-01**: Admin dashboard shows utilization rates per vehicle and location
-- [ ] **RPRT-02**: Admin dashboard shows booking trends over time
-- [ ] **RPRT-03**: Admin can export reports to CSV/Excel
-- [ ] **RPRT-04**: Manager can view their direct reports' current and upcoming bookings
+- [x] **RPRT-01**: Admin dashboard shows utilization rates per vehicle and location
+- [x] **RPRT-02**: Admin dashboard shows booking trends over time
+- [x] **RPRT-03**: Admin can export reports to CSV/Excel
+- [x] **RPRT-04**: Manager can view their direct reports' current and upcoming bookings
 
 ### Platform
 
@@ -133,10 +133,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | M365-02 | Phase 5 | Complete |
 | M365-03 | Phase 5 | Complete |
 | M365-04 | Phase 2 | Complete |
-| RPRT-01 | Phase 7 | Pending |
-| RPRT-02 | Phase 7 | Pending |
-| RPRT-03 | Phase 7 | Pending |
-| RPRT-04 | Phase 7 | Pending |
+| RPRT-01 | Phase 7 | Complete |
+| RPRT-02 | Phase 7 | Complete |
+| RPRT-03 | Phase 7 | Complete |
+| RPRT-04 | Phase 7 | Complete |
 | PLAT-01 | Phase 1 | Complete |
 | PLAT-02 | Phase 1 | Complete |
 | PLAT-03 | Phase 1 | Complete |

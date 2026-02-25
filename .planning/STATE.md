@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 6: Notifications -- Complete (2 of 2 plans done).
+**Current focus:** Phase 7: Reporting and Manager Visibility -- In Progress (1 of 3 plans done).
 
 ## Current Position
 
-Phase: 6 of 7 (Notifications)
-Plan: 2 of 2 in current phase (06-02 complete)
-Status: Phase Complete
-Last activity: 2026-02-25 -- Completed 06-02-PLAN.md (Timer-triggered scheduled reminders)
+Phase: 7 of 7 (Reporting and Manager Visibility)
+Plan: 1 of 3 in current phase (07-01 complete)
+Status: In Progress
+Last activity: 2026-02-25 -- Completed 07-01-PLAN.md (Reporting backend service and API endpoints)
 
-Progress: [#########.] 90%
+Progress: [#########.] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 5.0min
-- Total execution time: 1.44 hours
+- Total plans completed: 18
+- Average duration: 4.9min
+- Total execution time: 1.49 hours
 
 **By Phase:**
 
@@ -44,9 +44,10 @@ Progress: [#########.] 90%
 | Phase 05 P02 | 4min | 2 tasks | 6 files |
 | Phase 06 P01 | 8min | 2 tasks | 6 files |
 | Phase 06 P02 | 5min | 1 task | 3 files |
+| Phase 07 P01 | 3min | 2 tasks | 6 files |
 
 **Recent Trend:**
-- Last 5 plans: 5min, 3min, 4min, 8min, 5min
+- Last 5 plans: 3min, 4min, 8min, 5min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -118,6 +119,10 @@ Recent decisions affecting current work:
 - [Phase 06]: Batch processing with 1-second delay between batches of 10 for Graph API rate limiting
 - [Phase 06]: Overdue notification multi-recipient: employee + manager + admin (OVERDUE_ADMIN_EMAIL env var)
 - [Phase 06]: Admin cancel notification uses IIFE pattern for fire-and-forget async in switch/case
+- [Phase 07]: Utilization rate calculated in TypeScript (not SQL) to avoid integer division precision issues
+- [Phase 07]: Raw booking export includes all statuses including Cancelled for complete fleet picture
+- [Phase 07]: Team bookings scope: current + upcoming only (privacy-first, no historical tracking)
+- [Phase 07]: Reporting endpoints under /api/backoffice/reports/* with mandatory date range params
 
 ### Pending Todos
 
@@ -131,5 +136,5 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 06-02-PLAN.md (Phase 6 complete)
-Resume file: .planning/phases/06-notifications/06-02-SUMMARY.md
+Stopped at: Completed 07-01-PLAN.md
+Resume file: .planning/phases/07-reporting-and-manager-visibility/07-01-SUMMARY.md
