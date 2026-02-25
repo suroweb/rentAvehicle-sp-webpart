@@ -1,0 +1,35 @@
+.rangeCalendarContainer {
+  margin-bottom: 8px;
+}
+
+.selectionHint {
+  font-size: 12px;
+  color: #605e5c;
+  padding: 4px 0 0;
+  min-height: 20px;
+}
+
+// Range styling applied via customDayCellRef (global classes on Fluent UI Calendar cells)
+:global {
+  .rangeStart {
+    background-color: #0078d4 !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+  }
+
+  .rangeEnd {
+    background-color: #0078d4 !important;
+    color: #ffffff !important;
+    border-radius: 50%;
+  }
+
+  .inRange {
+    background-color: rgba(0, 120, 212, 0.1) !important;
+    border-radius: 0;
+  }
+
+  // When start and end are the same date, show single solid circle
+  .rangeStart.rangeEnd {
+    border-radius: 50%;
+  }
+}
