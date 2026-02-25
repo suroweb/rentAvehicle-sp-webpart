@@ -1,0 +1,20 @@
+.stickyBottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 56px; /* Above BottomTabBar */
+  z-index: 100;
+  background: #ffffff;
+  border-top: 1px solid #edebe9;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stickyBottomBarText {
+  font-size: 13px;
+  font-weight: 500;
+  color: #323130;
+}

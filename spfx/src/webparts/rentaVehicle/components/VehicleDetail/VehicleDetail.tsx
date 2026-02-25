@@ -11,6 +11,9 @@ import { IAvailableVehicle, IVehicleAvailabilitySlot } from '../../models/IBooki
 import { AvailabilityStrip } from './AvailabilityStrip';
 import { AvailabilityTimeline } from './AvailabilityTimeline';
 import { BookingForm } from './BookingForm';
+import { BottomSheet } from './BottomSheet';
+import { StickyBottomBar } from './StickyBottomBar';
+import { useResponsive } from '../../hooks/useResponsive';
 
 export interface IVehicleDetailProps {
   vehicleId: number;
@@ -43,6 +46,11 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   // State for pre-filling BookingForm from timeline or strip slot click
   const [prefillDate, setPrefillDate] = React.useState<Date | undefined>(undefined);
   const [prefillStartHour, setPrefillStartHour] = React.useState<number | undefined>(undefined);
+
+  // Mobile state
+  const { isMobile } = useResponsive();
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = React.useState<boolean>(false);
+  const [selectionLabel, setSelectionLabel] = React.useState<string>('');
 
   // Week navigation state for AvailabilityStrip
   const [weekOffset, setWeekOffset] = React.useState<number>(0);
@@ -138,19 +146,28 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
     setWeekOffset(Math.max(0, targetWeek));
   }, []);
 
+  // Selection summary callback for mobile sticky bottom bar
+  const handleSelectionSummary = React.useCallback(function onSelectionSummary(summary: string): void {
+    setSelectionLabel(summary);
+  }, []);
+
   // Handlers
   const handleBookingComplete = React.useCallback(function onBookingComplete(_bookingId: number): void {
     setBookingSuccess(true);
     // Reset prefill to trigger form reset via smart defaults
     setPrefillDate(undefined);
     setPrefillStartHour(undefined);
+    // Dismiss bottom sheet on mobile after successful booking
+    if (isMobile) {
+      setIsBottomSheetOpen(false);
+    }
     // Re-fetch availability to show new booking as booked
     apiService.getVehicleAvailability(vehicleId, 7, weekStartDate)
       .then(function updateSlots(slots: IVehicleAvailabilitySlot[]): void {
         setAvailabilitySlots(slots);
       })
       .catch(function onError(): void { /* silently fail */ });
-  }, [vehicleId, weekStartDate, apiService]);
+  }, [vehicleId, weekStartDate, apiService, isMobile]);
 
   const handleConflict = React.useCallback(function onConflict(): void {
     // Re-fetch availability to refresh the strip
@@ -300,7 +317,7 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
           </Pivot>
         </div>
 
-        {/* Right column: sticky booking form -- always visible */}
+        {/* Right column: sticky booking form -- always visible on desktop */}
         <div className={styles.rightColumn}>
           <BookingForm
             vehicleId={vehicle.id}
@@ -315,9 +332,40 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
             prefillStartHour={prefillStartHour}
             onFormDateChange={handleFormDateChange}
             availabilitySlots={availabilitySlots}
+            onSelectionSummary={handleSelectionSummary}
           />
         </div>
       </div>
+
+      {/* Mobile: sticky bottom bar + bottom sheet with booking form */}
+      {isMobile && (
+        <>
+          <StickyBottomBar
+            dateTimeLabel={selectionLabel || 'Select a time'}
+            onBook={function openSheet(): void { setIsBottomSheetOpen(true); }}
+          />
+          <BottomSheet
+            isOpen={isBottomSheetOpen}
+            onDismiss={function closeSheet(): void { setIsBottomSheetOpen(false); }}
+          >
+            <BookingForm
+              vehicleId={vehicle.id}
+              vehicleName={vehicleName}
+              locationName={vehicle.locationName}
+              locationTimezone={vehicleTimezone}
+              apiService={apiService}
+              onBookingComplete={handleBookingComplete}
+              onConflict={handleConflict}
+              onNavigateToVehicle={onNavigateToVehicle}
+              prefillDate={prefillDate}
+              prefillStartHour={prefillStartHour}
+              onFormDateChange={handleFormDateChange}
+              availabilitySlots={availabilitySlots}
+              onSelectionSummary={handleSelectionSummary}
+            />
+          </BottomSheet>
+        </>
+      )}
     </div>
   );
 };

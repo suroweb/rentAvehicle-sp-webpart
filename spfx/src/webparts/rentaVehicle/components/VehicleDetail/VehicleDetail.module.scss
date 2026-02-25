@@ -389,10 +389,11 @@
 @media (max-width: $mobile-breakpoint) {
   .vehicleDetailLayout {
     flex-direction: column;
+    padding-bottom: 120px; /* StickyBottomBar (56px from bottom + bar height) */
   }
 
   .rightColumn {
-    display: none; /* Hidden on mobile -- form will be in bottom sheet (Plan 03) */
+    display: none; /* Hidden on mobile -- form is in bottom sheet */
   }
 
   .formRow {

@@ -24,6 +24,7 @@ export interface IBookingFormProps {
   prefillStartHour?: number;
   onFormDateChange?: (date: Date) => void;
   availabilitySlots?: IVehicleAvailabilitySlot[];
+  onSelectionSummary?: (summary: string) => void;
 }
 
 type FormState = 'selection' | 'review' | 'submitting';
@@ -84,6 +85,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   prefillStartHour,
   onFormDateChange,
   availabilitySlots,
+  onSelectionSummary,
 }) => {
   const tz = useTimezone(locationTimezone);
 
@@ -114,6 +116,15 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
       setEndHour(nextHr);
     }
   }, [prefillDate, prefillStartHour]);
+
+  // Emit selection summary to parent for mobile sticky bottom bar
+  React.useEffect(function emitSummary(): void {
+    if (onSelectionSummary) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const summaryLabel = months[startDate.getMonth()] + ' ' + startDate.getDate() + ', ' + pad2(startHour) + ':00\u2013' + pad2(endHour) + ':00';
+      onSelectionSummary(summaryLabel);
+    }
+  }, [startDate, startHour, endHour, onSelectionSummary]);
 
   // Computed UTC times for review and submission
   const startTimeUtc = React.useMemo(function computeStart(): string {
