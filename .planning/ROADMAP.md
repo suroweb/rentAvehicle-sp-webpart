@@ -116,11 +116,11 @@ Plans:
   2. Employee receives a return reminder before their return date/time
   3. Manager receives a notification when one of their direct reports books a vehicle
   4. Notifications are delivered as Teams Adaptive Cards with action buttons (not just plain text emails)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md -- Notification service layer: email confirmation (Graph sendMail), Teams activity feed notifications, manager lookup, wired into booking and admin booking endpoints
+- [ ] 06-02-PLAN.md -- Timer-triggered scheduled reminders: pickup reminder (1h before), return reminder (1h before), overdue alerts (15min grace), human verification
 
 ### Phase 7: Reporting and Manager Visibility
 **Goal**: Fleet admins can analyze utilization patterns and export data, and managers can see their team's rental activity
