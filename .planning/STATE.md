@@ -5,14 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** Phase 8: UX Polish -- Availability Strip Navigation and Booking Process Refinement (3 of 3 plans done -- PHASE COMPLETE).
+**Current focus:** Phase 8: UX Polish -- human testing in progress. All 3 plans executed, verification found 12 items needing visual/functional checks.
 
 ## Current Position
 
 Phase: 8 of 8 (UX Polish: Availability Strip Navigation and Booking Process Refinement)
 Plan: 3 of 3 in current phase (08-03 complete -- PHASE COMPLETE)
-Status: COMPLETE
-Last activity: 2026-02-25 -- Completed 08-03-PLAN.md (Mobile booking experience with bottom sheet, sticky bar, touch targets)
+Status: TESTING
+Last activity: 2026-02-25 -- Human testing Phase 8. Fixed: layout wraps on narrow containers, dev role centralized.
+
+### Testing Progress (12 items from VERIFICATION.md)
+1. [x] Desktop side-by-side layout — FIXED (flex-wrap for narrow containers)
+2. [ ] Strip arrow navigation loading next/previous weeks
+3. [ ] Free slot click pre-filling the form
+4. [ ] Form date change shifting the strip week
+5. [ ] Today column blue accent highlight
+6. [ ] Overlap warning MessageBar
+7. [ ] Post-booking strip refresh and form reset
+8. [ ] Mobile bottom sheet open/close with swipe-to-dismiss
+9. [ ] Mobile strip 44px touch targets
+10. [ ] Mobile Day View vertical slot list with vehicle swipe
+11. [ ] Day View prev/next day arrows
+12. [ ] Past hour filtering in dropdowns
 
 Progress: [##########] 100%
 
@@ -166,5 +180,6 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Completed 08-03-PLAN.md (Phase 8 complete -- all plans delivered)
-Resume file: .planning/phases/08-ux-polish-availability-strip-navigation-and-booking-process-refinement/08-03-SUMMARY.md
+Stopped at: Human testing Phase 8 — item 1/12 fixed (layout wrap), items 2-12 remain
+Resume with: `/gsd:verify-work 8` to continue step-by-step testing
+Also fixed: dev.config.json centralized dev role config (was Admin, now Employee)
