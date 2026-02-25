@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: complete
-last_updated: "2026-02-25T21:00:00.000Z"
+milestone: v1.1
+milestone_name: Production & Documentation
+status: active
+last_updated: "2026-02-25T21:10:00.000Z"
 progress:
-  total_phases: 10
-  completed_phases: 10
-  total_plans: 30
-  completed_plans: 30
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,13 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-25)
 
 **Core value:** Employees can quickly find and book an available vehicle at their location -- self-service, no approval bottleneck.
-**Current focus:** v1.0 MVP shipped. Planning next milestone.
+**Current focus:** v1.1 Production & Documentation — make v1.0 deployable, verifiable, and presentable.
 
 ## Current Position
 
-Phase: v1.0 complete (10 phases, 30 plans)
-Status: MILESTONE COMPLETE
-Last activity: 2026-02-25 -- v1.0 MVP archived to .planning/milestones/
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-25 — Milestone v1.1 started
 
 ## Accumulated Context
 
@@ -43,8 +44,20 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 
 (None active — resolved during v1.0)
 
+### Pending Todos
+
+8 todos feeding into v1.1:
+- Verify Phase 5 M365 calendar integration (api)
+- Verify Phase 6 Notifications on live tenant (api)
+- Add admin timezone configuration per location (ui)
+- App registration and Graph API setup guide (docs)
+- SharePoint App Catalog deployment guide (docs)
+- Developer documentation and portfolio README (docs)
+- CI/CD pipeline GitHub Actions (tooling)
+- Infrastructure as Code Bicep templates (tooling)
+
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: v1.0 milestone complete and archived.
-Resume with: `/gsd:new-milestone` to start v1.1 planning.
+Stopped at: Milestone v1.1 started, defining requirements.
+Resume with: Continue requirements definition and roadmap creation.

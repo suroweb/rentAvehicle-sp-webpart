@@ -36,7 +36,18 @@ Employees can quickly find and book an available vehicle at their location for c
 
 ### Active
 
-(Fresh for next milestone — define with `/gsd:new-milestone`)
+#### Current Milestone: v1.1 Production & Documentation
+
+**Goal:** Make v1.0 deployable, verifiable, and presentable — verify live tenant integrations, create deployment and developer documentation, set up CI/CD and IaC, and add admin timezone configuration.
+
+**Target features:**
+- Live tenant verification of M365 calendar integration and notifications
+- App registration and Graph API setup guide
+- SharePoint App Catalog deployment guide
+- Developer documentation and portfolio README
+- CI/CD pipeline with GitHub Actions
+- Infrastructure as Code with Bicep templates
+- Admin timezone configuration per location
 
 ### Out of Scope
 
@@ -82,4 +93,4 @@ Initial UX testing led to range picker unification (Phase 08.1) and Day View rem
 | Week View only (Day View removed) | Day View added complexity without sufficient value over per-vehicle week strip | ✓ Good — Phase 08.1.1 cleanup |
 
 ---
-*Last updated: 2026-02-25 after v1.0 milestone*
+*Last updated: 2026-02-25 after v1.1 milestone start*
