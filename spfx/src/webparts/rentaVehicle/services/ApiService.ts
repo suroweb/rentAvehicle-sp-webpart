@@ -4,6 +4,7 @@ import { IVehicle, IVehicleInput, IVehicleFilters } from '../models/IVehicle';
 import { ICategory, ICategoryInput } from '../models/ICategory';
 import { ILocation, ILocationSyncResult } from '../models/ILocation';
 import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, ITimelineData, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
+import { IKpiSummary, IUtilizationData, IUtilizationVehicleData, ITrendData, IRawBookingRecord } from '../models/IReport';
 
 // Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
@@ -208,6 +209,59 @@ export class ApiService {
       '/api/backoffice/bookings/' + String(bookingId),
       { cancelReason: cancelReason }
     );
+  }
+
+  // ── Reports ─────────────────────────────────────────────
+
+  public async getKpi(dateFrom: string, dateTo: string): Promise<IKpiSummary> {
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    return this.get<IKpiSummary>('/api/backoffice/reports/kpi?' + params.toString());
+  }
+
+  public async getUtilizationReport(
+    dateFrom: string,
+    dateTo: string,
+    locationId?: number
+  ): Promise<IUtilizationData[] | IUtilizationVehicleData[]> {
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    if (locationId !== undefined) {
+      params.append('locationId', String(locationId));
+    }
+    return this.get<IUtilizationData[] | IUtilizationVehicleData[]>(
+      '/api/backoffice/reports/utilization?' + params.toString()
+    );
+  }
+
+  public async getTrends(
+    dateFrom: string,
+    dateTo: string,
+    granularity: 'daily' | 'weekly',
+    locationId?: number,
+    categoryId?: number
+  ): Promise<ITrendData[]> {
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    params.append('granularity', granularity);
+    if (locationId !== undefined) {
+      params.append('locationId', String(locationId));
+    }
+    if (categoryId !== undefined) {
+      params.append('categoryId', String(categoryId));
+    }
+    return this.get<ITrendData[]>('/api/backoffice/reports/trends?' + params.toString());
+  }
+
+  public async getRawExportData(dateFrom: string, dateTo: string): Promise<IRawBookingRecord[]> {
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    params.append('type', 'raw');
+    return this.get<IRawBookingRecord[]>('/api/backoffice/reports/export?' + params.toString());
   }
 
   // ── HTTP helpers ──────────────────────────────────────────

@@ -14,8 +14,10 @@ import { VehicleBrowse } from '../VehicleBrowse/VehicleBrowse';
 import { VehicleDetail } from '../VehicleDetail/VehicleDetail';
 import { MyBookings } from '../MyBookings/MyBookings';
 import { AllBookings } from '../AllBookings/AllBookings';
+import { Reports } from '../Reports/Reports';
 import { ApiService } from '../../services/ApiService';
 import { ILocation } from '../../models/ILocation';
+import { ICategory } from '../../models/ICategory';
 import { AadHttpClient } from '@microsoft/sp-http';
 
 interface IAppShellContentProps {
@@ -38,13 +40,17 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
     return new ApiService(apiClient || null);
   }, [apiClient]);
 
-  // Locations loaded for admin pages (AllBookings)
+  // Locations and categories loaded for admin pages (AllBookings, Reports)
   const [adminLocations, setAdminLocations] = React.useState<ILocation[]>([]);
+  const [adminCategories, setAdminCategories] = React.useState<ICategory[]>([]);
   React.useEffect(() => {
     if (auth.user && (auth.user.role === 'Admin' || auth.user.role === 'SuperAdmin') && apiService) {
       apiService.getLocations()
         .then((locs: ILocation[]) => { setAdminLocations(locs); })
         .catch(() => { /* Locations load failure is non-blocking */ });
+      apiService.getCategories()
+        .then((cats: ICategory[]) => { setAdminCategories(cats); })
+        .catch(() => { /* Categories load failure is non-blocking */ });
     }
   }, [auth.user, apiService]);
 
@@ -149,6 +155,21 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
         return (
           <p className={styles.welcomeText}>
             API connection is not available. All Bookings requires an active API connection.
+          </p>
+        );
+      case 'reports':
+        if (apiService) {
+          return (
+            <Reports
+              apiService={apiService}
+              locations={adminLocations}
+              categories={adminCategories}
+            />
+          );
+        }
+        return (
+          <p className={styles.welcomeText}>
+            API connection not available.
           </p>
         );
       default:
