@@ -51,9 +51,9 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   const [bookingSuccess, setBookingSuccess] = React.useState<boolean>(false);
   const [availabilityView, setAvailabilityView] = React.useState<string>('week');
 
-  // State for pre-filling BookingForm from timeline or strip slot click
-  const [prefillDate, setPrefillDate] = React.useState<Date | undefined>(undefined);
-  const [prefillStartHour, setPrefillStartHour] = React.useState<number | undefined>(undefined);
+  // State for pre-filling BookingForm from timeline/strip slot click or browse-page date context
+  const [prefillDate, setPrefillDate] = React.useState<Date | undefined>(initialStartDate);
+  const [prefillStartHour, setPrefillStartHour] = React.useState<number | undefined>(initialStartHour);
 
   // Mobile state
   const { isMobile } = useResponsive();
@@ -62,6 +62,20 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
 
   // Week navigation state for AvailabilityStrip
   const [weekOffset, setWeekOffset] = React.useState<number>(0);
+
+  // Set initial weekOffset to show the week containing initialStartDate from browse page
+  React.useEffect(function setInitialWeek(): void {
+    if (initialStartDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffMs = initialStartDate.getTime() - today.getTime();
+      const diffDays = Math.floor(diffMs / 86400000);
+      const targetOffset = Math.floor(diffDays / 7);
+      if (targetOffset >= 0 && targetOffset <= 7) {
+        setWeekOffset(targetOffset);
+      }
+    }
+  }, []); // Only run once on mount -- initialStartDate won't change
 
   // Compute weekStartDate string for API calls
   const weekStartDate = React.useMemo(function computeWeekStart(): string {
