@@ -5,6 +5,7 @@ import styles from './VehicleDetail.module.scss';
 import { IVehicleAvailabilitySlot } from '../../models/IBooking';
 import { useTimezone } from '../../hooks/useTimezone';
 import { useResponsive } from '../../hooks/useResponsive';
+import { IRangeState } from './RangeCalendar';
 
 export interface IAvailabilityStripProps {
   slots: IVehicleAvailabilitySlot[];
@@ -14,6 +15,8 @@ export interface IAvailabilityStripProps {
   onPrevWeek: () => void;
   onNextWeek: () => void;
   onSlotClick: (dayDate: Date, hour: number) => void;
+  range?: IRangeState;
+  onRangeChange?: (partial: Partial<IRangeState>) => void;
 }
 
 // Display hours range for the strip (8:00 - 20:00)

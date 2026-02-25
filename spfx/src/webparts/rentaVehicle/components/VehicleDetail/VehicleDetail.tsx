@@ -14,6 +14,7 @@ import { BookingForm } from './BookingForm';
 import { BottomSheet } from './BottomSheet';
 import { StickyBottomBar } from './StickyBottomBar';
 import { useResponsive } from '../../hooks/useResponsive';
+import { IRangeState } from './RangeCalendar';
 
 export interface IVehicleDetailProps {
   vehicleId: number;
@@ -30,6 +31,17 @@ export interface IVehicleDetailProps {
 
 function pad2(n: number): string {
   return n < 10 ? '0' + String(n) : String(n);
+}
+
+function getToday(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function getNextFullHour(): number {
+  const now = new Date();
+  const nextHour = now.getHours() + 1;
+  return nextHour >= 24 ? 0 : nextHour;
 }
 
 export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
@@ -51,9 +63,28 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   const [bookingSuccess, setBookingSuccess] = React.useState<boolean>(false);
   const [availabilityView, setAvailabilityView] = React.useState<string>('week');
 
-  // State for pre-filling BookingForm from timeline/strip slot click or browse-page date context
-  const [prefillDate, setPrefillDate] = React.useState<Date | undefined>(initialStartDate);
-  const [prefillStartHour, setPrefillStartHour] = React.useState<number | undefined>(initialStartHour);
+  // Unified range state -- single source of truth for date/time selection
+  const [range, setRange] = React.useState<IRangeState>(function initRange(): IRangeState {
+    const defaultStart = initialStartDate || getToday();
+    const defaultStartHour = initialStartHour !== undefined ? initialStartHour : getNextFullHour();
+    const defaultEnd = initialEndDate || defaultStart;
+    const defaultEndHour = initialEndHour !== undefined
+      ? initialEndHour
+      : (defaultStartHour >= 23 ? 23 : defaultStartHour + 1);
+    return {
+      startDate: defaultStart,
+      startHour: defaultStartHour,
+      endDate: defaultEnd,
+      endHour: defaultEndHour,
+    };
+  });
+
+  // Partial update helper -- preserves other fields
+  const updateRange = React.useCallback(function onUpdateRange(partial: Partial<IRangeState>): void {
+    setRange(function mergeRange(prev: IRangeState): IRangeState {
+      return { ...prev, ...partial };
+    });
+  }, []);
 
   // Mobile state
   const { isMobile } = useResponsive();
@@ -76,6 +107,18 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
       }
     }
   }, []); // Only run once on mount -- initialStartDate won't change
+
+  // Watch range.startDate for strip sync (replaces old handleFormDateChange callback)
+  React.useEffect(function syncStripToRange(): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((range.startDate.getTime() - today.getTime()) / 86400000);
+    const targetWeek = Math.floor(diffDays / 7);
+    const clamped = Math.max(0, Math.min(7, targetWeek));
+    if (clamped !== weekOffset) {
+      setWeekOffset(clamped);
+    }
+  }, [range.startDate]); // Only react to startDate changes
 
   // Compute weekStartDate string for API calls
   const weekStartDate = React.useMemo(function computeWeekStart(): string {
@@ -150,23 +193,13 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
     if (weekOffset < 7) setWeekOffset(weekOffset + 1);
   }, [weekOffset]);
 
-  // Strip slot click handler -- pre-fill booking form with date and hour
+  // Strip slot click handler -- update range with clicked date and hour
   const handleStripSlotClick = React.useCallback(function onStripSlotClick(
     dayDate: Date, hour: number
   ): void {
-    setPrefillDate(dayDate);
-    setPrefillStartHour(hour);
+    updateRange({ startDate: dayDate, startHour: hour, endDate: dayDate, endHour: hour >= 23 ? 23 : hour + 1 });
     setBookingSuccess(false);
-  }, []);
-
-  // Form date change handler (bidirectional sync -- form changes shift the strip)
-  const handleFormDateChange = React.useCallback(function onFormDateChange(date: Date): void {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffDays = Math.floor((date.getTime() - today.getTime()) / 86400000);
-    const targetWeek = Math.floor(diffDays / 7);
-    setWeekOffset(Math.max(0, targetWeek));
-  }, []);
+  }, [updateRange]);
 
   // Selection summary callback for mobile sticky bottom bar
   const handleSelectionSummary = React.useCallback(function onSelectionSummary(summary: string): void {
@@ -176,9 +209,15 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
   // Handlers
   const handleBookingComplete = React.useCallback(function onBookingComplete(_bookingId: number): void {
     setBookingSuccess(true);
-    // Reset prefill to trigger form reset via smart defaults
-    setPrefillDate(undefined);
-    setPrefillStartHour(undefined);
+    // Reset range to smart defaults
+    const today = getToday();
+    const nextHour = getNextFullHour();
+    setRange({
+      startDate: today,
+      startHour: nextHour,
+      endDate: today,
+      endHour: nextHour >= 23 ? 23 : nextHour + 1,
+    });
     // Dismiss bottom sheet on mobile after successful booking
     if (isMobile) {
       setIsBottomSheetOpen(false);
@@ -214,14 +253,12 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
     dateString: string,
     startHour: number
   ): void {
-    // Parse date string (YYYY-MM-DD) and pre-fill the booking form
+    // Parse date string (YYYY-MM-DD) and update range
     const parts = dateString.split('-');
     const date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-    setPrefillDate(date);
-    setPrefillStartHour(startHour);
-    // Scroll to booking form
+    updateRange({ startDate: date, startHour: startHour, endDate: date, endHour: startHour >= 23 ? 23 : startHour + 1 });
     setBookingSuccess(false);
-  }, []);
+  }, [updateRange]);
 
   // Loading state
   if (loading) {
@@ -325,6 +362,8 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
                 onSlotClick={handleStripSlotClick}
+                range={range}
+                onRangeChange={updateRange}
               />
             </PivotItem>
             <PivotItem headerText="Day View" itemKey="day">
@@ -334,6 +373,8 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
                 locationTimezone={vehicleTimezone}
                 currentUserId={currentUserId}
                 onSlotClick={handleTimelineSlotClick}
+                range={range}
+                onRangeChange={updateRange}
               />
             </PivotItem>
           </Pivot>
@@ -350,9 +391,8 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
             onBookingComplete={handleBookingComplete}
             onConflict={handleConflict}
             onNavigateToVehicle={onNavigateToVehicle}
-            prefillDate={prefillDate}
-            prefillStartHour={prefillStartHour}
-            onFormDateChange={handleFormDateChange}
+            range={range}
+            onRangeChange={updateRange}
             availabilitySlots={availabilitySlots}
             onSelectionSummary={handleSelectionSummary}
           />
@@ -379,9 +419,8 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
               onBookingComplete={handleBookingComplete}
               onConflict={handleConflict}
               onNavigateToVehicle={onNavigateToVehicle}
-              prefillDate={prefillDate}
-              prefillStartHour={prefillStartHour}
-              onFormDateChange={handleFormDateChange}
+              range={range}
+              onRangeChange={updateRange}
               availabilitySlots={availabilitySlots}
               onSelectionSummary={handleSelectionSummary}
             />

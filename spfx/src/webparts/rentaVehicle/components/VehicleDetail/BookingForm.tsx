@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { PrimaryButton, DefaultButton } from '@fluentui/react/lib/Button';
 import { Dropdown, IDropdownOption } from '@fluentui/react/lib/Dropdown';
-import { DatePicker } from '@fluentui/react/lib/DatePicker';
-import { DayOfWeek } from '@fluentui/react/lib/Calendar';
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import styles from './VehicleDetail.module.scss';
@@ -10,6 +8,7 @@ import suggestionStyles from '../MyBookings/MyBookings.module.scss';
 import { ApiService } from '../../services/ApiService';
 import { IConflictResponse, IBookingSuggestion, IVehicleAvailabilitySlot } from '../../models/IBooking';
 import { useTimezone, localToUtcIso } from '../../hooks/useTimezone';
+import { RangeCalendar, IRangeState } from './RangeCalendar';
 
 export interface IBookingFormProps {
   vehicleId: number;
@@ -20,9 +19,8 @@ export interface IBookingFormProps {
   onBookingComplete: (bookingId: number) => void;
   onConflict: () => void;
   onNavigateToVehicle?: (vehicleId: number) => void;
-  prefillDate?: Date;
-  prefillStartHour?: number;
-  onFormDateChange?: (date: Date) => void;
+  range: IRangeState;
+  onRangeChange: (partial: Partial<IRangeState>) => void;
   availabilitySlots?: IVehicleAvailabilitySlot[];
   onSelectionSummary?: (summary: string) => void;
 }
@@ -37,17 +35,6 @@ function pad2(n: number): string {
 const HOUR_OPTIONS: IDropdownOption[] = [];
 for (let i = 0; i < 24; i++) {
   HOUR_OPTIONS.push({ key: i, text: pad2(i) + ':00' });
-}
-
-function getToday(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-function getNextFullHour(): number {
-  const now = new Date();
-  const nextHour = now.getHours() + 1;
-  return nextHour >= 24 ? 0 : nextHour;
 }
 
 /**
@@ -81,9 +68,8 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
   onBookingComplete,
   onConflict,
   onNavigateToVehicle,
-  prefillDate,
-  prefillStartHour,
-  onFormDateChange,
+  range,
+  onRangeChange,
   availabilitySlots,
   onSelectionSummary,
 }) => {
@@ -91,61 +77,41 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
 
   // Form state
   const [formState, setFormState] = React.useState<FormState>('selection');
-  const [startDate, setStartDate] = React.useState<Date>(getToday);
-  const [endDate, setEndDate] = React.useState<Date>(getToday);
-  const [startHour, setStartHour] = React.useState<number>(getNextFullHour);
-  const [endHour, setEndHour] = React.useState<number>(function initEndHour(): number {
-    const next = getNextFullHour();
-    return next >= 23 ? 23 : next + 1;
-  });
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [suggestions, setSuggestions] = React.useState<IBookingSuggestion[]>([]);
-
-  // Apply prefill from timeline slot click
-  React.useEffect(function applyPrefill(): void {
-    if (prefillDate !== undefined) {
-      setStartDate(prefillDate);
-      setEndDate(prefillDate);
-      setFormState('selection');
-      setError(undefined);
-      setSuggestions([]);
-    }
-    if (prefillStartHour !== undefined) {
-      setStartHour(prefillStartHour);
-      const nextHr = prefillStartHour >= 23 ? 23 : prefillStartHour + 1;
-      setEndHour(nextHr);
-    }
-  }, [prefillDate, prefillStartHour]);
 
   // Emit selection summary to parent for mobile sticky bottom bar
   React.useEffect(function emitSummary(): void {
     if (onSelectionSummary) {
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      const summaryLabel = months[startDate.getMonth()] + ' ' + startDate.getDate() + ', ' + pad2(startHour) + ':00\u2013' + pad2(endHour) + ':00';
+      const sameDay = range.startDate.getTime() === range.endDate.getTime();
+      const summaryLabel = sameDay
+        ? months[range.startDate.getMonth()] + ' ' + range.startDate.getDate() + ', ' + pad2(range.startHour) + ':00\u2013' + pad2(range.endHour) + ':00'
+        : months[range.startDate.getMonth()] + ' ' + range.startDate.getDate() + ' ' + pad2(range.startHour) + ':00 \u2013 ' + months[range.endDate.getMonth()] + ' ' + range.endDate.getDate() + ' ' + pad2(range.endHour) + ':00';
       onSelectionSummary(summaryLabel);
     }
-  }, [startDate, startHour, endHour, onSelectionSummary]);
+  }, [range.startDate, range.startHour, range.endDate, range.endHour, onSelectionSummary]);
 
   // Computed UTC times for review and submission
   const startTimeUtc = React.useMemo(function computeStart(): string {
     return localToUtcIso(
-      startDate.getFullYear(),
-      startDate.getMonth() + 1,
-      startDate.getDate(),
-      startHour,
+      range.startDate.getFullYear(),
+      range.startDate.getMonth() + 1,
+      range.startDate.getDate(),
+      range.startHour,
       locationTimezone
     );
-  }, [startDate, startHour, locationTimezone]);
+  }, [range.startDate, range.startHour, locationTimezone]);
 
   const endTimeUtc = React.useMemo(function computeEnd(): string {
     return localToUtcIso(
-      endDate.getFullYear(),
-      endDate.getMonth() + 1,
-      endDate.getDate(),
-      endHour,
+      range.endDate.getFullYear(),
+      range.endDate.getMonth() + 1,
+      range.endDate.getDate(),
+      range.endHour,
       locationTimezone
     );
-  }, [endDate, endHour, locationTimezone]);
+  }, [range.endDate, range.endHour, locationTimezone]);
 
   // Overlap warning: check if form selection conflicts with a booked slot
   const overlapWarning = React.useMemo(function checkOverlap(): boolean {
@@ -163,49 +129,32 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
 
   // Filtered hour options based on whether today is selected
   const startHourOptions = React.useMemo(function filterStartHours(): IDropdownOption[] {
-    return getFilteredHourOptions(startDate);
-  }, [startDate]);
+    return getFilteredHourOptions(range.startDate);
+  }, [range.startDate]);
 
   const endHourOptions = React.useMemo(function filterEndHours(): IDropdownOption[] {
-    return getFilteredHourOptions(endDate);
-  }, [endDate]);
+    return getFilteredHourOptions(range.endDate);
+  }, [range.endDate]);
 
-  // Handlers
-  const handleStartDateChange = React.useCallback(function onStartDateChange(date: Date | null | undefined): void {
-    if (date) {
-      setStartDate(date);
-      setSuggestions([]);
-      if (onFormDateChange) {
-        onFormDateChange(date);
-      }
-    }
-  }, [onFormDateChange]);
-
-  const handleEndDateChange = React.useCallback(function onEndDateChange(date: Date | null | undefined): void {
-    if (date) {
-      setEndDate(date);
-      setSuggestions([]);
-    }
-  }, []);
-
+  // Handlers -- use onRangeChange to update hours via range state
   const handleStartHourChange = React.useCallback(
     function onStartHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
       if (option) {
-        setStartHour(option.key as number);
+        onRangeChange({ startHour: option.key as number });
         setSuggestions([]);
       }
     },
-    []
+    [onRangeChange]
   );
 
   const handleEndHourChange = React.useCallback(
     function onEndHourChange(_e: React.FormEvent<HTMLDivElement>, option?: IDropdownOption): void {
       if (option) {
-        setEndHour(option.key as number);
+        onRangeChange({ endHour: option.key as number });
         setSuggestions([]);
       }
     },
-    []
+    [onRangeChange]
   );
 
   const handleReview = React.useCallback(function onReview(): void {
@@ -347,13 +296,15 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
           {suggestions.map(function renderSuggestion(suggestion: IBookingSuggestion, idx: number): React.ReactElement {
             const handleSuggestionClick = function onSuggestionClick(): void {
               if (suggestion.type === 'time_shift') {
-                // Parse suggestion times and update form
+                // Parse suggestion times and update range
                 const sugStart = new Date(suggestion.startTime);
                 const sugEnd = new Date(suggestion.endTime);
-                setStartDate(new Date(sugStart.getFullYear(), sugStart.getMonth(), sugStart.getDate()));
-                setEndDate(new Date(sugEnd.getFullYear(), sugEnd.getMonth(), sugEnd.getDate()));
-                setStartHour(sugStart.getHours());
-                setEndHour(sugEnd.getHours());
+                onRangeChange({
+                  startDate: new Date(sugStart.getFullYear(), sugStart.getMonth(), sugStart.getDate()),
+                  endDate: new Date(sugEnd.getFullYear(), sugEnd.getMonth(), sugEnd.getDate()),
+                  startHour: sugStart.getHours(),
+                  endHour: sugEnd.getHours(),
+                });
                 setSuggestions([]);
                 setError(undefined);
               } else if (suggestion.type === 'alt_vehicle' && onNavigateToVehicle) {
@@ -387,50 +338,24 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
       )}
 
       <div className={styles.formFields}>
+        <RangeCalendar
+          range={range}
+          onRangeChange={onRangeChange}
+        />
+
         <div className={styles.formRow}>
           <div className={styles.formField}>
-            <DatePicker
-              label="Start date"
-              value={startDate}
-              onSelectDate={handleStartDateChange}
-              firstDayOfWeek={DayOfWeek.Monday}
-              minDate={getToday()}
-              formatDate={function fmtDate(date?: Date): string {
-                return date
-                  ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                  : '';
-              }}
-            />
-          </div>
-          <div className={styles.formFieldNarrow}>
             <Dropdown
               label={'Start time (' + tz.timezoneAbbr + ')'}
-              selectedKey={startHour}
+              selectedKey={range.startHour}
               options={startHourOptions}
               onChange={handleStartHourChange}
             />
           </div>
-        </div>
-
-        <div className={styles.formRow}>
           <div className={styles.formField}>
-            <DatePicker
-              label="End date"
-              value={endDate}
-              onSelectDate={handleEndDateChange}
-              firstDayOfWeek={DayOfWeek.Monday}
-              minDate={startDate}
-              formatDate={function fmtDate(date?: Date): string {
-                return date
-                  ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                  : '';
-              }}
-            />
-          </div>
-          <div className={styles.formFieldNarrow}>
             <Dropdown
               label={'End time (' + tz.timezoneAbbr + ')'}
-              selectedKey={endHour}
+              selectedKey={range.endHour}
               options={endHourOptions}
               onChange={handleEndHourChange}
             />

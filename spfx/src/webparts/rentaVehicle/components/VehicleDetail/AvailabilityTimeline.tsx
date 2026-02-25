@@ -8,6 +8,7 @@ import { ApiService } from '../../services/ApiService';
 import { ITimelineData, ITimelineBooking, IAvailableVehicle } from '../../models/IBooking';
 import { useTimezone } from '../../hooks/useTimezone';
 import { useResponsive } from '../../hooks/useResponsive';
+import { IRangeState } from './RangeCalendar';
 
 export interface IAvailabilityTimelineProps {
   apiService: ApiService;
@@ -15,6 +16,8 @@ export interface IAvailabilityTimelineProps {
   locationTimezone: string;
   currentUserId: string;
   onSlotClick: (vehicleId: number, date: string, startHour: number) => void;
+  range?: IRangeState;
+  onRangeChange?: (partial: Partial<IRangeState>) => void;
 }
 
 // Display hours range (8:00 - 20:00 = 12 columns)
