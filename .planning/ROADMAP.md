@@ -59,7 +59,9 @@
   1. Following the app registration guide, a person can create the Entra ID app registration with correct API permissions and Graph API configuration end-to-end
   2. Following the deployment guide, a person can upload the SPFx package to the App Catalog, deploy to a SharePoint site, and add the app as a Teams tab
   3. Developer README documents architecture, local development setup, tech stack, and serves as a portfolio showcase
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 10-01-PLAN.md — Admin guides: Entra ID app registration guide and SPFx/Azure Functions deployment guide
+- [ ] 10-02-PLAN.md — Portfolio README with architecture diagram, tech stack badges, and documentation links
 
 ### Phase 11: CI/CD and Infrastructure
 **Goal**: Code changes are automatically validated by CI, and infrastructure can be provisioned from templates
@@ -97,10 +99,10 @@
 | 08.1. Unified Date Range Picker | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 08.1.1. Remove Day View | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 9. Live Tenant Verification | v1.1 | 5/5 | Complete | 2026-02-26 |
-| 10. Documentation | v1.1 | 0/? | Not started | - |
+| 10. Documentation | v1.1 | 0/2 | Planned | - |
 | 11. CI/CD and Infrastructure | v1.1 | 0/? | Not started | - |
 | 12. Admin Timezone Configuration | v1.1 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-26 after Phase 9 completion (5 plans, all verified on live tenant)*
+*Last updated: 2026-02-26 after Phase 10 planning (2 plans created)*
