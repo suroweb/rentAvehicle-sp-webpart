@@ -171,6 +171,22 @@ export async function sendTeamsActivityNotification(
   try {
     const appBaseUrl = process.env.APP_BASE_URL || '';
 
+    // Teams activity feed webUrl must be a valid Teams deep link
+    // (https://teams.microsoft.com/l/...). If APP_BASE_URL is a SharePoint URL,
+    // convert it to a Teams deep link that opens the page in Teams.
+    // If APP_BASE_URL is empty, use a generic Teams deep link.
+    let webUrl: string;
+    if (appBaseUrl.includes('teams.microsoft.com')) {
+      webUrl = `${appBaseUrl}?bookingId=${bookingId}`;
+    } else if (appBaseUrl.includes('.sharepoint.com')) {
+      // Encode the SharePoint page URL as a Teams deep link
+      const spPageUrl = `${appBaseUrl}?bookingId=${bookingId}`;
+      webUrl = `https://teams.microsoft.com/l/entity/com.microsoft.teamspace.tab.web/null?webUrl=${encodeURIComponent(spPageUrl)}`;
+    } else {
+      // Fallback: generic Teams deep link
+      webUrl = `https://teams.microsoft.com/l/entity/com.microsoft.teamspace.tab.web/null?label=RentAVehicle&context=${encodeURIComponent(JSON.stringify({ bookingId }))}`;
+    }
+
     const client = await getGraphClient();
     await client
       .api(`/users/${userId}/teamwork/sendActivityNotification`)
@@ -178,7 +194,7 @@ export async function sendTeamsActivityNotification(
         topic: {
           source: 'text',
           value: 'RentAVehicle',
-          webUrl: `${appBaseUrl}?bookingId=${bookingId}`,
+          webUrl,
         },
         activityType,
         previewText: {
