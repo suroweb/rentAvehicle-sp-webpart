@@ -154,6 +154,7 @@
 |---|-------|------------|-------------|---------------|
 | 1 | Teams activity notification returned 400 BadRequest | webUrl in topic was empty or SharePoint URL; Graph API requires URLs starting with teams.microsoft.com/l/ | Fixed sendTeamsActivityNotification to construct valid Teams deep links: handles Teams URLs, SharePoint URLs (encoded), and empty URLs (generic Teams deep link fallback) | api/src/services/notificationService.ts |
 | 2 | Teams activity notification returned 403 Forbidden after webUrl fix | Teams app not installed for target user; activity feed requires app manifest with declared activityTypes | Known limitation: documented in checklist. Code is correct and will work once SPFx webpart is deployed as Teams app with activity types in manifest.json | (no code change -- documentation only) |
+| 3 | Security verification: local.settings.json git history | Flagged as potential security concern in verification report -- needed confirmation that real secrets were never committed | Verified safe: local.settings.json was committed with empty credential placeholders in early development (commits 953c58d through e52b9b3). All AZURE_CLIENT_SECRET, AZURE_CLIENT_ID, and AZURE_TENANT_ID values were `""` (empty strings). Commit ab4f366 gitignored the file and introduced local.settings.template.json. Real credentials were added AFTER gitignore -- no secret rotation needed. | No fix needed -- verified safe |
 
 ---
 
