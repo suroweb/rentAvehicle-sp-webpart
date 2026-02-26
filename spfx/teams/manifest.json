@@ -1,0 +1,71 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "faa3486e-fc56-40d2-b420-c5b9d30257b3",
+  "developer": {
+    "name": "RentAVehicle",
+    "websiteUrl": "https://contoso.sharepoint.com",
+    "privacyUrl": "https://contoso.sharepoint.com",
+    "termsOfUseUrl": "https://contoso.sharepoint.com"
+  },
+  "name": {
+    "short": "RentAVehicle",
+    "full": "RentAVehicle - Internal Vehicle Rental"
+  },
+  "description": {
+    "short": "Book fleet vehicles at your location",
+    "full": "Internal vehicle rental system. Employees can find and book available vehicles at their office location. Integrates with Outlook calendars and sends Teams notifications for booking confirmations, reminders, and alerts."
+  },
+  "icons": {
+    "color": "c79feb6b-b2b6-4102-bbc4-a2b3a9beff18_color.png",
+    "outline": "c79feb6b-b2b6-4102-bbc4-a2b3a9beff18_outline.png"
+  },
+  "accentColor": "#0078D4",
+  "staticTabs": [
+    {
+      "entityId": "rentavehicle",
+      "name": "RentAVehicle",
+      "contentUrl": "https://{teamSiteDomain}/_layouts/15/TeamsLogon.aspx?SPFX=true&dest=/_layouts/15/teamshostedapp.aspx%3Fteams%26personal%26componentId=c79feb6b-b2b6-4102-bbc4-a2b3a9beff18%26forceLocale={locale}",
+      "scopes": ["personal"]
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": [
+    "*.sharepoint.com",
+    "*.microsoft.com"
+  ],
+  "webApplicationInfo": {
+    "id": "<your-client-id>",
+    "resource": "api://<your-client-id>"
+  },
+  "activities": {
+    "activityTypes": [
+      {
+        "type": "bookingConfirmed",
+        "description": "A vehicle booking has been confirmed",
+        "templateText": "{actor} confirmed booking for {vehicle}"
+      },
+      {
+        "type": "managerBookingAlert",
+        "description": "An employee created a new vehicle booking",
+        "templateText": "{actor} booked {vehicle}"
+      },
+      {
+        "type": "pickupReminder",
+        "description": "Reminder to pick up a booked vehicle",
+        "templateText": "Pickup reminder for {vehicle}"
+      },
+      {
+        "type": "returnReminder",
+        "description": "Reminder to return a booked vehicle",
+        "templateText": "Return reminder for {vehicle}"
+      },
+      {
+        "type": "bookingOverdue",
+        "description": "A vehicle booking is overdue for return",
+        "templateText": "{vehicle} return is overdue"
+      }
+    ]
+  }
+}
