@@ -21,6 +21,7 @@
     "AZURE_CLIENT_ID": "",
     "AZURE_CLIENT_SECRET": "",
     "NOTIFICATION_SENDER_EMAIL": "",
+    "TEAMS_APP_ID": "",
     "APP_BASE_URL": ""
   }
 }

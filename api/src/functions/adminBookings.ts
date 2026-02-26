@@ -155,14 +155,16 @@ async function adminCancelBookingEndpoint(
             const pool = await getPool();
             const bookingResult = await pool.request()
               .input('bookingId', sql.Int, id)
-              .query('SELECT userId, userEmail, userDisplayName FROM Bookings WHERE id = @bookingId');
+              .query('SELECT b.userId, v.make, v.model FROM Bookings b INNER JOIN Vehicles v ON b.vehicleId = v.id WHERE b.id = @bookingId');
             if (bookingResult.recordset.length > 0) {
               const affected = bookingResult.recordset[0];
+              const vehicleName = `${affected.make} ${affected.model}`;
               await sendTeamsActivityNotification(
                 affected.userId,
                 'bookingCancelled',
-                `Your booking has been cancelled by an administrator. Reason: ${parsed.data.cancelReason}`,
-                id
+                `Your booking for ${vehicleName} has been cancelled by an administrator. Reason: ${parsed.data.cancelReason}`,
+                id,
+                vehicleName
               );
             }
           } catch (error) {

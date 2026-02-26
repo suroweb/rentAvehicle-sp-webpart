@@ -3,7 +3,7 @@
   "solution": {
     "name": "renta-vehicle-client-side-solution",
     "id": "faa3486e-fc56-40d2-b420-c5b9d30257b3",
-    "version": "1.0.0.0",
+    "version": "1.2.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -36,7 +36,7 @@
         "title": "renta-vehicle Feature",
         "description": "The feature that activates elements of the renta-vehicle solution.",
         "id": "cfa936b3-98fd-4d0d-9a72-ca9bc079d7e7",
-        "version": "1.0.0.0"
+        "version": "1.2.0.0"
       }
     ]
   },

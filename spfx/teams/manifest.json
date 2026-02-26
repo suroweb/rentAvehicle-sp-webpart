@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
   "manifestVersion": "1.17",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "id": "faa3486e-fc56-40d2-b420-c5b9d30257b3",
   "developer": {
     "name": "RentAVehicle",
@@ -39,6 +39,16 @@
     "id": "<your-client-id>",
     "resource": "api://<your-client-id>"
   },
+  "authorization": {
+    "permissions": {
+      "resourceSpecific": [
+        {
+          "type": "Application",
+          "name": "TeamsActivity.Send.User"
+        }
+      ]
+    }
+  },
   "activities": {
     "activityTypes": [
       {
@@ -65,6 +75,11 @@
         "type": "bookingOverdue",
         "description": "A vehicle booking is overdue for return",
         "templateText": "{vehicle} return is overdue"
+      },
+      {
+        "type": "bookingCancelled",
+        "description": "A vehicle booking has been cancelled by an administrator",
+        "templateText": "Booking for {vehicle} was cancelled"
       }
     ]
   }

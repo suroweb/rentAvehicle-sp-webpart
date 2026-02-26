@@ -25,16 +25,18 @@ interface IAppShellContentProps {
   supportContact: string;
   userDisplayName: string;
   apiClient: AadHttpClient | null;
+  initialNav?: string;
 }
 
 const AppShellContent: React.FC<IAppShellContentProps> = ({
   supportContact,
   userDisplayName,
   apiClient,
+  initialNav,
 }) => {
   const auth = useAuth();
   const { isMobile } = useResponsive();
-  const [activeNavKey, setActiveNavKey] = React.useState<string>('home');
+  const [activeNavKey, setActiveNavKey] = React.useState<string>(initialNav || 'home');
   const [selectedVehicleId, setSelectedVehicleId] = React.useState<number | null>(null);
   const [selectedDateContext, setSelectedDateContext] = React.useState<IDateContext | undefined>(undefined);
 
@@ -258,6 +260,7 @@ const AppShellContent: React.FC<IAppShellContentProps> = ({
 
 export const AppShell: React.FC<IAppShellProps> = ({
   apiClient,
+  initialNav,
   supportContact,
   userDisplayName,
   userEmail,
@@ -272,6 +275,7 @@ export const AppShell: React.FC<IAppShellProps> = ({
         supportContact={supportContact}
         userDisplayName={userDisplayName}
         apiClient={apiClient}
+        initialNav={initialNav}
       />
     </AuthProvider>
   );

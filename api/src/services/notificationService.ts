@@ -166,26 +166,17 @@ export async function sendTeamsActivityNotification(
   userId: string,
   activityType: string,
   previewText: string,
-  bookingId: number
+  bookingId: number,
+  vehicleName?: string
 ): Promise<void> {
   try {
-    const appBaseUrl = process.env.APP_BASE_URL || '';
-
-    // Teams activity feed webUrl must be a valid Teams deep link
-    // (https://teams.microsoft.com/l/...). If APP_BASE_URL is a SharePoint URL,
-    // convert it to a Teams deep link that opens the page in Teams.
-    // If APP_BASE_URL is empty, use a generic Teams deep link.
-    let webUrl: string;
-    if (appBaseUrl.includes('teams.microsoft.com')) {
-      webUrl = `${appBaseUrl}?bookingId=${bookingId}`;
-    } else if (appBaseUrl.includes('.sharepoint.com')) {
-      // Encode the SharePoint page URL as a Teams deep link
-      const spPageUrl = `${appBaseUrl}?bookingId=${bookingId}`;
-      webUrl = `https://teams.microsoft.com/l/entity/com.microsoft.teamspace.tab.web/null?webUrl=${encodeURIComponent(spPageUrl)}`;
-    } else {
-      // Fallback: generic Teams deep link
-      webUrl = `https://teams.microsoft.com/l/entity/com.microsoft.teamspace.tab.web/null?label=RentAVehicle&context=${encodeURIComponent(JSON.stringify({ bookingId }))}`;
-    }
+    // Deep link to the RentAVehicle personal tab in Teams
+    // TEAMS_APP_ID must match the "id" field in spfx/teams/manifest.json
+    const teamsAppId = process.env.TEAMS_APP_ID;
+    const entityId = 'rentavehicle';
+    const webUrl = teamsAppId
+      ? `https://teams.microsoft.com/l/entity/${teamsAppId}/${entityId}?context=${encodeURIComponent(JSON.stringify({ subEntityId: 'myBookings' }))}`
+      : `https://teams.microsoft.com`;
 
     const client = await getGraphClient();
     await client
@@ -200,7 +191,9 @@ export async function sendTeamsActivityNotification(
         previewText: {
           content: previewText,
         },
-        templateParameters: [],
+        templateParameters: vehicleName
+          ? [{ name: 'vehicle', value: vehicleName }]
+          : [],
       });
 
     console.log(
@@ -246,7 +239,8 @@ export async function notifyManagerOfBooking(
       manager.id,
       'managerBookingAlert',
       previewText,
-      bookingId
+      bookingId,
+      vehicleName
     );
   } catch (error) {
     console.error(
@@ -315,7 +309,8 @@ export async function sendBookingNotifications(
         row.userId,
         'bookingConfirmed',
         confirmPreview,
-        bookingId
+        bookingId,
+        vehicleName
       ),
       // 3. Teams activity notification to manager
       notifyManagerOfBooking(
@@ -417,7 +412,8 @@ export async function processPickupReminders(
           row.userId,
           'pickupReminder',
           previewText,
-          row.id
+          row.id,
+          vehicleName
         );
 
         // Atomic update -- WHERE sentAt IS NULL prevents duplicates across instances
@@ -494,7 +490,8 @@ export async function processReturnReminders(
           row.userId,
           'returnReminder',
           previewText,
-          row.id
+          row.id,
+          vehicleName
         );
 
         // Atomic update -- WHERE sentAt IS NULL prevents duplicates across instances
@@ -586,7 +583,8 @@ export async function processOverdueNotifications(
           row.userId,
           'bookingOverdue',
           previewText,
-          row.id
+          row.id,
+          vehicleName
         );
 
         // 2. Notify manager (if exists)
@@ -596,7 +594,8 @@ export async function processOverdueNotifications(
             manager.id,
             'bookingOverdue',
             previewText,
-            row.id
+            row.id,
+            vehicleName
           );
         }
 
@@ -614,7 +613,8 @@ export async function processOverdueNotifications(
                 adminUser.id,
                 'bookingOverdue',
                 previewText,
-                row.id
+                row.id,
+                vehicleName
               );
             }
           } catch (adminError) {

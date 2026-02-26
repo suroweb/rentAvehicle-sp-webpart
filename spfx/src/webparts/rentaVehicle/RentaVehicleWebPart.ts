@@ -20,6 +20,7 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
 
   private _apiClient: AadHttpClient | null = null;
   private _isTeams: boolean = false;
+  private _subEntityId: string = '';
 
   public render(): void {
     const element: React.ReactElement<IAppShellProps> = React.createElement(
@@ -27,6 +28,7 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
       {
         apiClient: this._apiClient,
         isTeams: this._isTeams,
+        initialNav: this._subEntityId || undefined,
         supportContact: this.properties.supportContact || '',
         userDisplayName: this.context.pageContext.user.displayName,
         userEmail: this.context.pageContext.user.email,
@@ -39,8 +41,16 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
   protected async onInit(): Promise<void> {
     await super.onInit();
 
-    // Detect Teams context
+    // Detect Teams context and read subEntityId for deep linking
     this._isTeams = !!this.context.sdks.microsoftTeams;
+    if (this._isTeams) {
+      try {
+        const teamsContext = await this.context.sdks.microsoftTeams!.teamsJs.app.getContext();
+        this._subEntityId = teamsContext?.page?.subPageId || '';
+      } catch {
+        this._subEntityId = '';
+      }
+    }
 
     // Initialize AadHttpClient for API calls
     try {
