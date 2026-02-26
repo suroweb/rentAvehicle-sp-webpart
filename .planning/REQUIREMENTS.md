@@ -11,9 +11,9 @@ Requirements for v1.1 Production & Documentation milestone. Each maps to roadmap
 
 - [x] **VRFY-01**: M365 calendar integration creates/updates/deletes resource calendar events on live tenant
 - [x] **VRFY-02**: Employee personal calendar events are created on booking via Graph API on live tenant
-- [ ] **VRFY-03**: Email notifications (booking confirmation, return reminder, overdue) deliver on live tenant
-- [ ] **VRFY-04**: Teams activity feed notifications deliver on live tenant
-- [ ] **VRFY-05**: Manager notification alerts deliver on live tenant
+- [x] **VRFY-03**: Email notifications (booking confirmation, return reminder, overdue) deliver on live tenant
+- [x] **VRFY-04**: Teams activity feed notifications deliver on live tenant
+- [x] **VRFY-05**: Manager notification alerts deliver on live tenant
 
 ### Documentation
 
@@ -68,9 +68,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | VRFY-01 | Phase 9 | Complete |
 | VRFY-02 | Phase 9 | Complete |
-| VRFY-03 | Phase 9 | Pending |
-| VRFY-04 | Phase 9 | Pending |
-| VRFY-05 | Phase 9 | Pending |
+| VRFY-03 | Phase 9 | Complete |
+| VRFY-04 | Phase 9 | Complete |
+| VRFY-05 | Phase 9 | Complete |
 | DOCS-01 | Phase 10 | Pending |
 | DOCS-02 | Phase 10 | Pending |
 | DOCS-03 | Phase 10 | Pending |
