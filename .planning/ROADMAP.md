@@ -27,7 +27,7 @@
 
 **Milestone Goal:** Make v1.0 deployable, verifiable, and presentable — verify live tenant integrations, create deployment and developer documentation, set up CI/CD and IaC, and add admin timezone configuration.
 
-- [ ] **Phase 9: Live Tenant Verification** - Verify M365 calendar integration and all notification channels work on a real tenant
+- [x] **Phase 9: Live Tenant Verification** - Verify M365 calendar integration and all notification channels work on a real tenant — completed 2026-02-26
 - [ ] **Phase 10: Documentation** - App registration guide, deployment guide, and developer README
 - [ ] **Phase 11: CI/CD and Infrastructure** - GitHub Actions pipeline and Bicep IaC templates
 - [ ] **Phase 12: Admin Timezone Configuration** - UI and API for admin-managed timezone per location
@@ -44,10 +44,12 @@
   3. Booking confirmation email arrives in the employee's inbox with correct booking details
   4. Teams activity feed notification appears for the booking employee and for the manager
   5. Cancelling or modifying a booking updates or removes the corresponding calendar events
-**Plans**: 3 plans
-- [ ] 09-01-PLAN.md — Environment setup: app registration, Graph permissions, resource mailbox, env vars, verification checklist
-- [ ] 09-02-PLAN.md — Calendar integration verification: resource + personal calendar events, lifecycle updates (cancel/checkout/checkin)
-- [ ] 09-03-PLAN.md — Notification channels verification: email, Teams activity feed, manager alerts, phase sign-off
+**Plans**: 5 plans (3 original + 2 gap closure)
+- [x] 09-01-PLAN.md — Environment setup: app registration, Graph permissions, resource mailbox, env vars, verification checklist
+- [x] 09-02-PLAN.md — Calendar integration verification: resource + personal calendar events, lifecycle updates
+- [x] 09-03-PLAN.md — Notification channels verification: email, Teams activity feed, manager alerts
+- [x] 09-04-PLAN.md — Teams app manifest deployment and notification fix (gap closure)
+- [x] 09-05-PLAN.md — Deep links and security verification (gap closure)
 
 ### Phase 10: Documentation
 **Goal**: A new developer or admin can set up and deploy the application from scratch using only the documentation
@@ -94,11 +96,11 @@
 | 8. UX Polish: Availability Strip Navigation | v1.0 | 5/5 | Complete | 2026-02-25 |
 | 08.1. Unified Date Range Picker | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 08.1.1. Remove Day View | v1.0 | 1/1 | Complete | 2026-02-25 |
-| 9. Live Tenant Verification | 1/3 | In Progress|  | - |
+| 9. Live Tenant Verification | v1.1 | 5/5 | Complete | 2026-02-26 |
 | 10. Documentation | v1.1 | 0/? | Not started | - |
 | 11. CI/CD and Infrastructure | v1.1 | 0/? | Not started | - |
 | 12. Admin Timezone Configuration | v1.1 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-25 after Phase 9 planning (3 plans in 3 waves)*
+*Last updated: 2026-02-26 after Phase 9 completion (5 plans, all verified on live tenant)*
