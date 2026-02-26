@@ -15,6 +15,8 @@ jest-output/
 release/
 solution/
 *.sppkg
+# Teams ZIP is a build artifact with baked-in tenant-specific values
+spfx/teams/TeamsSPFxApp.zip
 .heft/
 
 # Logs
