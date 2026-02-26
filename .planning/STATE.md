@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 Phase: 10 of 12 (Documentation) -- COMPLETE
 Plan: 2 of 2 -- all complete
 Status: Phase 10 complete. App registration guide, deployment guide, and README all delivered.
-Last activity: 2026-02-26 -- Admin/operator guides (app-registration.md, deployment.md) created with values extracted from source files
+Last activity: 2026-02-26 - Completed quick task 1: Rename branch master to main, push to GitHub
 
 Progress: [████████████░░░░] 50% milestone (2/4 phases complete)
 
@@ -65,6 +65,12 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 ### Blockers/Concerns
 
 None active. Teams notification blocker resolved.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Rename branch master to main, push to GitHub | 2026-02-26 | (branch ops) | [1-rename-branch-master-to-main-clean-histo](./quick/1-rename-branch-master-to-main-clean-histo/) |
 
 ### Pending Todos
 
