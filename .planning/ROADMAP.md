@@ -28,7 +28,7 @@
 **Milestone Goal:** Make v1.0 deployable, verifiable, and presentable — verify live tenant integrations, create deployment and developer documentation, set up CI/CD and IaC, and add admin timezone configuration.
 
 - [x] **Phase 9: Live Tenant Verification** - Verify M365 calendar integration and all notification channels work on a real tenant — completed 2026-02-26
-- [ ] **Phase 10: Documentation** - App registration guide, deployment guide, and developer README
+- [x] **Phase 10: Documentation** - App registration guide, deployment guide, and developer README (completed 2026-02-26)
 - [ ] **Phase 11: CI/CD and Infrastructure** - GitHub Actions pipeline and Bicep IaC templates
 - [ ] **Phase 12: Admin Timezone Configuration** - UI and API for admin-managed timezone per location
 
@@ -99,7 +99,7 @@
 | 08.1. Unified Date Range Picker | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 08.1.1. Remove Day View | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 9. Live Tenant Verification | v1.1 | 5/5 | Complete | 2026-02-26 |
-| 10. Documentation | 1/2 | In Progress|  | - |
+| 10. Documentation | 2/2 | Complete   | 2026-02-26 | - |
 | 11. CI/CD and Infrastructure | v1.1 | 0/? | Not started | - |
 | 12. Admin Timezone Configuration | v1.1 | 0/? | Not started | - |
 
