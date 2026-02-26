@@ -6,7 +6,6 @@ import { ILocation, ILocationSyncResult } from '../models/ILocation';
 import { IBooking, IAvailableVehicle, IVehicleAvailabilitySlot, IBookingInput, IBookingSuggestion, IConflictResponse } from '../models/IBooking';
 import { IKpiSummary, IUtilizationData, IUtilizationVehicleData, ITrendData, IRawBookingRecord, ITeamBooking } from '../models/IReport';
 
-// Placeholder: replace with the real Azure Functions app URL once deployed
 const API_BASE_URL = 'https://rentavehicle-api.azurewebsites.net';
 const LOCAL_DEV_API_URL = 'http://localhost:7071';
 

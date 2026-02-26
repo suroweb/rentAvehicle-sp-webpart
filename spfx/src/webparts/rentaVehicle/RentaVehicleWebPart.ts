@@ -8,6 +8,7 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { AadHttpClient } from '@microsoft/sp-http';
 
+import { ENV } from './../../config/env.generated';
 import { AppShell } from './components/AppShell/AppShell';
 import { IAppShellProps } from './components/AppShell/IAppShellProps';
 
@@ -44,7 +45,7 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
     // Initialize AadHttpClient for API calls
     try {
       this._apiClient = await this.context.aadHttpClientFactory
-        .getClient('api://<azure-functions-app-client-id>');
+        .getClient(`api://${ENV.AZURE_CLIENT_ID}`);
     } catch (error) {
       console.error('Failed to initialize API client:', error);
       // apiClient remains null -- AuthContext will handle the error state

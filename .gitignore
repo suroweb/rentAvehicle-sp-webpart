@@ -25,6 +25,9 @@ npm-debug.log*
 # Secrets
 api/local.settings.json
 
+# Generated config
+spfx/src/config/env.generated.ts
+
 # Coverage
 coverage/
 

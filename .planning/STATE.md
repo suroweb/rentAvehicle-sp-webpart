@@ -22,12 +22,19 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 9 of 12 (Live Tenant Verification) -- COMPLETE
-Plan: 03 of 03 (completed 2026-02-26)
-Status: Phase 9 complete, ready for Phase 10
-Last activity: 2026-02-26 -- 09-03 completed (notification verification: email PASS, Teams partial pass)
+Phase: 9 of 12 (Live Tenant Verification) -- IN PROGRESS
+Plan: 04-05 of 05 (09-04 task 1 done, 09-05 task 1 done, both blocked on Teams app deployment)
+Status: Teams notification 403 -- Teams app manifest not properly deployed via SPFx sync
+Last activity: 2026-02-26 -- Attempted Teams app deployment (multiple approaches), all blocked by manifest/sync issues
 
-Progress: [███████░░░] 75% (1/4 phases, 3/3 plans in phase 9)
+Progress: [███████░░░] 75% (1/4 phases, 3/5 plans in phase 9)
+
+### Active Blocker: Teams Activity Notifications
+
+The `sendActivityNotification` Graph API returns 403 because SPFx "Sync to Teams" auto-generates a manifest
+that omits `webApplicationInfo` and `activities` sections. Without these, Graph can't match the calling Entra
+app to the installed Teams app. See `.planning/phases/09-live-tenant-verification/09-SESSION-NOTES.md` for
+full details and three resolution options (A: clean deploy, B: systemDefault type, C: accept partial pass).
 
 ## Performance Metrics
 
@@ -54,7 +61,7 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 
 ### Blockers/Concerns
 
-(None active)
+- [Phase 09] Teams activity notification 403: SPFx sync doesn't include webApplicationInfo/activities in Teams manifest. Multiple deployment approaches tried. See 09-SESSION-NOTES.md.
 
 ### Pending Todos
 
@@ -63,5 +70,6 @@ All 8 v1.0 todos absorbed into v1.1 requirements (VRFY, DOCS, TOOL, FEAT categor
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 09-03-PLAN.md (notification verification complete, Phase 9 done)
-Resume with: `/gsd:execute-phase 10` to begin Phase 10 (documentation).
+Stopped at: Phase 9 plans 04-05 blocked on Teams app deployment (403 on sendActivityNotification)
+Resume with: Read `09-SESSION-NOTES.md` first, then choose Option A/B/C to resolve Teams notification blocker.
+Also: SPFx env.generated.ts system added (uncommitted), Entra app renamed to RentAVehicle-API, user_impersonation scope created.
