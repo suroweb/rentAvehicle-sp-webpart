@@ -113,11 +113,11 @@ Built as a phased delivery across **10 development phases** (30 plans total), pr
 
 ---
 
-## Getting Started (macOS)
+## Getting Started
 
-This guide walks through local development setup on macOS. For production deployment, see [docs/deployment.md](docs/deployment.md).
+This guide walks through local development setup. For production deployment, see [docs/deployment.md](docs/deployment.md).
 
-### Prerequisites
+### Prerequisites (macOS)
 
 - [Homebrew](https://brew.sh/) (`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`)
 - Node.js 22 (LTS) and npm (`brew install node@22`)
@@ -125,14 +125,23 @@ This guide walks through local development setup on macOS. For production deploy
 - Microsoft 365 developer tenant with SharePoint admin access
 - Entra ID app registration (follow [docs/app-registration.md](docs/app-registration.md) first)
 
-### 1. Install Docker (via Colima)
+### Prerequisites (Windows)
+
+- Node.js 22 (LTS): `winget install OpenJS.NodeJS.LTS` or download from [https://nodejs.org](https://nodejs.org)
+- Azure Functions Core Tools v4: `npm install -g azure-functions-core-tools@4 --unsafe-perm true` (alternatively: `winget install Microsoft.Azure.FunctionsCoreTools` or `choco install azure-functions-core-tools-4`)
+- Microsoft 365 developer tenant with SharePoint admin access
+- Entra ID app registration (follow [docs/app-registration.md](docs/app-registration.md) first)
+
+### 1. Install Docker
+
+**macOS** -- install Colima (lightweight, no Docker Desktop license required):
 
 ```bash
 brew install colima docker
 colima start
 ```
 
-Colima is a lightweight Docker runtime for macOS. No Docker Desktop license required.
+**Windows** -- install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/) with the WSL 2 backend enabled.
 
 ### 2. Start the local database
 
@@ -169,7 +178,7 @@ This sets your `LOCAL_DEV_*` values. The API uses these to simulate your identit
 
 ### 5. Configure tenant secrets
 
-Create `../.rentavehicle/secrets.json` (one directory above the project root -- keeps secrets outside the repo):
+Create `../.rentavehicle/secrets.json` (one directory above the project root -- keeps secrets outside the repo). On Windows you can also use backslashes: `..\.rentavehicle\secrets.json`.
 
 ```json
 {
@@ -222,117 +231,6 @@ Two options:
 ### Environment notes
 
 - **Local dev** uses Azure SQL Edge on Docker (`localhost:1433`) with the `sa` account
-- **Production** uses Azure SQL and Azure Functions -- see [docs/deployment.md](docs/deployment.md)
-- The `contoso.sharepoint.com` in the template is a placeholder -- your real domain is injected via secrets
-- To switch roles quickly: `node scripts/sync-dev-config.js --role Admin` (also accepts `Manager`, `Employee`, `SuperAdmin`)
-
----
-
-## Getting Started (Windows)
-
-This guide walks through local development setup on Windows. For production deployment, see [docs/deployment.md](docs/deployment.md).
-
-### Prerequisites
-
-- Node.js 22 (LTS): `winget install OpenJS.NodeJS.LTS` or download from [https://nodejs.org](https://nodejs.org)
-- Azure Functions Core Tools v4: `npm install -g azure-functions-core-tools@4 --unsafe-perm true` (alternatively: `winget install Microsoft.Azure.FunctionsCoreTools` or `choco install azure-functions-core-tools-4`)
-- Microsoft 365 developer tenant with SharePoint admin access
-- Entra ID app registration (follow [docs/app-registration.md](docs/app-registration.md) first)
-
-### 1. Install Docker Desktop
-
-Download and install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/). Ensure the WSL 2 backend is enabled (Docker Desktop prompts for this during install).
-
-Docker Desktop is the standard Docker runtime on Windows. Unlike macOS which can use the lightweight Colima alternative, Windows uses Docker Desktop directly.
-
-### 2. Start the local database
-
-```bash
-docker run -d --name rentavehicle-db -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=YourStrong!Pass123" -p 1433:1433 mcr.microsoft.com/azure-sql-edge
-```
-
-Azure SQL Edge runs the same SQL engine as Azure SQL but on ARM64/x64 Docker. The SA password matches `local.settings.template.json`.
-
-### 3. Seed the database
-
-```bash
-cd api
-npm install
-node setup-db.js
-```
-
-Creates the `RentAVehicle` database, all tables (Locations, Categories, Vehicles, Bookings), and seeds test data (Bucharest + Cluj locations, Sedan + SUV categories, 3 test vehicles).
-
-### 4. Configure your dev identity
-
-Edit `dev.config.json` in the project root:
-
-```json
-{
-  "role": "Admin",
-  "name": "Your Name",
-  "email": "you@yourtenant.onmicrosoft.com",
-  "officeLocation": "Bucharest"
-}
-```
-
-This sets your `LOCAL_DEV_*` values. The API uses these to simulate your identity during local development. Valid roles: `SuperAdmin`, `Admin`, `Manager`, `Employee`. The `officeLocation` must match a seeded location name.
-
-### 5. Configure tenant secrets
-
-Create `..\.rentavehicle\secrets.json` (one directory above the project root -- keeps secrets outside the repo). Forward slashes also work in most contexts (`../.rentavehicle/secrets.json`).
-
-```json
-{
-  "AZURE_TENANT_ID": "your-tenant-id",
-  "AZURE_CLIENT_ID": "your-client-id",
-  "AZURE_CLIENT_SECRET": "your-client-secret",
-  "NOTIFICATION_SENDER_EMAIL": "noreply@yourtenant.onmicrosoft.com",
-  "APP_BASE_URL": "https://yourtenant.sharepoint.com/sites/rentavehicle",
-  "TEAMS_APP_ID": "your-teams-app-id",
-  "SHAREPOINT_DOMAIN": "yourtenant.sharepoint.com"
-}
-```
-
-> **How configuration syncs:** On every `npm start`, the `prestart` script runs `scripts/sync-dev-config.js` which merges three sources into `api/local.settings.json`:
->
-> 1. `api/local.settings.template.json` -- committed base with safe defaults
-> 2. `dev.config.json` -- your role, name, email, officeLocation
-> 3. `../.rentavehicle/secrets.json` -- tenant secrets (IDs, keys, domain)
->
-> The generated `local.settings.json` is gitignored and never committed. The `SHAREPOINT_DOMAIN` value also replaces the CORS placeholder so the hosted workbench can call the local API.
-
-### 6. Start the API
-
-```bash
-cd api
-npm start
-```
-
-Runs `sync-dev-config.js` (generates `local.settings.json`), builds TypeScript, then starts Azure Functions on `http://localhost:7071`.
-
-### 7. Start the SPFx workbench
-
-In a separate terminal:
-
-```bash
-cd spfx
-npm install
-npm run start
-```
-
-### 8. Open the workbench
-
-Two options:
-- **Local workbench**: `https://localhost:4321/temp/workbench.html` (limited -- no real M365 context)
-- **Hosted workbench** (recommended): `https://yourtenant.sharepoint.com/_layouts/workbench.aspx` -- append `?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`
-
-> [!NOTE]
-> The hosted workbench requires the SPFx dev certificate to be trusted. Run `npx heft trust-dev-cert` in the `spfx` directory if you see certificate errors.
-
-### Environment notes
-
-- **Local dev** uses Azure SQL Edge on Docker Desktop (`localhost:1433`) with the `sa` account
 - **Production** uses Azure SQL and Azure Functions -- see [docs/deployment.md](docs/deployment.md)
 - The `contoso.sharepoint.com` in the template is a placeholder -- your real domain is injected via secrets
 - To switch roles quickly: `node scripts/sync-dev-config.js --role Admin` (also accepts `Manager`, `Employee`, `SuperAdmin`)
