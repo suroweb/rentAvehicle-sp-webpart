@@ -121,7 +121,7 @@ This guide walks through local development setup on macOS. For production deploy
 
 - [Homebrew](https://brew.sh/) (`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`)
 - Node.js 22 (LTS) and npm
-- Azure Functions Core Tools v4 (`npm install -g azure-functions-core-tools@4 --unsafe-perm true`)
+- Azure Functions Core Tools v4 (`brew tap azure/functions && brew install azure-functions-core-tools@4`)
 - Microsoft 365 developer tenant with SharePoint admin access
 - Entra ID app registration (follow [docs/app-registration.md](docs/app-registration.md) first)
 
