@@ -220,7 +220,7 @@ Two options:
 - **Hosted workbench** (recommended): `https://yourtenant.sharepoint.com/_layouts/workbench.aspx` -- append `?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`
 
 > [!NOTE]
-> The hosted workbench requires the SPFx dev certificate to be trusted. Run `npx gulp trust-dev-cert` in the `spfx` directory if you see certificate errors.
+> The hosted workbench requires the SPFx dev certificate to be trusted. Run `npx heft trust-dev-cert` in the `spfx` directory if you see certificate errors.
 
 ### Environment notes
 
