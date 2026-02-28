@@ -95,6 +95,17 @@ if (fs.existsSync(SECRETS_FILE)) {
     }
   }
   console.log('  Applied ' + secretCount + ' secret(s) from ../.rentavehicle/secrets.json');
+
+  // --- Step 4: Replace CORS placeholder with tenant domain ---
+  if (secrets.SHAREPOINT_DOMAIN) {
+    settings.Host.CORS = settings.Host.CORS.replace(
+      'contoso.sharepoint.com',
+      secrets.SHAREPOINT_DOMAIN
+    );
+    console.log('  Applied CORS domain: ' + secrets.SHAREPOINT_DOMAIN);
+  } else {
+    console.log('  CORS domain not set (add SHAREPOINT_DOMAIN to secrets.json for hosted workbench)');
+  }
 } else {
   console.log('  No secrets file found at ../.rentavehicle/secrets.json');
   console.log('  To configure tenant secrets, create that file with:');
@@ -103,7 +114,8 @@ if (fs.existsSync(SECRETS_FILE)) {
   console.log('    "AZURE_CLIENT_ID": "your-client-id",');
   console.log('    "AZURE_CLIENT_SECRET": "your-client-secret",');
   console.log('    "NOTIFICATION_SENDER_EMAIL": "sender@yourtenant.com",');
-  console.log('    "APP_BASE_URL": "https://yourtenant.sharepoint.com/sites/rentavehicle"');
+  console.log('    "APP_BASE_URL": "https://yourtenant.sharepoint.com/sites/rentavehicle",');
+  console.log('    "SHAREPOINT_DOMAIN": "yourtenant.sharepoint.com"');
   console.log('  }');
 }
 
