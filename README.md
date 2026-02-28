@@ -137,11 +137,7 @@ Colima is a lightweight Docker runtime for macOS. No Docker Desktop license requ
 ### 2. Start the local database
 
 ```bash
-docker run -d --name rentavehicle-db \
-  -e "ACCEPT_EULA=1" \
-  -e "MSSQL_SA_PASSWORD=YourStrong!Pass123" \
-  -p 1433:1433 \
-  mcr.microsoft.com/azure-sql-edge
+docker run -d --name rentavehicle-db -e "ACCEPT_EULA=1" -e "MSSQL_SA_PASSWORD=YourStrong!Pass123" -p 1433:1433 mcr.microsoft.com/azure-sql-edge
 ```
 
 Azure SQL Edge runs the same SQL engine as Azure SQL but on ARM64/x64 Docker. The SA password matches `local.settings.template.json`.
