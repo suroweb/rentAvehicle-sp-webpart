@@ -45,9 +45,8 @@ Short summary on functionality and used technologies.
 - Clone this repository
 - Ensure that you are at the solution folder
 - in the command-line run:
-  - `npm install -g @rushstack/heft`
   - `npm install`
-  - `heft start`
+  - `npm run start`
 
 > Include any additional steps as needed.
 
