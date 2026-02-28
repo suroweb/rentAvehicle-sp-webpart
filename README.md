@@ -113,66 +113,121 @@ Built as a phased delivery across **10 development phases** (30 plans total), pr
 
 ---
 
-## Getting Started
+## Getting Started (macOS)
+
+This guide walks through local development setup on macOS. For production deployment, see [docs/deployment.md](docs/deployment.md).
 
 ### Prerequisites
 
-- Node.js 22 (LTS)
-- npm
+- Node.js 22 (LTS) and npm
+- Azure Functions Core Tools v4 (`npm install -g azure-functions-core-tools@4 --unsafe-perm true`)
 - Microsoft 365 developer tenant with SharePoint admin access
-- Azure subscription (for Azure Functions and Azure SQL)
-- [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local) v4
+- Entra ID app registration (follow [docs/app-registration.md](docs/app-registration.md) first)
 
-### Installation
+### 1. Install Docker (via Colima)
 
 ```bash
-# Clone the repository
-git clone https://github.com/<your-org>/Rentavehicle.git
-cd Rentavehicle
-
-# Install SPFx dependencies
-cd spfx
-npm install
-
-# Install API dependencies
-cd ../api
-npm install
+brew install colima docker
+colima start
 ```
 
-### Configuration
+Colima is a lightweight Docker runtime for macOS. No Docker Desktop license required.
 
-1. Create the Entra ID app registration following the [App Registration Guide](docs/app-registration.md)
-2. Copy the environment template and fill in your tenant values:
+### 2. Start the local database
+
+```bash
+docker run -d --name rentavehicle-db \
+  -e "ACCEPT_EULA=1" \
+  -e "MSSQL_SA_PASSWORD=YourStrong!Pass123" \
+  -p 1433:1433 \
+  mcr.microsoft.com/azure-sql-edge
+```
+
+Azure SQL Edge runs the same SQL engine as Azure SQL but on ARM64/x64 Docker. The SA password matches `local.settings.template.json`.
+
+### 3. Seed the database
 
 ```bash
 cd api
-cp local.settings.template.json local.settings.json
+npm install
+node setup-db.js
 ```
 
-3. Set the required environment variables in `local.settings.json`:
-   - `AZURE_TENANT_ID` -- your Microsoft 365 tenant ID
-   - `AZURE_CLIENT_ID` -- the app registration client ID
-   - `AZURE_CLIENT_SECRET` -- the app registration client secret
-   - `AZURE_SQL_SERVER`, `AZURE_SQL_DATABASE` -- your Azure SQL connection details
-   - `NOTIFICATION_SENDER_EMAIL` -- sender address for booking emails
-   - `TEAMS_APP_ID` -- Teams app ID for activity notifications
+Creates the `RentAVehicle` database, all tables (Locations, Categories, Vehicles, Bookings), and seeds test data (Bucharest + Cluj locations, Sedan + SUV categories, 3 test vehicles).
 
-### Local Development
+### 4. Configure your dev identity
+
+Edit `dev.config.json` in the project root:
+
+```json
+{
+  "role": "Admin",
+  "name": "Your Name",
+  "email": "you@yourtenant.onmicrosoft.com",
+  "officeLocation": "Bucharest"
+}
+```
+
+This sets your `LOCAL_DEV_*` values. The API uses these to simulate your identity during local development. Valid roles: `SuperAdmin`, `Admin`, `Manager`, `Employee`. The `officeLocation` must match a seeded location name.
+
+### 5. Configure tenant secrets
+
+Create `../.rentavehicle/secrets.json` (one directory above the project root -- keeps secrets outside the repo):
+
+```json
+{
+  "AZURE_TENANT_ID": "your-tenant-id",
+  "AZURE_CLIENT_ID": "your-client-id",
+  "AZURE_CLIENT_SECRET": "your-client-secret",
+  "NOTIFICATION_SENDER_EMAIL": "noreply@yourtenant.onmicrosoft.com",
+  "APP_BASE_URL": "https://yourtenant.sharepoint.com/sites/rentavehicle",
+  "TEAMS_APP_ID": "your-teams-app-id",
+  "SHAREPOINT_DOMAIN": "yourtenant.sharepoint.com"
+}
+```
+
+> **How configuration syncs:** On every `npm start`, the `prestart` script runs `scripts/sync-dev-config.js` which merges three sources into `api/local.settings.json`:
+>
+> 1. `api/local.settings.template.json` -- committed base with safe defaults
+> 2. `dev.config.json` -- your role, name, email, officeLocation
+> 3. `../.rentavehicle/secrets.json` -- tenant secrets (IDs, keys, domain)
+>
+> The generated `local.settings.json` is gitignored and never committed. The `SHAREPOINT_DOMAIN` value also replaces the CORS placeholder so the hosted workbench can call the local API.
+
+### 6. Start the API
 
 ```bash
-# Start the API (builds TypeScript, then starts Azure Functions)
 cd api
 npm start
+```
 
-# In a separate terminal, start the SPFx webpart
+Runs `sync-dev-config.js` (generates `local.settings.json`), builds TypeScript, then starts Azure Functions on `http://localhost:7071`.
+
+### 7. Start the SPFx workbench
+
+In a separate terminal:
+
+```bash
 cd spfx
+npm install
 npm run start
 ```
 
-The SPFx workbench will open at `https://localhost:4321/temp/workbench.html`. For full functionality, use the hosted workbench on your SharePoint tenant.
+### 8. Open the workbench
 
-> [!TIP]
-> The API `prestart` script automatically syncs secrets from a shared config. See the [App Registration Guide](docs/app-registration.md) for details on the secrets file structure.
+Two options:
+- **Local workbench**: `https://localhost:4321/temp/workbench.html` (limited -- no real M365 context)
+- **Hosted workbench** (recommended): `https://yourtenant.sharepoint.com/_layouts/workbench.aspx` -- append `?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js`
+
+> [!NOTE]
+> The hosted workbench requires the SPFx dev certificate to be trusted. Run `npx gulp trust-dev-cert` in the `spfx` directory if you see certificate errors.
+
+### Environment notes
+
+- **Local dev** uses Azure SQL Edge on Docker (`localhost:1433`) with the `sa` account
+- **Production** uses Azure SQL and Azure Functions -- see [docs/deployment.md](docs/deployment.md)
+- The `contoso.sharepoint.com` in the template is a placeholder -- your real domain is injected via secrets
+- To switch roles quickly: `node scripts/sync-dev-config.js --role Admin` (also accepts `Manager`, `Employee`, `SuperAdmin`)
 
 ---
 
