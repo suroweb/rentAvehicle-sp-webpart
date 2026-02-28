@@ -28,7 +28,7 @@ async function setup() {
 
   // Run each statement explicitly to handle multi-line CREATE TABLEs
   const statements = [
-    // Phase 2 tables
+    // Core tables
     `CREATE TABLE Locations (
       id INT IDENTITY(1,1) PRIMARY KEY,
       name NVARCHAR(128) NOT NULL UNIQUE,
@@ -69,7 +69,7 @@ async function setup() {
     `CREATE INDEX IX_Vehicles_Status ON Vehicles(status) WHERE isArchived = 0`,
     `CREATE INDEX IX_Vehicles_IsArchived ON Vehicles(isArchived)`,
 
-    // Phase 3: timezone + bookings
+    // Timezone + bookings
     `ALTER TABLE Locations ADD timezone NVARCHAR(64) NOT NULL DEFAULT 'UTC'`,
     `CREATE TABLE Bookings (
       id INT IDENTITY(1,1) PRIMARY KEY,
@@ -91,10 +91,20 @@ async function setup() {
     `CREATE INDEX IX_Bookings_UserId ON Bookings(userId) INCLUDE (status, startTime, endTime)`,
     `CREATE INDEX IX_Bookings_StartTime ON Bookings(startTime) WHERE status IN ('Confirmed', 'Active')`,
 
-    // Phase 5: calendar integration columns
+    // Booking lifecycle
+    `ALTER TABLE Bookings ADD checkedOutAt DATETIME2 NULL`,
+    `ALTER TABLE Bookings ADD checkedInAt DATETIME2 NULL`,
+    `ALTER TABLE Bookings ADD cancelReason NVARCHAR(500) NULL`,
+
+    // Calendar integration
     `ALTER TABLE Vehicles ADD resourceMailboxEmail NVARCHAR(255) NULL`,
     `ALTER TABLE Bookings ADD vehicleCalendarEventId NVARCHAR(255) NULL`,
     `ALTER TABLE Bookings ADD employeeCalendarEventId NVARCHAR(255) NULL`,
+
+    // Notification tracking
+    `ALTER TABLE Bookings ADD pickupReminderSentAt DATETIME2 NULL`,
+    `ALTER TABLE Bookings ADD returnReminderSentAt DATETIME2 NULL`,
+    `ALTER TABLE Bookings ADD overdueNotificationSentAt DATETIME2 NULL`,
   ];
 
   for (const stmt of statements) {
