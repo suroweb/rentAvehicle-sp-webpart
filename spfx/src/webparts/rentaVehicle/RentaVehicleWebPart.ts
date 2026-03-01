@@ -23,6 +23,15 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
   private _subEntityId: string = '';
 
   public render(): void {
+    // In local workbench (no API client), use dev.config.json identity
+    const isLocalDev = this._apiClient === null;
+    const userDisplayName = isLocalDev && ENV.DEV_USER_NAME
+      ? ENV.DEV_USER_NAME
+      : this.context.pageContext.user.displayName;
+    const userEmail = isLocalDev && ENV.DEV_USER_EMAIL
+      ? ENV.DEV_USER_EMAIL
+      : this.context.pageContext.user.email;
+
     const element: React.ReactElement<IAppShellProps> = React.createElement(
       AppShell,
       {
@@ -30,8 +39,8 @@ export default class RentaVehicleWebPart extends BaseClientSideWebPart<IRentaVeh
         isTeams: this._isTeams,
         initialNav: this._subEntityId || undefined,
         supportContact: this.properties.supportContact || '',
-        userDisplayName: this.context.pageContext.user.displayName,
-        userEmail: this.context.pageContext.user.email,
+        userDisplayName,
+        userEmail,
       }
     );
 
