@@ -23,8 +23,8 @@ Requirements for v1.1 Production & Documentation milestone. Each maps to roadmap
 
 ### Tooling
 
-- [ ] **TOOL-01**: GitHub Actions pipeline builds SPFx package and Azure Functions on push/PR
-- [ ] **TOOL-02**: GitHub Actions pipeline runs linting and type checking
+- [x] **TOOL-01**: GitHub Actions pipeline builds SPFx package and Azure Functions on push/PR
+- [x] **TOOL-02**: GitHub Actions pipeline runs linting and type checking
 - [x] **TOOL-03**: Bicep templates provision Azure Functions App, Azure SQL, and App Service Plan
 - [x] **TOOL-04**: Bicep templates configure Entra ID Easy Auth and application settings
 
@@ -74,8 +74,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-01 | Phase 10 | Complete |
 | DOCS-02 | Phase 10 | Complete |
 | DOCS-03 | Phase 10 | Complete |
-| TOOL-01 | Phase 11 | Pending |
-| TOOL-02 | Phase 11 | Pending |
+| TOOL-01 | Phase 11 | Complete |
+| TOOL-02 | Phase 11 | Complete |
 | TOOL-03 | Phase 11 | Complete |
 | TOOL-04 | Phase 11 | Complete |
 | FEAT-01 | Phase 12 | Pending |

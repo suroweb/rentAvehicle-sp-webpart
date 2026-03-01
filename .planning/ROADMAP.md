@@ -29,7 +29,7 @@
 
 - [x] **Phase 9: Live Tenant Verification** - Verify M365 calendar integration and all notification channels work on a real tenant — completed 2026-02-26
 - [x] **Phase 10: Documentation** - App registration guide, deployment guide, and developer README (completed 2026-02-26)
-- [ ] **Phase 11: CI/CD and Infrastructure** - GitHub Actions pipeline and Bicep IaC templates
+- [x] **Phase 11: CI/CD and Infrastructure** - GitHub Actions pipeline and Bicep IaC templates (completed 2026-03-01)
 - [ ] **Phase 12: Admin Timezone Configuration** - UI and API for admin-managed timezone per location
 
 ## Phase Details
@@ -103,7 +103,7 @@ Plans:
 | 08.1.1. Remove Day View | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 9. Live Tenant Verification | v1.1 | 5/5 | Complete | 2026-02-26 |
 | 10. Documentation | 2/2 | Complete   | 2026-02-26 | - |
-| 11. CI/CD and Infrastructure | 1/2 | In Progress|  | - |
+| 11. CI/CD and Infrastructure | 2/2 | Complete   | 2026-03-01 | - |
 | 12. Admin Timezone Configuration | v1.1 | 0/? | Not started | - |
 
 ---
