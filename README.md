@@ -24,14 +24,14 @@ RentAVehicle is a self-service vehicle booking system built directly into Micros
 
 ## Screenshots
 
-![Booking View](docs/images/booking-view.png)
-*Vehicle availability and booking interface*
+![Browse Vehicles](docs/images/browse-vehicles.png)
+*Browse available vehicles with location, date range, and time filters*
 
-![Admin Dashboard](docs/images/admin-dashboard.png)
-*Fleet management and reporting dashboard*
+![Vehicle Detail & Booking](docs/images/vehicle-detail-booking.png)
+*View vehicle details, check weekly availability, and book directly*
 
-> [!NOTE]
-> Screenshots to be captured from the live deployment.
+![My Bookings](docs/images/my-bookings.png)
+*Track upcoming and past bookings with quick actions*
 
 ---
 
