@@ -96,6 +96,17 @@ async function setup() {
     `ALTER TABLE Bookings ADD checkedInAt DATETIME2 NULL`,
     `ALTER TABLE Bookings ADD cancelReason NVARCHAR(500) NULL`,
 
+    // Phase 4: Update status CHECK constraint to include 'Overdue'
+    `DECLARE @constraintName NVARCHAR(200);
+SELECT @constraintName = cc.name
+FROM sys.check_constraints cc
+INNER JOIN sys.columns c ON cc.parent_object_id = c.object_id AND cc.parent_column_id = c.column_id
+WHERE cc.parent_object_id = OBJECT_ID('Bookings') AND c.name = 'status';
+IF @constraintName IS NOT NULL
+  EXEC('ALTER TABLE Bookings DROP CONSTRAINT ' + @constraintName);`,
+    `ALTER TABLE Bookings ADD CONSTRAINT CK_Bookings_Status
+  CHECK (status IN ('Confirmed', 'Active', 'Completed', 'Cancelled', 'Overdue'))`,
+
     // Calendar integration
     `ALTER TABLE Vehicles ADD resourceMailboxEmail NVARCHAR(255) NULL`,
     `ALTER TABLE Bookings ADD vehicleCalendarEventId NVARCHAR(255) NULL`,
