@@ -55,7 +55,7 @@ Each task was committed atomically:
 
 1. **Task 1: Add Overdue status to Bookings CHECK constraint in setup-db.js** - `297182a` (fix)
 
-**Plan metadata:** (pending final commit)
+**Plan metadata:** `cc90793` (docs: complete plan)
 
 ## Files Created/Modified
 - `api/setup-db.js` - Added 2 SQL statements: (1) dynamic SQL to drop old inline CHECK, (2) named CK_Bookings_Status with 5 statuses
