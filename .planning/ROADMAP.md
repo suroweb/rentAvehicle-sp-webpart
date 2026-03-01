@@ -72,7 +72,10 @@
   2. The CI pipeline fails the build if linting or TypeScript type checking produces errors
   3. Running the Bicep templates provisions an Azure Functions App, Azure SQL database, and App Service Plan
   4. The Bicep templates configure Entra ID Easy Auth and required application settings so the deployed app authenticates without manual portal configuration
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — GitHub Actions CI workflow with parallel SPFx and API build jobs, API ESLint setup
+- [ ] 11-02-PLAN.md — Bicep IaC templates: Function App, SQL, Storage, App Service Plan, Easy Auth
 
 ### Phase 12: Admin Timezone Configuration
 **Goal**: Admins can manage timezone settings per location, and all booking times display in the correct local timezone
