@@ -150,7 +150,7 @@ async function adminCancelBookingEndpoint(
         });
 
         // Fire-and-forget: notify affected employee of admin cancellation
-        (async () => {
+        void (async () => {
           try {
             const pool = await getPool();
             const bookingResult = await pool.request()
