@@ -154,6 +154,21 @@ export const MyBookings: React.FC<IMyBookingsProps> = function MyBookings(props)
       setConfirmDialogBookingId(undefined);
       setCancellingId(bookingId);
 
+      // --- Cancel error simulation via ?simulateError=cancelBooking ---
+      let simulateCancelError = false;
+      try {
+        simulateCancelError = new URLSearchParams(window.location.search).get('simulateError') === 'cancelBooking';
+      } catch { /* ignore */ }
+
+      if (simulateCancelError) {
+        setTimeout(function onSimulatedError(): void {
+          setCancellingId(undefined);
+          setError('API request failed: 500 Internal Server Error - Unable to cancel booking. Please try again later.');
+        }, 1200);
+        return;
+      }
+      // --- End cancel error simulation ---
+
       apiService
         .cancelBooking(bookingId)
         .then(function onCancelSuccess(): Promise<IBooking[]> {

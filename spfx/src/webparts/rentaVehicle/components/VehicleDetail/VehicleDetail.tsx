@@ -62,15 +62,20 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
 
   // Unified range state -- single source of truth for date/time selection
   const [range, setRange] = React.useState<IRangeState>(function initRange(): IRangeState {
-    const defaultStart = initialStartDate || getToday();
+    const today = getToday();
     const defaultStartHour = initialStartHour !== undefined ? initialStartHour : getNextFullHour();
+    // If nextHour wrapped to 0 (i.e. it's 23:xx) and no explicit dates passed, use tomorrow
+    const needsTomorrow = defaultStartHour === 0 && !initialStartDate;
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const defaultStart = initialStartDate || (needsTomorrow ? tomorrow : today);
     const defaultEnd = initialEndDate || defaultStart;
     const defaultEndHour = initialEndHour !== undefined
       ? initialEndHour
-      : (defaultStartHour >= 23 ? 23 : defaultStartHour + 1);
+      : (needsTomorrow ? 9 : (defaultStartHour >= 23 ? 23 : defaultStartHour + 1));
     return {
       startDate: defaultStart,
-      startHour: defaultStartHour,
+      startHour: needsTomorrow ? 8 : defaultStartHour,
       endDate: defaultEnd,
       endHour: defaultEndHour,
     };
@@ -209,12 +214,18 @@ export const VehicleDetail: React.FC<IVehicleDetailProps> = ({
     // Reset range to smart defaults
     const today = getToday();
     const nextHour = getNextFullHour();
-    setRange({
-      startDate: today,
-      startHour: nextHour,
-      endDate: today,
-      endHour: nextHour >= 23 ? 23 : nextHour + 1,
-    });
+    if (nextHour === 0) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      setRange({ startDate: tomorrow, startHour: 8, endDate: tomorrow, endHour: 9 });
+    } else {
+      setRange({
+        startDate: today,
+        startHour: nextHour,
+        endDate: today,
+        endHour: nextHour >= 23 ? 23 : nextHour + 1,
+      });
+    }
     // Dismiss bottom sheet on mobile after successful booking
     if (isMobile) {
       setIsBottomSheetOpen(false);

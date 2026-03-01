@@ -180,6 +180,56 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
     setSuggestions([]);
 
     try {
+      // --- Booking error simulation via ?simulateError=booking ---
+      let simulateBookingError = false;
+      try {
+        simulateBookingError = new URLSearchParams(window.location.search).get('simulateError') === 'booking';
+      } catch { /* ignore */ }
+
+      if (simulateBookingError) {
+        await new Promise<void>(resolve => setTimeout(resolve, 1200));
+        // Build fake suggestions relative to the requested time
+        const reqStart = new Date(startTimeUtc);
+        const reqEnd = new Date(endTimeUtc);
+        const durationMs = reqEnd.getTime() - reqStart.getTime();
+        const shiftedStart = new Date(reqEnd.getTime() + 3600000); // 1 h after requested end
+        const shiftedEnd = new Date(shiftedStart.getTime() + durationMs);
+        const fakeSuggestions: IBookingSuggestion[] = [
+          {
+            type: 'time_shift',
+            vehicleId: vehicleId,
+            vehicleName: vehicleName,
+            startTime: shiftedStart.toISOString(),
+            endTime: shiftedEnd.toISOString(),
+            label: 'Same vehicle, later slot',
+          },
+          {
+            type: 'alt_vehicle',
+            vehicleId: vehicleId + 1,
+            vehicleName: 'Alternative Vehicle',
+            startTime: startTimeUtc,
+            endTime: endTimeUtc,
+            label: 'Different vehicle, same time',
+          },
+        ];
+        setError('This slot was just booked by someone else. Please choose a different time.');
+        setSuggestions(fakeSuggestions);
+        setFormState('selection');
+        onConflict();
+        return;
+      }
+      // Simulate a server error on confirm via ?simulateError=bookingServer
+      let simulateServerError = false;
+      try {
+        simulateServerError = new URLSearchParams(window.location.search).get('simulateError') === 'bookingServer';
+      } catch { /* ignore */ }
+
+      if (simulateServerError) {
+        await new Promise<void>(resolve => setTimeout(resolve, 1200));
+        throw new Error('API request failed: 500 Internal Server Error - An unexpected error occurred while processing your booking. Please try again later.');
+      }
+      // --- End booking error simulation ---
+
       const result = await apiService.createBooking({
         vehicleId: vehicleId,
         startTime: startTimeUtc,
@@ -203,7 +253,7 @@ export const BookingForm: React.FC<IBookingFormProps> = ({
       setError(message);
       setFormState('review');
     }
-  }, [vehicleId, startTimeUtc, endTimeUtc, apiService, onBookingComplete, onConflict]);
+  }, [vehicleId, vehicleName, startTimeUtc, endTimeUtc, apiService, onBookingComplete, onConflict]);
 
   // Submitting state
   if (formState === 'submitting') {

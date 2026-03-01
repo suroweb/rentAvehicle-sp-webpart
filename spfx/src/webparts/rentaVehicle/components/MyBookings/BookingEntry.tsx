@@ -52,6 +52,21 @@ export const BookingEntry: React.FC<IBookingEntryProps> = function BookingEntry(
     setActionLoading(true);
     setActionError(undefined);
 
+    // --- Checkout error simulation via ?simulateError=checkout ---
+    let simulateCheckoutError = false;
+    try {
+      simulateCheckoutError = new URLSearchParams(window.location.search).get('simulateError') === 'checkout';
+    } catch { /* ignore */ }
+
+    if (simulateCheckoutError) {
+      setTimeout(function onSimulatedError(): void {
+        setActionLoading(false);
+        setActionError('API request failed: 500 Internal Server Error - Unable to process vehicle check-out. Please try again later.');
+      }, 1200);
+      return;
+    }
+    // --- End checkout error simulation ---
+
     apiService.checkOutBooking(booking.id)
       .then(function onSuccess(): void {
         setActionLoading(false);
@@ -67,6 +82,21 @@ export const BookingEntry: React.FC<IBookingEntryProps> = function BookingEntry(
   const handleCheckIn = React.useCallback(function onCheckIn(): void {
     setActionLoading(true);
     setActionError(undefined);
+
+    // --- Return error simulation via ?simulateError=returnVehicle ---
+    let simulateReturnError = false;
+    try {
+      simulateReturnError = new URLSearchParams(window.location.search).get('simulateError') === 'returnVehicle';
+    } catch { /* ignore */ }
+
+    if (simulateReturnError) {
+      setTimeout(function onSimulatedError(): void {
+        setActionLoading(false);
+        setActionError('API request failed: 500 Internal Server Error - Unable to process vehicle return. Please try again later.');
+      }, 1200);
+      return;
+    }
+    // --- End return error simulation ---
 
     apiService.checkInBooking(booking.id)
       .then(function onSuccess(): void {

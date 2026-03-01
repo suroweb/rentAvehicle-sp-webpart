@@ -26,12 +26,23 @@ export interface IAuthProviderProps {
 
 /**
  * Error simulation via URL query parameter: ?simulateError=<type>
+ *
+ * Auth-level (handled here, blocks app):
  *   auth       — Authentication failed (AAD token / consent error)
  *   network    — Backend API unreachable
  *   permission — 403 Forbidden, user not authorized
  *   notfound   — 404 API endpoint not found
  *   server     — 500 Internal server error
  *   degraded   — API failed but app runs in limited mode
+ *
+ * Booking-level (handled in BookingForm):
+ *   booking       — 409 conflict when confirming a booking
+ *   bookingServer — 500 server error when confirming a booking
+ *
+ * Browse-level (handled in VehicleBrowse):
+ *   browseFilters — filter load failure (locations/categories API)
+ *   browseSearch  — search API failure after clicking Search
+ *   browseEmpty   — search returns zero results
  */
 type SimulatedError = 'auth' | 'network' | 'permission' | 'notfound' | 'server' | 'degraded';
 

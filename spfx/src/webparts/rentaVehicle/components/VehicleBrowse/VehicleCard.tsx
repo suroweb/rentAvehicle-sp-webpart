@@ -13,6 +13,8 @@ export const VehicleCard: React.FC<IVehicleCardProps> = ({
   vehicle,
   onSelect,
 }) => {
+  const [imgError, setImgError] = React.useState<boolean>(false);
+
   const handleClick = React.useCallback((): void => {
     onSelect(vehicle.id);
   }, [vehicle.id, onSelect]);
@@ -27,6 +29,10 @@ export const VehicleCard: React.FC<IVehicleCardProps> = ({
     [vehicle.id, onSelect]
   );
 
+  const handleImgError = React.useCallback((): void => {
+    setImgError(true);
+  }, []);
+
   return (
     <div
       className={styles.vehicleCard}
@@ -38,11 +44,12 @@ export const VehicleCard: React.FC<IVehicleCardProps> = ({
     >
       {/* Photo or placeholder */}
       <div className={styles.cardPhoto}>
-        {vehicle.photoUrl ? (
+        {vehicle.photoUrl && !imgError ? (
           <img
             src={vehicle.photoUrl}
             alt={`${vehicle.make} ${vehicle.model}`}
             className={styles.cardImage}
+            onError={handleImgError}
           />
         ) : (
           <div className={styles.cardPlaceholder}>

@@ -69,6 +69,23 @@ function getFilteredHourOptions(selectedDate: Date): IDropdownOption[] {
   return filtered;
 }
 
+/**
+ * Read the ?simulateError= query param for Browse-specific error simulation.
+ * Supported values:
+ *   browseFilters — simulate filter load failure (locations/categories API down)
+ *   browseSearch  — simulate search API failure after clicking Search
+ *   browseEmpty   — simulate zero results from a search
+ */
+function getBrowseSimulatedError(): string | null {
+  try {
+    const value = new URLSearchParams(window.location.search).get('simulateError');
+    if (value && ['browseFilters', 'browseSearch', 'browseEmpty'].indexOf(value) !== -1) {
+      return value;
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
 export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   apiService,
   onNavigateToDetail,
@@ -84,6 +101,17 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
   const [range, setRange] = React.useState<IRangeState>(function initRange(): IRangeState {
     const today = getToday();
     const nextHour = getNextFullHour();
+    // If nextHour wrapped to 0 (i.e. it's 23:xx), start from tomorrow instead
+    if (nextHour === 0) {
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return {
+        startDate: tomorrow,
+        startHour: 8,
+        endDate: tomorrow,
+        endHour: 9,
+      };
+    }
     return {
       startDate: today,
       startHour: nextHour,
@@ -127,6 +155,12 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
 
     const loadFilters = async (): Promise<void> => {
       try {
+        // --- Error simulation: browseFilters ---
+        if (getBrowseSimulatedError() === 'browseFilters') {
+          await new Promise<void>(resolve => setTimeout(resolve, 800));
+          throw new Error('Unable to load locations and categories. The API returned 500 Internal Server Error.');
+        }
+
         const [locs, cats] = await Promise.all([
           apiService.getLocationsPublic(),
           apiService.getCategoriesPublic(),
@@ -257,6 +291,19 @@ export const VehicleBrowse: React.FC<IVehicleBrowseProps> = ({
     setError(undefined);
 
     try {
+      // --- Error simulation: browseSearch / browseEmpty ---
+      const browseSimError = getBrowseSimulatedError();
+      if (browseSimError === 'browseSearch') {
+        await new Promise<void>(resolve => setTimeout(resolve, 1200));
+        throw new Error('API request failed: 500 Internal Server Error - The server encountered an unexpected condition.');
+      }
+      if (browseSimError === 'browseEmpty') {
+        await new Promise<void>(resolve => setTimeout(resolve, 600));
+        setVehicles([]);
+        setHasSearched(true);
+        return;
+      }
+
       const results = await apiService.browseAvailableVehicles(
         selectedLocationId,
         startTimeUtc,
