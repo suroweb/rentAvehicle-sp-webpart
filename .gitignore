@@ -42,3 +42,6 @@ obj/
 # SPFx generated
 *.resx.ts
 *.scss.ts
+
+# Others
+pen/
