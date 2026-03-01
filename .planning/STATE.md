@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Production & Documentation
 status: active
-last_updated: "2026-03-01T14:57:03Z"
+last_updated: "2026-03-01T22:38:29Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 7
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 10 of 12 (Documentation) -- COMPLETE
-Plan: 2 of 2 -- all complete
-Status: Phase 10 complete. App registration guide, deployment guide, and README all delivered.
-Last activity: 2026-03-01 - Completed quick task 6: Add app screenshots to docs and README
+Phase: 11 of 12 (CI/CD & Infrastructure) -- IN PROGRESS
+Plan: 1 of 2 complete (11-02 done, 11-01 remaining)
+Status: Bicep IaC templates complete. GitHub Actions CI/CD pipeline next.
+Last activity: 2026-03-01 - Completed 11-02: Azure Infrastructure Bicep Templates
 
 Progress: [████████████░░░░] 50% milestone (2/4 phases complete)
 
@@ -38,6 +38,7 @@ Progress: [████████████░░░░] 50% milestone (2/4 
 **v1.1 metrics:**
 - Phase 9: 5 plans completed (3 original + 2 gap closure)
 - Phase 10: 2/2 plans completed (plan 01: admin guides 4min, plan 02: README 2min)
+- Phase 11: 1/2 plans completed (plan 02: Bicep IaC 2min)
 
 ## Accumulated Context
 
@@ -56,6 +57,10 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 - [Phase 10]: Used "Microsoft Entra ID" consistently in admin guides, never "Azure AD"
 - [Phase 10]: Documented custom Teams manifest deployment (TeamsSPFxApp.zip) over "Sync to Teams" based on Phase 9 findings
 - [Phase 10]: All configuration values in docs extracted from actual source files, not written from memory
+- [Phase 11]: Consumption Y1 plan for zero-cost baseline with pay-per-execution
+- [Phase 11]: Basic tier SQL (~$5/mo) as cost-effective starting point
+- [Phase 11]: Return401 unauthenticated action for API-only Function App (no browser redirect)
+- [Phase 11]: Secrets via @secure() params at deploy time, never in template files
 
 ### Roadmap Evolution
 
@@ -84,5 +89,5 @@ All 8 v1.0 todos absorbed into v1.1 requirements (VRFY, DOCS, TOOL, FEAT categor
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed quick task 6: Add app screenshots to docs and README
-Resume with: `/gsd:plan-phase 11` or `/gsd:execute-phase 11`
+Stopped at: Completed 11-02-PLAN.md (Bicep IaC templates)
+Resume with: `/gsd:execute-phase 11` for plan 11-01 (GitHub Actions CI/CD)
