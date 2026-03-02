@@ -31,7 +31,7 @@ Requirements for v1.1 Production & Documentation milestone. Each maps to roadmap
 ### Feature
 
 - [x] **FEAT-01**: Admin can view and edit timezone setting for each location
-- [ ] **FEAT-02**: Location timezone is used for all booking time display at that location
+- [x] **FEAT-02**: Location timezone is used for all booking time display at that location
 
 ## Future Requirements
 
@@ -79,7 +79,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-03 | Phase 11 | Complete |
 | TOOL-04 | Phase 11 | Complete |
 | FEAT-01 | Phase 12 | Complete |
-| FEAT-02 | Phase 12 | Pending |
+| FEAT-02 | Phase 12 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 14 total
