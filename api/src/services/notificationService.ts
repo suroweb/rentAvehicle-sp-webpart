@@ -87,6 +87,7 @@ export async function sendBookingConfirmationEmail(
           b.startTime, b.endTime,
           v.make, v.model, v.licensePlate,
           l.name AS locationName,
+          l.timezone AS locationTimezone,
           c.name AS categoryName
         FROM Bookings b
         INNER JOIN Vehicles v ON b.vehicleId = v.id
@@ -101,6 +102,7 @@ export async function sendBookingConfirmationEmail(
     }
 
     const row = result.recordset[0];
+    const locationTimezone = row.locationTimezone || 'UTC';
 
     const htmlBody = buildConfirmationEmailHtml(
       {
@@ -115,7 +117,8 @@ export async function sendBookingConfirmationEmail(
         categoryName: row.categoryName || '',
         locationName: row.locationName || '',
       },
-      appBaseUrl
+      appBaseUrl,
+      locationTimezone
     );
 
     const subject = `Booking Confirmed: ${row.make} ${row.model} (${row.licensePlate}) - ${row.locationName || 'Unknown Location'}`;
@@ -220,7 +223,8 @@ export async function notifyManagerOfBooking(
   employeeName: string,
   vehicleName: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  timezone: string
 ): Promise<void> {
   try {
     const manager = await getManagerInfo(employeeUserId);
@@ -232,7 +236,8 @@ export async function notifyManagerOfBooking(
       employeeName,
       vehicleName,
       startDate,
-      endDate
+      endDate,
+      timezone
     );
 
     await sendTeamsActivityNotification(
@@ -275,6 +280,7 @@ export async function sendBookingNotifications(
           b.startTime, b.endTime,
           v.make, v.model, v.licensePlate,
           l.name AS locationName,
+          l.timezone AS locationTimezone,
           c.name AS categoryName
         FROM Bookings b
         INNER JOIN Vehicles v ON b.vehicleId = v.id
@@ -294,11 +300,13 @@ export async function sendBookingNotifications(
     const vehicleName = `${row.make} ${row.model}`;
     const startIso = new Date(row.startTime).toISOString();
     const endIso = new Date(row.endTime).toISOString();
+    const locationTimezone = row.locationTimezone || 'UTC';
 
     const confirmPreview = buildBookingConfirmationPreview(
       vehicleName,
       startIso,
-      endIso
+      endIso,
+      locationTimezone
     );
 
     const results = await Promise.allSettled([
@@ -319,7 +327,8 @@ export async function sendBookingNotifications(
         row.userDisplayName || row.userEmail,
         vehicleName,
         startIso,
-        endIso
+        endIso,
+        locationTimezone
       ),
     ]);
 
@@ -383,7 +392,8 @@ export async function processPickupReminders(
         b.id, b.userId, b.userEmail, b.userDisplayName,
         b.startTime, b.endTime,
         v.make, v.model, v.licensePlate,
-        l.name AS locationName
+        l.name AS locationName,
+        l.timezone AS locationTimezone
       FROM Bookings b
       INNER JOIN Vehicles v ON b.vehicleId = v.id
       LEFT JOIN Locations l ON v.locationId = l.id
@@ -401,11 +411,13 @@ export async function processPickupReminders(
 
     await processBatch(result.recordset, 10, 1000, async (row) => {
       try {
+        const locationTimezone = row.locationTimezone || 'UTC';
         const vehicleName = `${row.make} ${row.model}`;
         const previewText = buildReminderPreview(
           'pickup',
           vehicleName,
-          new Date(row.startTime).toISOString()
+          new Date(row.startTime).toISOString(),
+          locationTimezone
         );
 
         await sendTeamsActivityNotification(
@@ -461,7 +473,8 @@ export async function processReturnReminders(
         b.id, b.userId, b.userEmail, b.userDisplayName,
         b.startTime, b.endTime,
         v.make, v.model, v.licensePlate,
-        l.name AS locationName
+        l.name AS locationName,
+        l.timezone AS locationTimezone
       FROM Bookings b
       INNER JOIN Vehicles v ON b.vehicleId = v.id
       LEFT JOIN Locations l ON v.locationId = l.id
@@ -479,11 +492,13 @@ export async function processReturnReminders(
 
     await processBatch(result.recordset, 10, 1000, async (row) => {
       try {
+        const locationTimezone = row.locationTimezone || 'UTC';
         const vehicleName = `${row.make} ${row.model}`;
         const previewText = buildReminderPreview(
           'return',
           vehicleName,
-          new Date(row.endTime).toISOString()
+          new Date(row.endTime).toISOString(),
+          locationTimezone
         );
 
         await sendTeamsActivityNotification(
@@ -540,7 +555,8 @@ export async function processOverdueNotifications(
         b.id, b.userId, b.userEmail, b.userDisplayName,
         b.startTime, b.endTime, b.status,
         v.make, v.model, v.licensePlate,
-        l.name AS locationName
+        l.name AS locationName,
+        l.timezone AS locationTimezone
       FROM Bookings b
       INNER JOIN Vehicles v ON b.vehicleId = v.id
       LEFT JOIN Locations l ON v.locationId = l.id
@@ -572,10 +588,12 @@ export async function processOverdueNotifications(
             `);
         }
 
+        const locationTimezone = row.locationTimezone || 'UTC';
         const vehicleName = `${row.make} ${row.model}`;
         const previewText = buildOverduePreview(
           vehicleName,
-          new Date(row.endTime).toISOString()
+          new Date(row.endTime).toISOString(),
+          locationTimezone
         );
 
         // 1. Notify employee
