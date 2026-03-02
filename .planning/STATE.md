@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Production & Documentation
-status: unknown
-last_updated: "2026-03-01T22:44:17.556Z"
+status: in-progress
+last_updated: "2026-03-02T09:00:31Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 13
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 
 ## Current Position
 
-Phase: 11 of 12 (CI/CD & Infrastructure) -- COMPLETE
-Plan: 2 of 2 complete
-Status: Phase 11 complete. CI workflow and Bicep IaC templates both delivered.
-Last activity: 2026-03-01 - Completed 11-01: GitHub Actions CI workflow
+Phase: 12 of 12 (Admin Timezone Configuration)
+Plan: 1 of 4 complete
+Status: Phase 12 in progress. Plan 01 (API + Data Foundation) complete.
+Last activity: 2026-03-02 - Completed 12-01: API + Data Foundation for timezone management
 
-Progress: [████████████████░░░░] 75% milestone (3/4 phases complete)
+Progress: [████████████████████] 75% milestone (3/4 phases, 12-01 of 12-04 in progress)
 
 ## Performance Metrics
 
@@ -39,6 +39,7 @@ Progress: [████████████████░░░░] 75% mil
 - Phase 9: 5 plans completed (3 original + 2 gap closure)
 - Phase 10: 2/2 plans completed (plan 01: admin guides 4min, plan 02: README 2min)
 - Phase 11: 2/2 plans completed (plan 01: CI workflow 3min, plan 02: Bicep IaC 2min)
+- Phase 12: 1/4 plans completed (plan 01: API + Data Foundation 14min)
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 - [Phase 11]: Secrets via @secure() params at deploy time, never in template files
 - [Phase 11]: Pinned ESLint to v8 for API because v10 dropped .eslintrc.json support
 - [Phase 11]: CI env stub generation pattern to bypass local secrets dependency in SPFx builds
+- [Phase 12]: Added UTC explicitly to timezone list since Intl.supportedValuesOf omits it but DB default is 'UTC'
+- [Phase 12]: Used January 15 standard time baseline for UTC offset computation to avoid DST ambiguity
 
 ### Roadmap Evolution
 
@@ -90,6 +93,6 @@ All 8 v1.0 todos absorbed into v1.1 requirements (VRFY, DOCS, TOOL, FEAT categor
 
 ## Session Continuity
 
-Last session: 2026-03-01
-Stopped at: Completed 11-01-PLAN.md (GitHub Actions CI workflow) -- Phase 11 complete
-Resume with: `/gsd:plan-phase 12` or `/gsd:execute-phase 12`
+Last session: 2026-03-02
+Stopped at: Completed 12-01-PLAN.md (API + Data Foundation) -- Phase 12 plan 1/4
+Resume with: `/gsd:execute-phase 12` (continues with 12-02)
