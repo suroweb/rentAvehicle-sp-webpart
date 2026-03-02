@@ -6,8 +6,8 @@ import { getUserFromRequest, requireRole } from '../middleware/auth.js';
  * No authentication required. Returns service status and timestamp.
  */
 export async function health(
-  request: HttpRequest,
-  context: InvocationContext
+  _request: HttpRequest,
+  _context: InvocationContext
 ): Promise<HttpResponseInit> {
   return {
     jsonBody: {
@@ -33,7 +33,7 @@ app.http('health', {
  */
 export async function adminHealth(
   request: HttpRequest,
-  context: InvocationContext
+  _context: InvocationContext
 ): Promise<HttpResponseInit> {
   const user = await getUserFromRequest(request);
 

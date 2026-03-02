@@ -14,7 +14,6 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from '@azure/functions';
-import sql from 'mssql';
 import { getUserFromRequest, requireRole } from '../middleware/auth.js';
 import { getPool } from '../services/database.js';
 import { syncBookingToCalendars } from '../services/calendarService.js';
