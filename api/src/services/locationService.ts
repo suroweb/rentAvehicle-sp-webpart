@@ -19,11 +19,11 @@ export async function getLocationsWithVehicleCounts(): Promise<ILocation[]> {
 
   const result = await request.query(`
     SELECT
-      l.id, l.name, l.isActive, l.lastSyncedAt, l.createdAt, l.updatedAt,
+      l.id, l.name, l.isActive, l.timezone, l.lastSyncedAt, l.createdAt, l.updatedAt,
       COUNT(v.id) AS vehicleCount
     FROM Locations l
     LEFT JOIN Vehicles v ON l.id = v.locationId AND v.isArchived = 0
-    GROUP BY l.id, l.name, l.isActive, l.lastSyncedAt, l.createdAt, l.updatedAt
+    GROUP BY l.id, l.name, l.isActive, l.timezone, l.lastSyncedAt, l.createdAt, l.updatedAt
     ORDER BY l.name
   `);
 
@@ -158,4 +158,17 @@ function isStale(lastSyncedAt: Date | string): boolean {
       : new Date(lastSyncedAt);
   const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   return syncTime < twentyFourHoursAgo;
+}
+
+/**
+ * Update the IANA timezone for a location.
+ * Returns true if a row was updated, false if the location was not found.
+ */
+export async function updateTimezone(locationId: number, timezone: string): Promise<boolean> {
+  const pool = await getPool();
+  const result = await pool.request()
+    .input('id', sql.Int, locationId)
+    .input('timezone', sql.NVarChar(64), timezone)
+    .query('UPDATE Locations SET timezone = @timezone, updatedAt = GETUTCDATE() WHERE id = @id');
+  return result.rowsAffected[0] > 0;
 }
