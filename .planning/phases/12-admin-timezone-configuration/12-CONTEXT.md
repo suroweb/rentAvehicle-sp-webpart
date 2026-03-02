@@ -20,6 +20,8 @@ Out of scope: auto-detection of timezones, bulk import/migration tools, user-lev
 
 ### Timezone Picker UI
 - Searchable dropdown (Fluent UI ComboBox with autocomplete)
+- Full IANA timezone database (~400 zones) — locations are worldwide, no curated subset
+- IANA list hardcoded in the frontend (zones rarely change, avoids extra API call)
 - Options display with UTC offset prefix: "(UTC+02:00) Europe/Bucharest"
 - Timezone column always visible in the LocationList table
 - Claude's Discretion: table cell format (whether to include abbreviation alongside IANA name)
