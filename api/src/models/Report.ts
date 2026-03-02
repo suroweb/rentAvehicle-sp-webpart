@@ -60,6 +60,8 @@ export interface IRawBookingRecord {
   vehicleModel: string;
   vehicleLicensePlate: string;
   locationName: string;
+  /** IANA timezone identifier for the booking's location. */
+  locationTimezone: string;
   startTime: string;
   endTime: string;
   status: string;

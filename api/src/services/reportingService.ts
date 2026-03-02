@@ -289,6 +289,7 @@ export async function getRawBookingData(
         v.model AS vehicleModel,
         v.licensePlate AS vehicleLicensePlate,
         l.name AS locationName,
+        l.timezone AS locationTimezone,
         b.startTime,
         b.endTime,
         b.status,
