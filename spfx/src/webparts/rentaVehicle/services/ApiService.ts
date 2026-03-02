@@ -105,6 +105,13 @@ export class ApiService {
     return this.post<ILocationSyncResult>('/api/backoffice/locations/sync', {});
   }
 
+  public async updateLocationTimezone(locationId: number, timezone: string): Promise<void> {
+    await this.patch<void>(
+      '/api/backoffice/locations/' + String(locationId) + '/timezone',
+      { timezone }
+    );
+  }
+
   // ── Employee: Vehicle Browse & Detail ────────────────────
 
   public async browseAvailableVehicles(
