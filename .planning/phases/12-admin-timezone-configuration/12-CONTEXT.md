@@ -55,7 +55,10 @@ Out of scope: auto-detection of timezones, bulk import/migration tools, user-lev
 <specifics>
 ## Specific Ideas
 
-No specific requirements — open to standard approaches. User wants a clean, inline editing experience consistent with the existing admin table patterns.
+**Core use case — cross-timezone booking (must work end-to-end):**
+A user in New York books a vehicle at a Berlin location. They see availability and booking times in Berlin's timezone (CET/CEST). They pick "10:00 - 12:00" — that's 10:00 Berlin time. The system converts to UTC for storage. No time conflicts arise because UTC is the single source of truth. When the user views "My Bookings", times display in Berlin's timezone. Notifications confirm "10:00 - 12:00 CET". This scenario depends on admins having correctly configured the Berlin location's timezone — which is exactly what this phase delivers.
+
+User wants a clean, inline editing experience consistent with the existing admin table patterns.
 
 </specifics>
 
