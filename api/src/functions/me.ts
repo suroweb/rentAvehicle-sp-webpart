@@ -8,7 +8,7 @@ import { getUserFromRequest } from '../middleware/auth.js';
  */
 export async function me(
   request: HttpRequest,
-  context: InvocationContext
+  _context: InvocationContext
 ): Promise<HttpResponseInit> {
   const user = await getUserFromRequest(request);
 

@@ -23,13 +23,6 @@ type ClientPrincipal = z.infer<typeof ClientPrincipalSchema>;
  * Role hierarchy for determining effective role.
  * Higher number = higher privilege.
  */
-const ROLE_HIERARCHY: Record<string, number> = {
-  Employee: 0,
-  Manager: 1,
-  Admin: 2,
-  SuperAdmin: 3,
-};
-
 /**
  * Determines the effective (highest-privilege) role from a list of roles.
  * Defaults to Employee if no recognized roles are present.

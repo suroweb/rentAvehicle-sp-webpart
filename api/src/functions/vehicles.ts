@@ -13,9 +13,6 @@
  * Admin users are location-scoped: they only see vehicles at their officeLocation.
  * SuperAdmin users can view/manage vehicles at any location.
  */
-// DELIBERATE LINT ERROR: unused variable for CI test
-const thisWillFail: string = 'lint should catch me';
-
 import {
   app,
   HttpRequest,
