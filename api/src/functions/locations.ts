@@ -19,8 +19,10 @@ import {
   getLocationsWithVehicleCounts,
   ensureLocationsSynced,
   syncLocations,
+  updateTimezone,
 } from '../services/locationService.js';
 import { getDistinctOfficeLocations } from '../services/graphService.js';
+import { TimezoneUpdateSchema } from '../models/Location.js';
 
 const isAdminOrSuperAdmin = requireRole('Admin', 'SuperAdmin');
 const isSuperAdmin = requireRole('SuperAdmin');
@@ -129,6 +131,56 @@ async function listLocationsPublic(
   }
 }
 
+/**
+ * PATCH /api/backoffice/locations/{id}/timezone
+ * Update a location's IANA timezone.
+ * Requires Admin or SuperAdmin role.
+ */
+async function updateLocationTimezone(
+  request: HttpRequest,
+  context: InvocationContext
+): Promise<HttpResponseInit> {
+  try {
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return { status: 401, jsonBody: { error: 'Not authenticated' } };
+    }
+    if (!isAdminOrSuperAdmin(user)) {
+      return {
+        status: 403,
+        jsonBody: { error: 'Admin or SuperAdmin role required' },
+      };
+    }
+
+    const id = parseInt(request.params.id, 10);
+    if (isNaN(id)) {
+      return { status: 400, jsonBody: { error: 'Invalid location ID' } };
+    }
+
+    const body = (await request.json()) as Record<string, unknown>;
+    const parsed = TimezoneUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      return {
+        status: 400,
+        jsonBody: { error: 'Validation failed', details: parsed.error.flatten() },
+      };
+    }
+
+    const updated = await updateTimezone(id, parsed.data.timezone);
+    if (!updated) {
+      return { status: 404, jsonBody: { error: 'Location not found' } };
+    }
+
+    return { jsonBody: { success: true } };
+  } catch (error) {
+    context.error('updateLocationTimezone failed:', error);
+    return {
+      status: 500,
+      jsonBody: { error: 'Internal server error' },
+    };
+  }
+}
+
 // Register location endpoints
 app.http('listLocationsPublic', {
   methods: ['GET'],
@@ -149,4 +201,11 @@ app.http('syncLocations', {
   authLevel: 'anonymous',
   route: 'backoffice/locations/sync',
   handler: syncLocationsTrigger,
+});
+
+app.http('updateLocationTimezone', {
+  methods: ['PATCH'],
+  authLevel: 'anonymous',
+  route: 'backoffice/locations/{id}/timezone',
+  handler: updateLocationTimezone,
 });
