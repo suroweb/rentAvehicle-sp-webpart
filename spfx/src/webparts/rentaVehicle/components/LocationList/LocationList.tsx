@@ -9,10 +9,12 @@ import {
 import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import { Icon } from '@fluentui/react/lib/Icon';
+import { ComboBox, IComboBox, IComboBoxOption } from '@fluentui/react/lib/ComboBox';
 import styles from './LocationList.module.scss';
 import { ApiService } from '../../services/ApiService';
 import { ILocation, ILocationSyncResult } from '../../models/ILocation';
 import { AppRole } from '../../models/IUser';
+import { TIMEZONE_OPTIONS } from '../../data/timezones';
 
 export interface ILocationListProps {
   apiService: ApiService;
@@ -25,6 +27,11 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
   const [syncing, setSyncing] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [syncResult, setSyncResult] = React.useState<ILocationSyncResult | undefined>(undefined);
+
+  // Timezone inline editing state
+  const [editingLocationId, setEditingLocationId] = React.useState<number | null>(null);
+  const [savingTimezoneId, setSavingTimezoneId] = React.useState<number | null>(null);
+  const [savedTimezoneId, setSavedTimezoneId] = React.useState<number | null>(null);
 
   const fetchLocations = React.useCallback(async (): Promise<void> => {
     try {
@@ -68,6 +75,43 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
       setSyncing(false);
     }
   }, [apiService, fetchLocations]);
+
+  const handleTimezoneChange = React.useCallback(
+    async (locationId: number, timezone: string): Promise<void> => {
+      setEditingLocationId(null);
+      setSavingTimezoneId(locationId);
+      setSavedTimezoneId(null);
+
+      try {
+        await apiService.updateLocationTimezone(locationId, timezone);
+
+        // Update local state immediately
+        setLocations(function updateLocations(prev: ILocation[]): ILocation[] {
+          return prev.map(function mapLocation(loc: ILocation): ILocation {
+            if (loc.id === locationId) {
+              return Object.assign({}, loc, { timezone: timezone });
+            }
+            return loc;
+          });
+        });
+
+        setSavingTimezoneId(null);
+        setSavedTimezoneId(locationId);
+
+        // Clear saved indicator after 2 seconds
+        setTimeout(function clearSaved(): void {
+          setSavedTimezoneId(function clearIfMatch(prev: number | null): number | null {
+            return prev === locationId ? null : prev;
+          });
+        }, 2000);
+      } catch (err) {
+        setSavingTimezoneId(null);
+        const message = err instanceof Error ? err.message : 'Failed to update timezone';
+        setError(message);
+      }
+    },
+    [apiService]
+  );
 
   const isSuperAdmin = userRole === 'SuperAdmin';
 
@@ -116,6 +160,69 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
         onRender: (item: ILocation) => (
           <span>{item.vehicleCount !== undefined ? item.vehicleCount : '--'}</span>
         ),
+      },
+      {
+        key: 'timezone',
+        name: 'Timezone',
+        minWidth: 200,
+        maxWidth: 320,
+        isResizable: true,
+        onRender: (item: ILocation) => {
+          const tz = item.timezone || 'UTC';
+          const isUnconfigured = !item.timezone || item.timezone === 'UTC';
+
+          // Saving state
+          if (savingTimezoneId === item.id) {
+            return (
+              <span className={styles.timezoneSaving}>
+                <Spinner size={SpinnerSize.xSmall} />
+                Saving...
+              </span>
+            );
+          }
+
+          // Just saved state
+          if (savedTimezoneId === item.id) {
+            return (
+              <span className={styles.timezoneSaved}>
+                <Icon iconName="CheckMark" styles={{ root: { fontSize: 12 } }} />
+                {tz}
+              </span>
+            );
+          }
+
+          // Editing state
+          if (editingLocationId === item.id) {
+            return (
+              <ComboBox
+                autoComplete="on"
+                allowFreeform={true}
+                options={TIMEZONE_OPTIONS}
+                selectedKey={tz}
+                onChange={(_ev: React.FormEvent<IComboBox>, option?: IComboBoxOption) => {
+                  if (option) {
+                    handleTimezoneChange(item.id, option.key as string).catch(() => { /* handled in callback */ });
+                  }
+                }}
+                onBlur={() => setEditingLocationId(null)}
+                openOnKeyboardFocus
+                className={styles.timezoneComboBox}
+                placeholder="Search timezone..."
+              />
+            );
+          }
+
+          // Read-only display
+          return (
+            <span
+              onClick={() => setEditingLocationId(item.id)}
+              className={isUnconfigured ? styles.timezoneUnconfigured : styles.timezoneCell}
+              title="Click to edit timezone"
+            >
+              {isUnconfigured ? 'UTC (not configured)' : tz}
+            </span>
+          );
+        },
       },
       {
         key: 'status',
@@ -167,7 +274,7 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
         ),
       },
     ],
-    []
+    [editingLocationId, savingTimezoneId, savedTimezoneId, handleTimezoneChange]
   );
 
   if (loading) {
