@@ -94,19 +94,55 @@ export function exportSummaryCSV(data: IUtilizationData[]): void {
 }
 
 /**
+ * Format a UTC date string in a specific IANA timezone for CSV export.
+ * Returns a human-readable date/time string with timezone abbreviation.
+ * Example: "Feb 26, 2026, 10:00 AM EET"
+ */
+function formatInTimezone(utcDateStr: string, timezone: string): string {
+  try {
+    var date = new Date(utcDateStr);
+    var formatted = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZone: timezone,
+    }).format(date);
+
+    // Extract timezone abbreviation
+    var abbrFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'short',
+    });
+    var abbrFormatted = abbrFormatter.format(date);
+    var commaIndex = abbrFormatted.lastIndexOf(', ');
+    var abbr = commaIndex >= 0 ? abbrFormatted.substring(commaIndex + 2) : timezone;
+    return formatted + ' ' + abbr;
+  } catch (e) {
+    // Fallback to raw string if timezone is invalid
+    return e ? utcDateStr : utcDateStr;
+  }
+}
+
+/**
  * Export raw booking records to CSV (anonymized -- no employee data columns).
- * Columns: Booking ID, Vehicle (Make Model), License Plate, Location, Start Time, End Time, Duration (Hours), Status.
+ * Times are formatted in each booking's location timezone with abbreviation.
+ * Columns: Booking ID, Vehicle (Make Model), License Plate, Location, Timezone, Start Time, End Time, Duration (Hours), Status.
  */
 export function exportRawDataCSV(data: IRawBookingRecord[]): void {
-  const headers = ['Booking ID', 'Vehicle (Make Model)', 'License Plate', 'Location', 'Start Time', 'End Time', 'Duration (Hours)', 'Status'];
+  const headers = ['Booking ID', 'Vehicle (Make Model)', 'License Plate', 'Location', 'Timezone', 'Start Time', 'End Time', 'Duration (Hours)', 'Status'];
   const rows: (string | number)[][] = data.map(function mapRow(item: IRawBookingRecord): (string | number)[] {
+    var tz = item.locationTimezone || 'UTC';
     return [
       item.bookingId,
       item.vehicleMake + ' ' + item.vehicleModel,
       item.vehicleLicensePlate,
       item.locationName,
-      item.startTime,
-      item.endTime,
+      tz,
+      formatInTimezone(item.startTime, tz),
+      formatInTimezone(item.endTime, tz),
       Math.round(item.durationHours * 100) / 100,
       item.status,
     ];
