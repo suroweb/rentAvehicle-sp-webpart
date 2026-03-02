@@ -100,8 +100,8 @@ export function exportSummaryCSV(data: IUtilizationData[]): void {
  */
 function formatInTimezone(utcDateStr: string, timezone: string): string {
   try {
-    var date = new Date(utcDateStr);
-    var formatted = new Intl.DateTimeFormat('en-US', {
+    const date = new Date(utcDateStr);
+    const formatted = new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -112,13 +112,13 @@ function formatInTimezone(utcDateStr: string, timezone: string): string {
     }).format(date);
 
     // Extract timezone abbreviation
-    var abbrFormatter = new Intl.DateTimeFormat('en-US', {
+    const abbrFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       timeZoneName: 'short',
     });
-    var abbrFormatted = abbrFormatter.format(date);
-    var commaIndex = abbrFormatted.lastIndexOf(', ');
-    var abbr = commaIndex >= 0 ? abbrFormatted.substring(commaIndex + 2) : timezone;
+    const abbrFormatted = abbrFormatter.format(date);
+    const commaIndex = abbrFormatted.lastIndexOf(', ');
+    const abbr = commaIndex >= 0 ? abbrFormatted.substring(commaIndex + 2) : timezone;
     return formatted + ' ' + abbr;
   } catch (e) {
     // Fallback to raw string if timezone is invalid
@@ -134,7 +134,7 @@ function formatInTimezone(utcDateStr: string, timezone: string): string {
 export function exportRawDataCSV(data: IRawBookingRecord[]): void {
   const headers = ['Booking ID', 'Vehicle (Make Model)', 'License Plate', 'Location', 'Timezone', 'Start Time', 'End Time', 'Duration (Hours)', 'Status'];
   const rows: (string | number)[][] = data.map(function mapRow(item: IRawBookingRecord): (string | number)[] {
-    var tz = item.locationTimezone || 'UTC';
+    const tz = item.locationTimezone || 'UTC';
     return [
       item.bookingId,
       item.vehicleMake + ' ' + item.vehicleModel,
