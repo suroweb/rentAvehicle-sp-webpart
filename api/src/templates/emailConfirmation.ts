@@ -19,19 +19,34 @@ function escapeHtml(text: string): string {
 
 /**
  * Format a date string into a human-readable format for email display.
- * Example: "Feb 26, 2026, 10:00 AM"
+ * Appends timezone abbreviation for clarity.
+ * Example: "Feb 26, 2026, 10:00 AM EET"
  */
-function formatDateTime(dateStr: string): string {
+function formatDateTime(dateStr: string, timezone: string): string {
   const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('en-US', {
+  const formatted = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-    timeZone: 'UTC',
+    timeZone: timezone,
   }).format(date);
+
+  // Extract timezone abbreviation
+  try {
+    const f = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      timeZoneName: 'short',
+    });
+    const parts = f.format(date);
+    const commaIndex = parts.lastIndexOf(', ');
+    const abbr = commaIndex >= 0 ? parts.substring(commaIndex + 2) : timezone;
+    return formatted + ' ' + abbr;
+  } catch {
+    return formatted;
+  }
 }
 
 /**
@@ -59,7 +74,8 @@ export function buildConfirmationEmailHtml(
     categoryName: string;
     locationName: string;
   },
-  appBaseUrl: string
+  appBaseUrl: string,
+  timezone: string
 ): string {
   const viewUrl = `${escapeHtml(appBaseUrl)}?bookingId=${booking.id}`;
   const cancelUrl = `${escapeHtml(appBaseUrl)}?bookingId=${booking.id}&amp;action=cancel`;
@@ -104,11 +120,11 @@ export function buildConfirmationEmailHtml(
           </tr>
           <tr>
             <td style="padding: 8px 12px 8px 0; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">Pickup</td>
-            <td style="padding: 8px 0; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">${formatDateTime(booking.startTime)}</td>
+            <td style="padding: 8px 0; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">${formatDateTime(booking.startTime, timezone)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 12px 8px 0; font-weight: 600; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">Return</td>
-            <td style="padding: 8px 0; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">${formatDateTime(booking.endTime)}</td>
+            <td style="padding: 8px 0; color: #333333; font-size: 14px; border-bottom: 1px solid #f0f0f0;">${formatDateTime(booking.endTime, timezone)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 12px 8px 0; font-weight: 600; color: #333333; font-size: 14px;">Status</td>
