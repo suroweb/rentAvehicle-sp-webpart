@@ -14,7 +14,7 @@ import styles from './LocationList.module.scss';
 import { ApiService } from '../../services/ApiService';
 import { ILocation, ILocationSyncResult } from '../../models/ILocation';
 import { AppRole } from '../../models/IUser';
-import { TIMEZONE_OPTIONS } from '../../data/timezones';
+import { TIMEZONE_OPTIONS, ITimezoneOption } from '../../data/timezones';
 
 export interface ILocationListProps {
   apiService: ApiService;
@@ -32,6 +32,28 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
   const [editingLocationId, setEditingLocationId] = React.useState<number | null>(null);
   const [savingTimezoneId, setSavingTimezoneId] = React.useState<number | null>(null);
   const [savedTimezoneId, setSavedTimezoneId] = React.useState<number | null>(null);
+
+  // Timezone search/filter state
+  const [filteredTimezones, setFilteredTimezones] = React.useState<ITimezoneOption[]>(TIMEZONE_OPTIONS);
+  const [timezoneSearchText, setTimezoneSearchText] = React.useState<string>('');
+
+  const handleTimezoneInputChange = React.useCallback((text: string): void => {
+    setTimezoneSearchText(text);
+    if (!text || text.trim() === '') {
+      setFilteredTimezones(TIMEZONE_OPTIONS);
+      return;
+    }
+    const query = text.toLowerCase();
+    const filtered = TIMEZONE_OPTIONS.filter(
+      (opt: ITimezoneOption) => opt.text.toLowerCase().includes(query)
+    );
+    setFilteredTimezones(filtered);
+  }, []);
+
+  const handleTimezoneMenuOpen = React.useCallback((): void => {
+    setTimezoneSearchText('');
+    setFilteredTimezones(TIMEZONE_OPTIONS);
+  }, []);
 
   const fetchLocations = React.useCallback(async (): Promise<void> => {
     try {
@@ -78,6 +100,8 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
 
   const handleTimezoneChange = React.useCallback(
     async (locationId: number, timezone: string): Promise<void> => {
+      setTimezoneSearchText('');
+      setFilteredTimezones(TIMEZONE_OPTIONS);
       setEditingLocationId(null);
       setSavingTimezoneId(locationId);
       setSavedTimezoneId(null);
@@ -195,19 +219,30 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
           if (editingLocationId === item.id) {
             return (
               <ComboBox
-                autoComplete="on"
                 allowFreeform={true}
-                options={TIMEZONE_OPTIONS}
-                selectedKey={tz}
+                autoComplete="off"
+                options={filteredTimezones}
+                text={timezoneSearchText}
                 onChange={(_ev: React.FormEvent<IComboBox>, option?: IComboBoxOption) => {
                   if (option) {
                     handleTimezoneChange(item.id, option.key as string).catch(() => { /* handled in callback */ });
                   }
                 }}
-                onBlur={() => setEditingLocationId(null)}
+                onInputValueChange={handleTimezoneInputChange}
+                onMenuOpen={handleTimezoneMenuOpen}
+                onBlur={() => {
+                  setEditingLocationId(null);
+                  setTimezoneSearchText('');
+                  setFilteredTimezones(TIMEZONE_OPTIONS);
+                }}
                 openOnKeyboardFocus
+                shouldRestoreFocus={false}
                 className={styles.timezoneComboBox}
                 placeholder="Search timezone..."
+                calloutProps={{
+                  calloutMaxHeight: 320,
+                  styles: { root: { minWidth: 320 } }
+                }}
               />
             );
           }
@@ -274,7 +309,7 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
         ),
       },
     ],
-    [editingLocationId, savingTimezoneId, savedTimezoneId, handleTimezoneChange]
+    [editingLocationId, savingTimezoneId, savedTimezoneId, handleTimezoneChange, filteredTimezones, timezoneSearchText, handleTimezoneInputChange, handleTimezoneMenuOpen]
   );
 
   if (loading) {
