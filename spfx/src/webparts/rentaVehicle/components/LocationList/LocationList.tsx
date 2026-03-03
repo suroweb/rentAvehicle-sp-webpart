@@ -36,6 +36,19 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
   // Timezone search/filter state
   const [filteredTimezones, setFilteredTimezones] = React.useState<ITimezoneOption[]>(TIMEZONE_OPTIONS);
   const [timezoneSearchText, setTimezoneSearchText] = React.useState<string>('');
+  const comboBoxRef = React.useRef<IComboBox>(null);
+
+  // Auto-focus ComboBox when it mounts (so first click lets you type immediately)
+  React.useEffect(() => {
+    if (editingLocationId !== null) {
+      const frame = requestAnimationFrame(() => {
+        if (comboBoxRef.current) {
+          comboBoxRef.current.focus(true);
+        }
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [editingLocationId]);
 
   const handleTimezoneInputChange = React.useCallback((text: string): void => {
     setTimezoneSearchText(text);
@@ -222,6 +235,7 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
             ];
             return (
               <ComboBox
+                componentRef={comboBoxRef}
                 allowFreeform={true}
                 autoComplete="off"
                 options={filteredTimezones.length > 0 ? filteredTimezones : noResultsOption}
