@@ -7,6 +7,9 @@
     "build": "tsc",
     "start": "func start",
     "prestart": "node ../scripts/sync-dev-config.js && npm run build",
+    "start:admin": "node ../scripts/sync-dev-config.js --role Admin && npm start",
+    "start:superadmin": "node ../scripts/sync-dev-config.js --role SuperAdmin && npm start",
+    "start:manager": "node ../scripts/sync-dev-config.js --role Manager && npm start",
     "clean-secrets": "node ../scripts/sync-dev-config.js --clean"
   },
   "dependencies": {
