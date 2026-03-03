@@ -90,6 +90,7 @@ None active. Teams notification blocker resolved.
 | 4 | Fix Bookings CHECK constraint to include Overdue | 2026-03-01 | 297182a | [4-fix-getmybookingsendpoint-check-constrai](./quick/4-fix-getmybookingsendpoint-check-constrai/) |
 | 5 | Add test user override for local dev (API + SPFx) | 2026-03-01 | 534caf5, 1a1bcb8 | [5-add-test-user-override-for-local-dev-on-](./quick/5-add-test-user-override-for-local-dev-on-/) |
 | 6 | Add app screenshots to docs/images and update README | 2026-03-01 | 9a393fe, 1176595 | [6-add-app-screenshots-to-docs-images-and-u](./quick/6-add-app-screenshots-to-docs-images-and-u/) |
+| 7 | Document role-specific start scripts in README | 2026-03-03 | 03da34e | [7-document-role-specific-start-scripts-in-](./quick/7-document-role-specific-start-scripts-in-/) |
 
 ### Pending Todos
 
@@ -97,6 +98,6 @@ All 8 v1.0 todos absorbed into v1.1 requirements (VRFY, DOCS, TOOL, FEAT categor
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Completed 12-04-PLAN.md (Timezone Column UI) -- Phase 12 complete, v1.1 milestone complete
+Last session: 2026-03-03
+Stopped at: Completed quick task 7 (Document role-specific start scripts in README)
 Resume with: All phases complete. v1.1 milestone finished.
