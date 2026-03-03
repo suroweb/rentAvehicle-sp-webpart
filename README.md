@@ -209,6 +209,22 @@ npm start
 
 Runs `sync-dev-config.js` (generates `local.settings.json`), builds TypeScript, then starts Azure Functions on `http://localhost:7071`.
 
+#### Role-specific start scripts
+
+To start the API as a specific role without manually editing `dev.config.json`:
+
+| Command | Role | Description |
+|---------|------|-------------|
+| `npm start` | Employee | Default role |
+| `npm run start:admin` | Admin | Fleet and booking management |
+| `npm run start:superadmin` | SuperAdmin | Full system administration |
+| `npm run start:manager` | Manager | Team bookings visibility |
+
+Each role script runs `sync-dev-config.js --role X` to update `dev.config.json` and regenerate `local.settings.json`, then starts the API. The role persists in `dev.config.json`, so subsequent `npm start` calls keep the last-set role.
+
+> [!NOTE]
+> The SPFx frontend does not need role-specific scripts. It calls the API's `/api/me` endpoint to resolve the current user's role at runtime.
+
 ### 7. Start the SPFx workbench
 
 In a separate terminal:
@@ -233,7 +249,7 @@ Two options:
 - **Local dev** uses Azure SQL Edge on Docker (`localhost:1433`) with the `sa` account
 - **Production** uses Azure SQL and Azure Functions -- see [docs/deployment.md](docs/deployment.md)
 - The `contoso.sharepoint.com` in the template is a placeholder -- your real domain is injected via secrets
-- To switch roles quickly: `node scripts/sync-dev-config.js --role Admin` (also accepts `Manager`, `Employee`, `SuperAdmin`)
+- To switch roles: use `npm run start:admin`, `npm run start:superadmin`, or `npm run start:manager` from the `api` directory. Alternatively, run `node scripts/sync-dev-config.js --role Admin` directly (also accepts `Manager`, `Employee`, `SuperAdmin`)
 
 ---
 
