@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Production & Documentation
 status: unknown
-last_updated: "2026-03-02T09:42:18.855Z"
+last_updated: "2026-03-03T12:10:03.754Z"
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-02-25)
 ## Current Position
 
 Phase: 12 of 12 (Admin Timezone Configuration)
-Plan: 4 of 4 complete
-Status: Phase 12 complete. All plans executed.
-Last activity: 2026-03-02 - Completed 12-04: Inline editable timezone column in LocationList
+Plan: 5 of 5 complete
+Status: Phase 12 complete. All plans executed (including gap closure plan 05).
+Last activity: 2026-03-03 - Completed 12-05: Timezone ComboBox UX fix (filtered search)
 
 Progress: [█████████████████████████] 100% milestone (4/4 phases, all complete)
 
@@ -39,7 +39,7 @@ Progress: [███████████████████████
 - Phase 9: 5 plans completed (3 original + 2 gap closure)
 - Phase 10: 2/2 plans completed (plan 01: admin guides 4min, plan 02: README 2min)
 - Phase 11: 2/2 plans completed (plan 01: CI workflow 3min, plan 02: Bicep IaC 2min)
-- Phase 12: 4/4 plans completed (plan 01: API + Data Foundation 14min, plan 02: Notification Timezone 5min, plan 03: Report Export Timezone 3min, plan 04: Timezone Column UI 7min)
+- Phase 12: 5/5 plans completed (plan 01: API + Data Foundation 14min, plan 02: Notification Timezone 5min, plan 03: Report Export Timezone 3min, plan 04: Timezone Column UI 7min, plan 05: ComboBox UX Fix 3min)
 
 ## Accumulated Context
 
@@ -70,6 +70,9 @@ All v1.0 decisions documented with outcomes (see PROJECT.md).
 - [Phase 12]: UTC fallback via || 'UTC' for locations without timezone configuration in exports
 - [Phase 12]: Used IComboBox type for ComboBox onChange event (not HTMLElement) to match Fluent UI API
 - [Phase 12]: Used .catch() pattern for floating promise in onChange handler (both no-floating-promises and no-void rules active)
+- [Phase 12]: Used controlled text prop instead of selectedKey for ComboBox to start input empty for search
+- [Phase 12]: Used disabled IComboBoxOption for no-results state (Fluent UI v8 compatibility over onRenderLowerContent)
+- [Phase 12]: Set autoComplete=off to prevent Fluent UI inline prefix auto-completion
 
 ### Roadmap Evolution
 
@@ -99,5 +102,5 @@ All 8 v1.0 todos absorbed into v1.1 requirements (VRFY, DOCS, TOOL, FEAT categor
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed quick task 7 (Document role-specific start scripts in README)
+Stopped at: Completed 12-05 (Timezone ComboBox UX fix - gap closure plan)
 Resume with: All phases complete. v1.1 milestone finished.
