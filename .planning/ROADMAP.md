@@ -85,11 +85,12 @@ Plans:
   1. Admin can view the current timezone for each location in the admin interface
   2. Admin can edit and save a timezone setting for any location
   3. Booking times throughout the application display in the timezone configured for the booking's location
-**Plans**: 4 plans (2 waves)
-- [ ] 12-01-PLAN.md — API: PATCH timezone endpoint, locationService timezone query fix, Zod validation, static IANA timezone data module (Wave 1)
-- [ ] 12-02-PLAN.md — Notifications: Replace hardcoded UTC in adaptiveCards/emailConfirmation templates, add l.timezone to notification queries (Wave 1)
-- [ ] 12-03-PLAN.md — Export: Add locationTimezone to report models/query, timezone-formatted CSV export (Wave 1)
-- [ ] 12-04-PLAN.md — Frontend: LocationList timezone column with inline ComboBox editor, auto-save, ApiService method, SCSS styles (Wave 2, depends on 01)
+**Plans**: 5 plans (2 waves + 1 gap closure)
+- [x] 12-01-PLAN.md — API: PATCH timezone endpoint, locationService timezone query fix, Zod validation, static IANA timezone data module (Wave 1)
+- [x] 12-02-PLAN.md — Notifications: Replace hardcoded UTC in adaptiveCards/emailConfirmation templates, add l.timezone to notification queries (Wave 1)
+- [x] 12-03-PLAN.md — Export: Add locationTimezone to report models/query, timezone-formatted CSV export (Wave 1)
+- [x] 12-04-PLAN.md — Frontend: LocationList timezone column with inline ComboBox editor, auto-save, ApiService method, SCSS styles (Wave 2, depends on 01)
+- [ ] 12-05-PLAN.md — Fix timezone ComboBox UX: filtered search, clear-on-open, polished dropdown (gap closure)
 
 ## Progress
 
@@ -106,10 +107,10 @@ Plans:
 | 08.1. Unified Date Range Picker | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 08.1.1. Remove Day View | v1.0 | 1/1 | Complete | 2026-02-25 |
 | 9. Live Tenant Verification | v1.1 | 5/5 | Complete | 2026-02-26 |
-| 10. Documentation | 2/2 | Complete   | 2026-02-26 | - |
-| 11. CI/CD and Infrastructure | 2/2 | Complete    | 2026-03-01 | - |
-| 12. Admin Timezone Configuration | 4/4 | Complete    | 2026-03-02 | - |
+| 10. Documentation | v1.1 | 2/2 | Complete | 2026-02-26 |
+| 11. CI/CD and Infrastructure | v1.1 | 2/2 | Complete | 2026-03-01 |
+| 12. Admin Timezone Configuration | v1.1 | 4/5 | Gap Closure | 2026-03-02 |
 
 ---
 *Roadmap created: 2026-02-22*
-*Last updated: 2026-02-26 after Phase 10 planning (2 plans created)*
+*Last updated: 2026-03-03 after Phase 12 gap closure planning (1 plan created)*
