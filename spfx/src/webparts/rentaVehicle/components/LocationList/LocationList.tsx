@@ -217,11 +217,14 @@ export const LocationList: React.FC<ILocationListProps> = ({ apiService, userRol
 
           // Editing state
           if (editingLocationId === item.id) {
+            const noResultsOption: IComboBoxOption[] = [
+              { key: '__no_results__', text: `No timezones matching "${timezoneSearchText}"`, disabled: true }
+            ];
             return (
               <ComboBox
                 allowFreeform={true}
                 autoComplete="off"
-                options={filteredTimezones}
+                options={filteredTimezones.length > 0 ? filteredTimezones : noResultsOption}
                 text={timezoneSearchText}
                 onChange={(_ev: React.FormEvent<IComboBox>, option?: IComboBoxOption) => {
                   if (option) {
