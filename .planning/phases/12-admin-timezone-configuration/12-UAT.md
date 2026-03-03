@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 12-admin-timezone-configuration
 source: 12-01-SUMMARY.md, 12-02-SUMMARY.md, 12-03-SUMMARY.md, 12-04-SUMMARY.md
 started: 2026-03-02T10:00:00Z
@@ -64,17 +64,28 @@ skipped: 1
   reason: "User reported: when i click it appears like a pre filled input text. i click on it.. then i can add text to the addtional text.. its not user friendly.. and as i type i dont see the the list is filterout.. its the same long list with timezone... we need to fix UX for this."
   severity: major
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "allowFreeform={true} on Fluent UI ComboBox causes input to render as editable text field with cursor at end — user keystrokes append to existing timezone value instead of starting fresh search"
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.tsx"
+      issue: "ComboBox at lines 197-211: allowFreeform={true} + autoComplete='on' + static unfiltered options"
+  missing:
+    - "Add state-managed filtering via onInputValueChange with substring matching"
+    - "Filter TIMEZONE_OPTIONS based on user input before passing to options prop"
+    - "Clear input text on ComboBox open so user starts typing fresh"
+  debug_session: ".planning/debug/tz-combobox-ux.md"
 
 - truth: "Typing in the ComboBox filters the timezone list to matching results"
   status: failed
   reason: "User reported: same issue as test 3, doesn't filter"
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Fluent UI v8 ComboBox autoComplete='on' only does inline prefix completion in input field — does NOT filter/hide non-matching dropdown items. All 419 timezone options remain visible. Custom filtering logic via onInputValueChange is required."
+  artifacts:
+    - path: "spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.tsx"
+      issue: "Static TIMEZONE_OPTIONS passed to options prop without filtering"
+    - path: "spfx/src/webparts/rentaVehicle/data/timezones.ts"
+      issue: "419 options always passed in full — consumer must filter"
+  missing:
+    - "Implement onInputValueChange handler that filters TIMEZONE_OPTIONS by text.toLowerCase().includes(query)"
+    - "Maintain filteredOptions state, pass to options prop instead of static array"
+  debug_session: ".planning/debug/tz-combobox-ux.md"
