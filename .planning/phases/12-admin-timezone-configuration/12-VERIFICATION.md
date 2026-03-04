@@ -1,216 +1,189 @@
 ---
 phase: 12-admin-timezone-configuration
-verified: 2026-03-02T10:00:00Z
-status: passed
-score: 20/20 must-haves verified
-re_verification: false
+verified: 2026-03-03T13:30:00Z
+status: human_needed
+score: 5/5 must-haves verified
+re_verification: true
+previous_status: passed (pre-UAT)
+previous_score: 20/20 (initial, before UAT discovered gaps)
+gaps_closed:
+  - "Clicking a timezone cell opens a ComboBox with a clear empty input ready for typing"
+  - "Typing in the ComboBox filters the dropdown to only matching timezone options"
+  - "The dropdown is usable and polished -- not a raw 419-item unfiltered list"
+  - "Selecting a filtered result saves the timezone (existing auto-save still works)"
+gaps_remaining: []
+regressions: []
+human_verification:
+  - test: "ComboBox opens with empty input ready for typing (UAT Test 3)"
+    expected: "Clicking a timezone cell opens a ComboBox with an empty input field and 'Search timezone...' placeholder; the field does NOT pre-fill with the current timezone value; dropdown shows full 419-item list initially"
+    why_human: "Controlled text prop behavior and focus-on-open UX require interactive browser testing"
+  - test: "Typing filters the timezone list in real-time (UAT Test 4)"
+    expected: "Typing 'berlin' narrows the dropdown to show only entries containing 'berlin' (e.g., Europe/Berlin); typing 'utc+01' shows UTC+01:00 timezones; typing 'zzzzz' shows 'No timezones matching \"zzzzz\"' disabled option"
+    why_human: "Real-time filter-as-you-type behavior requires interactive browser testing; static analysis confirms the handler exists and wires correctly but cannot confirm runtime rendering"
+  - test: "Email confirmation timezone display (UAT Test 8 -- previously skipped)"
+    expected: "Create a booking at a location configured to Europe/Bucharest (UTC+02:00); trigger confirmation email; email shows pickup/return times as 'Feb 26, 2026, 10:00 AM EET' (not UTC)"
+    why_human: "Requires real Graph API send and email client inspection; not available in dev environment"
 ---
 
 # Phase 12: Admin Timezone Configuration Verification Report
 
 **Phase Goal:** Admins can manage timezone settings per location, and all booking times display in the correct local timezone
-**Verified:** 2026-03-02
-**Status:** PASSED
-**Re-verification:** No — initial verification
+**Verified:** 2026-03-03T13:30:00Z
+**Status:** HUMAN_NEEDED (all automated checks passed; 3 interactive tests required)
+**Re-verification:** Yes -- after gap closure via Plan 05 (ComboBox UX fix)
+
+---
+
+## Re-verification Context
+
+The initial VERIFICATION.md (2026-03-02) was marked `passed` with score 20/20. However, UAT conducted on 2026-03-03 discovered two major gaps:
+
+- **UAT Test 3 (FAILED):** ComboBox opened pre-filled with current timezone value; user could not start a fresh search
+- **UAT Test 4 (FAILED):** Typing in the ComboBox did not filter the dropdown; full 419-item list remained visible
+
+Root cause (diagnosed in `.planning/debug/tz-combobox-ux.md`): `allowFreeform={true}` + `autoComplete="on"` + no `onInputValueChange` handler -- input appended text to existing value; no filtering logic.
+
+Plan 05 was executed (2026-03-03) to close both gaps. This re-verification confirms Plan 05 actually fixed the code.
 
 ---
 
 ## Goal Achievement
 
-### Observable Truths (from ROADMAP.md Success Criteria)
+### Observable Truths (Plan 05 Gap-Closure)
 
-| #  | Truth                                                                               | Status     | Evidence                                                                                     |
-|----|-------------------------------------------------------------------------------------|------------|----------------------------------------------------------------------------------------------|
-| 1  | Admin can view the current timezone for each location in the admin interface        | VERIFIED   | LocationList.tsx timezone column renders `item.timezone` in read-only state (line 171–224)  |
-| 2  | Admin can edit and save a timezone setting for any location                         | VERIFIED   | ComboBox inline editor + `handleTimezoneChange` calls `apiService.updateLocationTimezone`   |
-| 3  | Booking times throughout the application display in the configured location timezone | VERIFIED   | All 5 notification queries + email + CSV export pass `locationTimezone` to formatters       |
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | Clicking a timezone cell opens a ComboBox with a clear empty input ready for typing | VERIFIED | `text={timezoneSearchText}` initialized as `''` (line 38); `onMenuOpen` resets to `''` (lines 53-56); no `selectedKey` prop -- input starts empty; line 228 confirms `text={timezoneSearchText}` in JSX |
+| 2 | Typing in the ComboBox filters the dropdown to only matching timezone options | VERIFIED | `onInputValueChange={handleTimezoneInputChange}` (line 234); handler at lines 40-51 filters via `opt.text.toLowerCase().includes(query)`; `options={filteredTimezones...}` (line 227) |
+| 3 | Selecting a filtered result saves the timezone (existing auto-save still works) | VERIFIED | `onChange` handler (lines 229-232) calls `handleTimezoneChange(item.id, option.key)`; `handleTimezoneChange` (lines 101-138) resets filter state then proceeds with PATCH API call |
+| 4 | The dropdown is usable and polished -- not a raw 419-item unfiltered list | VERIFIED | `calloutProps={{ calloutMaxHeight: 320 }}` (lines 245-248); `autoComplete="off"` (line 226); blue border in SCSS `.ms-ComboBox { border: 1px solid #0078d4 }` (line 141); placeholder "Search timezone..." (line 244) |
+| 5 | No-results state renders when filter yields zero matches | VERIFIED | `noResultsOption` at lines 220-222: `{ key: '__no_results__', text: 'No timezones matching "..."', disabled: true }`; used at `filteredTimezones.length > 0 ? filteredTimezones : noResultsOption` (line 227) |
 
-**Score:** 3/3 ROADMAP success criteria verified
-
----
-
-### Plan-Level Truths (Plan 01 — API Foundation)
-
-| #  | Truth                                                                                               | Status     | Evidence                                                                                                          |
-|----|-----------------------------------------------------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------------------|
-| 1  | PATCH /api/backoffice/locations/{id}/timezone endpoint accepts { timezone: string } and updates DB  | VERIFIED   | `updateLocationTimezone` handler in locations.ts lines 139–182; route registered at line 206–210                 |
-| 2  | PATCH endpoint validates IANA identifier using Intl.DateTimeFormat try/catch                        | VERIFIED   | `TimezoneUpdateSchema` in Location.ts lines 33–45 with `.refine()` and `Intl.DateTimeFormat`                    |
-| 3  | PATCH endpoint returns 400 for invalid timezone, 404 for unknown location, 401/403 unauthorized     | VERIFIED   | Lines 161–171 in locations.ts: isNaN(id)→400, safeParse failure→400, !updated→404, !user→401, !admin→403         |
-| 4  | Only Admin and SuperAdmin roles can call the PATCH timezone endpoint                                | VERIFIED   | `isAdminOrSuperAdmin(user)` check at locations.ts line 148–152                                                   |
-| 5  | getLocationsWithVehicleCounts() includes l.timezone in SELECT and GROUP BY                          | VERIFIED   | locationService.ts lines 22–27: `l.timezone` in both SELECT and GROUP BY                                        |
-| 6  | A static TypeScript module exports ~400 IANA timezone options with UTC offset display labels        | VERIFIED   | timezones.ts: 419 entries (420 lines total), format `(UTC+HH:MM) Zone/Name`, includes UTC, Bucharest, New_York  |
-| 7  | The TimezoneUpdateSchema uses Zod with .refine() for IANA validation                               | VERIFIED   | Location.ts lines 33–45: `z.object({ timezone: z.string().min(1).max(64).refine(...) })`                        |
-
-**Score:** 7/7 Plan 01 truths verified
+**Score:** 5/5 Plan 05 truths verified
 
 ---
 
-### Plan-Level Truths (Plan 02 — Notification Timezone Awareness)
+### All Phase 12 Truths (Including Previously Verified Plans 01-04)
 
-| #  | Truth                                                                                              | Status     | Evidence                                                                                                              |
-|----|----------------------------------------------------------------------------------------------------|------------|-----------------------------------------------------------------------------------------------------------------------|
-| 1  | Booking confirmation emails show times in the location's configured timezone with abbreviation     | VERIFIED   | emailConfirmation.ts: `formatDateTime(dateStr, timezone)` appends timezone abbreviation (lines 25–50)                |
-| 2  | Teams activity feed notifications show booking times in the configured timezone with abbreviation  | VERIFIED   | adaptiveCards.ts: all 4 builders accept `timezone`, use `extractTimezoneAbbr` helper (lines 14–120)                 |
-| 3  | Pickup reminder notifications display time in location's configured timezone                       | VERIFIED   | notificationService.ts lines 414–421: `locationTimezone = row.locationTimezone \|\| 'UTC'` passed to buildReminderPreview |
-| 4  | Overdue notifications display time in location's configured timezone                               | VERIFIED   | notificationService.ts lines 591–597: locationTimezone passed to `buildOverduePreview`                             |
-| 5  | Manager booking alert notifications show times in location's configured timezone                   | VERIFIED   | notificationService.ts lines 235–241: `buildManagerAlertPreview` receives `timezone` parameter                     |
-| 6  | Locations without configured timezone fall back gracefully to UTC                                  | VERIFIED   | All 5 call-sites use `row.locationTimezone \|\| 'UTC'` pattern                                                      |
-
-**Score:** 6/6 Plan 02 truths verified
-
----
-
-### Plan-Level Truths (Plan 03 — Report Export Timezone Formatting)
-
-| #  | Truth                                                                                                  | Status     | Evidence                                                                                              |
-|----|--------------------------------------------------------------------------------------------------------|------------|-------------------------------------------------------------------------------------------------------|
-| 1  | CSV export times are formatted in each booking's location timezone instead of raw UTC ISO strings      | VERIFIED   | ReportExport.ts: `formatInTimezone(item.startTime, tz)` used for both start and end times (lines 144–145) |
-| 2  | CSV export includes a Timezone column identifying the IANA timezone used for each row                 | VERIFIED   | ReportExport.ts line 135: headers array includes 'Timezone'; row includes `tz` at position 4         |
-| 3  | Timezone abbreviation (e.g. EET, CET) is appended to formatted start and end times in CSV            | VERIFIED   | `formatInTimezone` uses `Intl.DateTimeFormat` with `timeZoneName: 'short'` and appends abbreviation  |
-| 4  | Unconfigured locations (UTC) fall back gracefully to UTC formatting in exports                        | VERIFIED   | ReportExport.ts line 137: `var tz = item.locationTimezone \|\| 'UTC'`                                |
-
-**Score:** 4/4 Plan 03 truths verified
-
----
-
-### Plan-Level Truths (Plan 04 — Frontend Timezone Column UI)
-
-| #  | Truth                                                                                                          | Status     | Evidence                                                                                                            |
-|----|----------------------------------------------------------------------------------------------------------------|------------|---------------------------------------------------------------------------------------------------------------------|
-| 1  | LocationList table has a Timezone column displaying the IANA timezone name for each location                   | VERIFIED   | LocationList.tsx lines 165–226: column key='timezone', renders 4 states                                            |
-| 2  | Clicking the timezone cell activates an inline searchable ComboBox with ~400 IANA timezone options             | VERIFIED   | Lines 195–213: `editingLocationId === item.id` renders `<ComboBox options={TIMEZONE_OPTIONS} />`                   |
-| 3  | The ComboBox options display with UTC offset prefix: (UTC+02:00) Europe/Bucharest                              | VERIFIED   | TIMEZONE_OPTIONS entries format confirmed: `{ key: "Europe/Bucharest", text: "(UTC+02:00) Europe/Bucharest" }`    |
-| 4  | Selecting a timezone auto-saves via PATCH API immediately without a confirm button                             | VERIFIED   | `onChange` in ComboBox calls `handleTimezoneChange` which calls `apiService.updateLocationTimezone`                |
-| 5  | A brief success indicator (checkmark or message) shows after successful save                                   | VERIFIED   | Lines 185–191: `savedTimezoneId === item.id` renders CheckMark icon + timezone; cleared after 2000ms timeout      |
-| 6  | Locations with timezone 'UTC' (default/unconfigured) show a visual indicator nudging admin to configure       | VERIFIED   | Lines 172, 216–223: `isUnconfigured` flag triggers `styles.timezoneUnconfigured` + "UTC (not configured)" text    |
-| 7  | ApiService has an updateLocationTimezone(locationId, timezone) method calling PATCH backoffice/locations/{id}/timezone | VERIFIED | ApiService.ts lines 108–113: method exists, calls `this.patch<void>('/api/backoffice/locations/' + String(locationId) + '/timezone', { timezone })` |
-| 8  | Both Admin and SuperAdmin users see the timezone column and can edit it                                        | VERIFIED   | Column renders unconditionally (not gated by `isSuperAdmin`); `handleTimezoneChange` calls API for both roles     |
-| 9  | Error state shows when timezone save fails                                                                     | VERIFIED   | Lines 107–110: catch block calls `setError(message)`, displayed via MessageBar at line 304–313                    |
-
-**Score:** 9/9 Plan 04 truths verified
+| # | Plan | Truth | Status |
+|---|------|-------|--------|
+| 1 | 01 | PATCH /api/backoffice/locations/{id}/timezone accepts `{ timezone: string }` and updates DB | VERIFIED (initial) |
+| 2 | 01 | PATCH endpoint validates IANA identifier using `Intl.DateTimeFormat` try/catch | VERIFIED (initial) |
+| 3 | 01 | PATCH returns 400/404/401/403 correctly | VERIFIED (initial) |
+| 4 | 01 | Only Admin and SuperAdmin can call PATCH timezone | VERIFIED (initial) |
+| 5 | 01 | `getLocationsWithVehicleCounts` includes `l.timezone` | VERIFIED (initial) |
+| 6 | 01 | Static TS module exports 419 IANA options with UTC offset labels | VERIFIED (initial) |
+| 7 | 01 | `TimezoneUpdateSchema` uses Zod `.refine()` | VERIFIED (initial) |
+| 8 | 02 | Confirmation emails show times in location timezone with abbreviation | VERIFIED (initial) |
+| 9 | 02 | Teams activity feed shows booking times in location timezone | VERIFIED (initial) |
+| 10 | 02 | Pickup reminder notifications use location timezone | VERIFIED (initial) |
+| 11 | 02 | Overdue notifications use location timezone | VERIFIED (initial) |
+| 12 | 02 | Manager booking alerts use location timezone | VERIFIED (initial) |
+| 13 | 02 | Locations without timezone fall back to UTC | VERIFIED (initial) |
+| 14 | 03 | CSV export times formatted in location timezone | VERIFIED (initial) |
+| 15 | 03 | CSV includes Timezone column with IANA identifier | VERIFIED (initial) |
+| 16 | 03 | Timezone abbreviation appended to formatted times in CSV | VERIFIED (initial) |
+| 17 | 03 | Unconfigured locations fall back to UTC in exports | VERIFIED (initial) |
+| 18 | 04 | Timezone column visible in LocationList with IANA name | VERIFIED (initial) |
+| 19 | 04 | **ComboBox opens with empty input ready for typing** | VERIFIED (gap closed by Plan 05) |
+| 20 | 04 | **Typing filters the dropdown to matching results** | VERIFIED (gap closed by Plan 05) |
+| 21 | 04 | UTC offset format: `(UTC+02:00) Europe/Bucharest` | VERIFIED (initial) |
+| 22 | 04 | Auto-save on selection via PATCH API | VERIFIED (initial, preserved in Plan 05) |
+| 23 | 04 | Success checkmark shown after save | VERIFIED (initial, preserved in Plan 05) |
+| 24 | 04 | UTC (not configured) shows visual indicator | VERIFIED (initial) |
+| 25 | 04 | `ApiService.updateLocationTimezone` calls PATCH endpoint | VERIFIED (initial) |
+| 26 | 04 | Admin and SuperAdmin can both edit timezone | VERIFIED (initial) |
+| 27 | 04 | Error state shows when save fails | VERIFIED (initial) |
 
 ---
 
-## Required Artifacts
+## Required Artifacts (Plan 05 Focus)
 
-| Artifact                                                                          | Expected                                          | Status     | Details                                                                             |
-|-----------------------------------------------------------------------------------|---------------------------------------------------|------------|-------------------------------------------------------------------------------------|
-| `api/src/functions/locations.ts`                                                  | PATCH handler for timezone update                 | VERIFIED   | `updateLocationTimezone` function at line 139, route registered at line 206         |
-| `api/src/services/locationService.ts`                                             | updateTimezone + fixed getLocationsWithVehicleCounts | VERIFIED | `updateTimezone` at line 167; `l.timezone` in query at lines 22 and 26             |
-| `api/src/models/Location.ts`                                                      | TimezoneUpdateSchema Zod validation               | VERIFIED   | `TimezoneUpdateSchema` at line 33, `z` imported at line 1                          |
-| `spfx/src/webparts/rentaVehicle/data/timezones.ts`                               | Static IANA timezone list with UTC offset labels  | VERIFIED   | 419 entries, 438 lines, includes UTC/Bucharest/New_York, sorted by offset           |
-| `api/src/templates/adaptiveCards.ts`                                              | Timezone-aware activity feed preview text         | VERIFIED   | All 4 public functions accept `timezone`, `extractTimezoneAbbr` helper present     |
-| `api/src/templates/emailConfirmation.ts`                                          | Timezone-aware email time formatting              | VERIFIED   | `formatDateTime(dateStr, timezone)` and `buildConfirmationEmailHtml(..., timezone)` |
-| `api/src/services/notificationService.ts`                                         | Location timezone in all 5 notification queries   | VERIFIED   | 5 occurrences of `l.timezone AS locationTimezone` confirmed                         |
-| `api/src/services/reportingService.ts`                                            | locationTimezone in getRawBookingData query       | VERIFIED   | `l.timezone AS locationTimezone` at line 291                                        |
-| `api/src/models/Report.ts`                                                        | locationTimezone field on IRawBookingRecord       | VERIFIED   | `locationTimezone: string` at line 64                                               |
-| `spfx/src/webparts/rentaVehicle/models/IReport.ts`                               | Frontend IRawBookingRecord with locationTimezone  | VERIFIED   | `locationTimezone: string` at line 49                                               |
-| `spfx/src/webparts/rentaVehicle/components/Reports/ReportExport.ts`              | Timezone-formatted CSV with formatInTimezone      | VERIFIED   | `formatInTimezone` helper at line 101, Timezone column in headers at line 135       |
-| `spfx/src/webparts/rentaVehicle/services/ApiService.ts`                          | updateLocationTimezone API method                 | VERIFIED   | Method at lines 108–113                                                             |
-| `spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.tsx`        | Timezone column with inline ComboBox editor       | VERIFIED   | ComboBox column with 4 render states (read/edit/saving/saved) at lines 165–226      |
-| `spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.module.scss` | Styles for timezone cell states                   | VERIFIED   | 5 style classes: timezoneCell, timezoneUnconfigured, timezoneSaving, timezoneSaved, timezoneComboBox |
+| Artifact | Expected | Status | Details |
+|----------|----------|--------|---------|
+| `spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.tsx` | Filtered ComboBox with `onInputValueChange` handler and `filteredOptions` state | VERIFIED | `filteredTimezones` state (line 37), `timezoneSearchText` state (line 38), `handleTimezoneInputChange` callback (lines 40-51), `handleTimezoneMenuOpen` callback (lines 53-56), `options={filteredTimezones...}` (line 227), `text={timezoneSearchText}` (line 228), `onInputValueChange` wired (line 234), `onMenuOpen` wired (line 235) |
+| `spfx/src/webparts/rentaVehicle/components/LocationList/LocationList.module.scss` | Enhanced ComboBox dropdown styling | VERIFIED | `.timezoneComboBox` enhanced (lines 134-163): blue border, rounded corners, input font/padding, placeholder styling, 320px max height; `.timezoneNoResults` class added (lines 165-171) |
 
 ---
 
-## Key Link Verification
+## Key Link Verification (Plan 05)
 
-| From                          | To                         | Via                                          | Status     | Details                                                                        |
-|-------------------------------|----------------------------|----------------------------------------------|------------|--------------------------------------------------------------------------------|
-| `locations.ts`                | `locationService.ts`       | imports `updateTimezone`                     | WIRED      | `import { ..., updateTimezone }` at line 22; called at locations.ts line 169   |
-| `locations.ts`                | `Location.ts`              | imports `TimezoneUpdateSchema`               | WIRED      | `import { TimezoneUpdateSchema }` at line 25; used at locations.ts line 161    |
-| `notificationService.ts`      | `adaptiveCards.ts`         | passes `locationTimezone` to preview builders | WIRED     | `buildBookingConfirmationPreview(..., locationTimezone)` at line 305–310        |
-| `notificationService.ts`      | `emailConfirmation.ts`     | passes `locationTimezone` to email builder   | WIRED      | `buildConfirmationEmailHtml(..., locationTimezone)` at line 107–122             |
-| `LocationList.tsx`            | `timezones.ts`             | imports TIMEZONE_OPTIONS for ComboBox        | WIRED      | `import { TIMEZONE_OPTIONS } from '../../data/timezones'` at line 17; used in ComboBox at line 200 |
-| `LocationList.tsx`            | `ApiService.ts`            | calls `updateLocationTimezone` on selection  | WIRED      | `apiService.updateLocationTimezone(locationId, timezone)` at line 86            |
-| `ReportExport.ts`             | `IReport.ts`               | uses `item.locationTimezone` for formatting  | WIRED      | `item.locationTimezone \|\| 'UTC'` at line 137; `IRawBookingRecord` imported at line 8 |
+| From | To | Via | Status | Details |
+|------|----|-----|--------|---------|
+| `onInputValueChange` callback | `filteredTimezones` state | substring filter on `TIMEZONE_OPTIONS` | WIRED | `handleTimezoneInputChange` calls `TIMEZONE_OPTIONS.filter(opt => opt.text.toLowerCase().includes(query))` then `setFilteredTimezones` (lines 40-51) |
+| `filteredTimezones` state | ComboBox `options` prop | state passed as options | WIRED | `options={filteredTimezones.length > 0 ? filteredTimezones : noResultsOption}` at line 227 |
+| `handleTimezoneChange` | filter state reset | reset on selection | WIRED | Lines 103-104: `setTimezoneSearchText('')` and `setFilteredTimezones(TIMEZONE_OPTIONS)` at top of handler |
+| `onBlur` handler | filter state reset | reset on dismiss | WIRED | Lines 236-240: sets `editingLocationId(null)`, `timezoneSearchText('')`, `filteredTimezones(TIMEZONE_OPTIONS)` |
+| `useMemo` dependency array | new state/handlers | deps include new state | WIRED | Line 315: `[..., filteredTimezones, timezoneSearchText, handleTimezoneInputChange, handleTimezoneMenuOpen]` |
 
 ---
 
 ## Requirements Coverage
 
-| Requirement | Source Plans        | Description                                                        | Status     | Evidence                                                                                               |
-|-------------|---------------------|--------------------------------------------------------------------|------------|--------------------------------------------------------------------------------------------------------|
-| FEAT-01     | 12-01, 12-04        | Admin can view and edit timezone setting for each location         | SATISFIED  | PATCH endpoint (Plan 01) + inline ComboBox editor in LocationList (Plan 04)                           |
-| FEAT-02     | 12-02, 12-03, 12-04 | Location timezone is used for all booking time display at that location | SATISFIED | Notifications use locationTimezone (Plan 02), CSV export formatted in locationTimezone (Plan 03), LocationList shows correct timezone (Plan 04) |
+| Requirement | Source Plans | Description | Status | Evidence |
+|-------------|-------------|-------------|--------|----------|
+| FEAT-01 | 12-01, 12-04, 12-05 | Admin can view and edit timezone setting for each location | SATISFIED | PATCH endpoint (Plan 01) + inline ComboBox editor (Plan 04) + searchable/filterable ComboBox UX (Plan 05) |
+| FEAT-02 | 12-02, 12-03 | Location timezone is used for all booking time display at that location | SATISFIED | Notifications use `locationTimezone` (Plan 02); CSV export formatted in `locationTimezone` (Plan 03) |
 
-Both requirements from REQUIREMENTS.md Phase 12 are fully satisfied. No orphaned requirements detected.
+Both FEAT-01 and FEAT-02 confirmed satisfied in REQUIREMENTS.md (lines 81-82, marked `Complete`). No orphaned requirements detected.
 
 ---
 
-## Commit Verification
+## Commit Verification (Plan 05)
 
-All 11 feature commits confirmed in git log:
+| Commit | Description | Status |
+|--------|-------------|--------|
+| `4779800` | feat(12-05): rewrite timezone ComboBox with filtered search UX | CONFIRMED -- 1 file changed, 41 insertions |
+| `2ce5ec0` | feat(12-05): add polished dropdown styling and empty state for timezone search | CONFIRMED -- 2 files changed, 40 insertions |
 
-| Commit    | Plan  | Description                                          |
-|-----------|-------|------------------------------------------------------|
-| `33a90c1` | 12-01 | (Included via 6cd6a0b onwards — model schema)       |
-| `6cd6a0b` | 12-01 | updateTimezone service + fixed locations query       |
-| `391f9e4` | 12-01 | PATCH timezone endpoint                              |
-| `58bce6b` | 12-01 | Static IANA timezone data module (419 entries)       |
-| `d8b9cd9` | 12-02 | Parameterize adaptiveCards.ts to accept timezone     |
-| `9b0bddc` | 12-02 | Parameterize emailConfirmation.ts to accept timezone |
-| `7502840` | 12-02 | l.timezone in all notification queries               |
-| `2379e97` | 12-03 | locationTimezone in raw export query and models      |
-| `14f1f3a` | 12-03 | CSV export times formatted in location timezone      |
-| `2c9942c` | 12-04 | updateLocationTimezone API method                    |
-| `12e3158` | 12-04 | Timezone cell SCSS styles                            |
-| `60daf35` | 12-04 | Timezone column with inline ComboBox editor          |
+Both commits confirmed in git log. Commit messages align with Plan 05 tasks.
 
 ---
 
 ## Anti-Patterns Found
 
-No blockers or warnings detected. One informational item:
+No blockers or warnings detected.
 
-| File               | Line | Pattern       | Severity | Impact                                                              |
-|--------------------|------|---------------|----------|---------------------------------------------------------------------|
-| LocationList.tsx   | 210  | `placeholder` | Info     | Fluent UI ComboBox `placeholder` prop — legitimate UI attribute, not a stub indicator |
+| File | Line | Pattern | Severity | Impact |
+|------|------|---------|----------|--------|
+| `LocationList.tsx` | 244 | `placeholder="Search timezone..."` | Info | Legitimate Fluent UI `placeholder` prop -- not a stub; this is the intended UX text |
+| `LocationList.tsx` | 221 | `key: '__no_results__'` | Info | Sentinel option key for disabled no-results state -- intentional pattern, not a stub |
 
 ---
 
 ## Human Verification Required
 
-### 1. Inline Edit UX Flow
+### 1. ComboBox Opens with Empty Input (UAT Test 3 Re-run)
 
-**Test:** Log in as Admin, navigate to Locations admin tab, click the "UTC (not configured)" cell on any location
-**Expected:** ComboBox opens with searchable IANA timezone list; typing "Bucharest" filters options; selecting "(UTC+02:00) Europe/Bucharest" auto-saves; spinner appears then green checkmark with timezone name; cell updates to "Europe/Bucharest" in non-italic styled state
-**Why human:** Interactive ComboBox search, auto-close on blur, 2-second checkmark fade — cannot verify via static analysis
+**Test:** Log in as Admin, navigate to the Locations admin tab, click the timezone cell on any location (including one already configured with a non-UTC timezone such as "Europe/Bucharest")
+**Expected:** The ComboBox opens with an empty input field showing the placeholder text "Search timezone..."; the field does NOT pre-fill with the current timezone value; the dropdown shows the full 419-item list initially
+**Why human:** The controlled `text={timezoneSearchText}` prop starting at `''` and `onMenuOpen` reset are code-correct, but actual focus-on-open behavior and cursor positioning in Fluent UI v8 within DetailsList context must be confirmed interactively
 
-### 2. Email Confirmation Timezone Display
+### 2. Typing Filters the Timezone List (UAT Test 4 Re-run)
 
-**Test:** Create a booking for a location configured to "Europe/Bucharest" (UTC+02:00); trigger confirmation email
-**Expected:** Email shows pickup/return times as "Feb 26, 2026, 10:00 AM EET" (not UTC)
-**Why human:** Requires real Graph API send and email client inspection
+**Test:** From the open ComboBox (Test 1 above), type "berlin" in the input
+**Expected:** The dropdown narrows in real-time to show only entries containing "berlin" (e.g., "(UTC+01:00) Europe/Berlin"); then type "zzzzz" -- dropdown should show a single disabled option "No timezones matching 'zzzzz'"
+**Why human:** Real-time render of filtered options during typing requires interactive browser testing; static analysis confirms the `onInputValueChange` -> `filteredTimezones` -> `options` pipeline is correctly wired but cannot confirm runtime update frequency or rendering
 
-### 3. Teams Activity Feed Timezone Display
+### 3. Email Confirmation Timezone Display (UAT Test 8 -- Previously Skipped)
 
-**Test:** Create a booking for a location with a non-UTC timezone; inspect Teams activity feed notification
-**Expected:** Preview text shows "Booking confirmed: Toyota Camry, Feb 26 10:00 AM EET - Feb 26 6:00 PM EET"
-**Why human:** Requires real Teams tenant with installed app and live notification delivery
-
-### 4. CSV Export Timezone Column
-
-**Test:** Export raw booking data as Admin; open CSV in Excel
-**Expected:** Columns include "Timezone" showing IANA identifier (e.g., "Europe/Bucharest"); Start Time / End Time columns show formatted local time with abbreviation (e.g., "Feb 26, 2026, 10:00 AM EET")
-**Why human:** Browser download + Excel rendering cannot be verified statically
+**Test:** Create a booking for a location configured to "Europe/Bucharest" (UTC+02:00); trigger the booking confirmation email
+**Expected:** Email shows pickup/return times as "Feb 26, 2026, 10:00 AM EET" (not in UTC); timezone abbreviation "EET" appears after the time
+**Why human:** Requires real Microsoft Graph API email send and email client inspection; skipped in original UAT due to dev environment constraints
 
 ---
 
-## Summary
+## Gaps Summary
 
-Phase 12 achieves its goal. All 4 plans are fully implemented:
+No code-level gaps remain. Both UAT failures (Tests 3 and 4) were root-caused to Fluent UI ComboBox misconfiguration and closed by Plan 05 (commits `4779800` and `2ce5ec0`):
 
-- **Plan 01 (API Foundation):** PATCH endpoint exists, routes correctly, validates with Zod `.refine()` + `Intl.DateTimeFormat`, returns correct HTTP status codes. `getLocationsWithVehicleCounts` includes `l.timezone`. 419-entry static IANA data module is substantive and properly structured.
+- **Gap 1 (pre-filled input):** Fixed by replacing `selectedKey={tz}` with `text={timezoneSearchText}` (starts empty) and adding `onMenuOpen` reset handler
+- **Gap 2 (no filtering):** Fixed by replacing `autoComplete="on"` with `autoComplete="off"`, adding `onInputValueChange={handleTimezoneInputChange}` handler with substring filter, and passing `filteredTimezones` to `options` prop
 
-- **Plan 02 (Notification Timezone):** Zero hardcoded `timeZone: 'UTC'` remain in template files. All 5 notification SQL queries include `l.timezone AS locationTimezone`. All template function signatures accept `timezone` parameter. UTC fallback is consistent across all 5 call-sites.
-
-- **Plan 03 (Report Export):** `getRawBookingData` query includes `l.timezone AS locationTimezone`. Both API and frontend `IRawBookingRecord` interfaces have `locationTimezone`. CSV export uses `formatInTimezone` helper with timezone abbreviation extraction and includes a Timezone header column.
-
-- **Plan 04 (Frontend UI):** `ApiService.updateLocationTimezone` is substantive (calls PATCH endpoint). SCSS has all 5 timezone state classes. `LocationList.tsx` imports `TIMEZONE_OPTIONS` and `apiService.updateLocationTimezone`, wires both into the column renderer with correct 4-state logic (read/edit/saving/saved). useMemo dependencies include editing state variables. Unconfigured (UTC) locations display distinctly.
-
-FEAT-01 and FEAT-02 are both fully satisfied per REQUIREMENTS.md. All 12 commits are present and match summary claims.
+The only outstanding items are interactive UX tests (Tests 3 and 4 re-run) that cannot be verified statically, plus UAT Test 8 (email) which was deferred due to dev environment constraints.
 
 ---
 
-_Verified: 2026-03-02_
+_Verified: 2026-03-03T13:30:00Z_
 _Verifier: Claude (gsd-verifier)_
+_Re-verification after: UAT gap closure via Plan 05_
