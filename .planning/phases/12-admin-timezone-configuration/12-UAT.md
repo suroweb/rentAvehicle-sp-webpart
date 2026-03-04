@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 12-admin-timezone-configuration
 source: 12-01-SUMMARY.md, 12-02-SUMMARY.md, 12-03-SUMMARY.md, 12-04-SUMMARY.md
 started: 2026-03-02T10:00:00Z
-updated: 2026-03-03T11:54:00Z
+updated: 2026-03-04T00:00:00Z
 ---
 
 ## Current Test
@@ -60,7 +60,7 @@ skipped: 1
 ## Gaps
 
 - truth: "Clicking a timezone cell opens an inline searchable ComboBox dropdown populated with IANA timezone options"
-  status: failed
+  status: resolved
   reason: "User reported: when i click it appears like a pre filled input text. i click on it.. then i can add text to the addtional text.. its not user friendly.. and as i type i dont see the the list is filterout.. its the same long list with timezone... we need to fix UX for this."
   severity: major
   test: 3
@@ -75,7 +75,7 @@ skipped: 1
   debug_session: ".planning/debug/tz-combobox-ux.md"
 
 - truth: "Typing in the ComboBox filters the timezone list to matching results"
-  status: failed
+  status: resolved
   reason: "User reported: same issue as test 3, doesn't filter"
   severity: major
   test: 4
